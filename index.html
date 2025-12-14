@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>مسبحة الروح القدس</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b1324;
+  --string:#c7d2fe66;
+  --bead:#dbeafe;
+  --bead-soft:#eef2ff;
+  --bead-super:#fde68a;
+  --active:#ffe680;
+  --text:#f8fafc;
+  --muted:#dbeafe;
+}
+
+body, button, svg {
+  touch-action: manipulation;
+}
+
+
+html,body{
+  margin:0;
+  height:100%;
+  background:radial-gradient(circle at center, #1e293b, var(--bg));
+  font-family:"Cairo", system-ui, sans-serif;
+  direction:rtl;
+  color:var(--text);
+  overflow:hidden;
+}
+
+.app{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:20px;
+  position:relative;
+}
+
+svg{
+  width:88vmin;
+  max-width:520px;
+  height:auto;
+}
+
+.string{ fill:none; stroke:var(--string); stroke-width:3; }
+
+.bead{
+  fill:var(--bead);
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.35));
+  transition: fill .3s ease, filter .3s ease;
+}
+.bead.small{ fill:var(--bead-soft); r:16; }
+.bead.super{
+  fill:var(--bead-super);
+  filter: drop-shadow(0 0 12px rgba(253,230,138,.7));
+}
+
+.text{
+  text-align:center;
+  max-width:480px;
+  line-height:1.9;
+  font-size:20px;
+  padding:0 20px;
+}
+
+.hint{
+  font-size:14px;
+  color:var(--muted);
+}
+
+.counter{
+  font-size:14px;
+  color:var(--muted);
+  letter-spacing:.5px;
+}
+
+svg{
+  width: 95vmin;      /* almost full width */
+  height: auto;
+  touch-action: none; /* prevent default gestures */
+  user-select: none;
+}
+
+
+/* Navigation arrows */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 230, 128, 0.1); /* subtle yellow circle */
+  border: none;
+  color: #ffe680; /* yellow arrow */
+  font-size: 24px;
+  padding: 12px 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 8px 2px rgba(255, 230, 128, 0.5); /* subtle glow */
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  z-index: 20;
+}
+
+.dove-blend {
+  opacity: 0.9;
+  mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
+  border-radius: 50%;
+}
+
+.nav:hover{ opacity:.7; background:rgba(255,255,255,.12); box-shadow: 0 0 10px 2px rgba(255,255,255,0.25); }
+.nav.left{ left:10px; }
+.nav.right{ right:10px; }
+
+/* Tap zones */
+.zone{
+  position:fixed;
+  top:0; bottom:0;
+  width:50%;
+  z-index:10;
+}
+.zone.left{ left:0; }
+.zone.right{ right:0; }
+
+.bead.active {
+  fill: var(--bead); /* normal color stays the same */
+  stroke: #a6ff00;   /* bright lime green ring */
+  stroke-width: 4px;
+  r: 16;             /* slightly bigger radius if needed */
+  animation: pulse 1s infinite;
+}
+
+/* optional subtle pulsing effect for the ring */
+@keyframes pulse {
+  0% { stroke-width: 4; }
+  50% { stroke-width: 7; }
+  100% { stroke-width: 4; }
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- NAV -->
+  <button class="nav right" aria-label="التالي">❮</button>
+  <button class="nav left" aria-label="السابق">❯</button>
+
+  <!-- ROSARY -->
+  <svg viewBox="0 0 600 600" aria-label="مسبحة الروح القدس">
+    <circle cx="300" cy="270" r="205" class="string" />
+    <g id="beads"></g>
+    <image href="radiant-holy-dove-stockcake.webp" x="200" y="180" width="200" height="200" class="dove-blend"/>
+  </svg>
+
+  <!-- TEXT -->
+  <div class="text" id="prayer"></div>
+  <div class="counter" id="counter"></div>
+</div>
+
+<div class="zone left"></div>
+<div class="zone right"></div>
+
+<script>
+const prePrayers = [
+  { name: 'تقديم الذات للروح القدس', sections: [
+    'يا روح الله، إنا نقدم لك ذواتنا وصلواتنا مع صلاة مريم العذراء والرسل طالبين منك أن تأتي وتجددنا وتجدد وجه الأرض.',
+    'هلم أيها الروح القدس، وأرسل من السماء شعاع نورك هلم يا أبا المساكين. هلم يا معطي المواهب.',
+    'أنتَ في التعب راحة وفي الحر اعتدال وفي البكاء تعزية، أيها النور الطوباوي، إملأ باطن قلوب المؤمنين.',
+    'أعط مؤمنيك المتكلين عليك المواهب السبع، إمنحهم ثواب الفضيلة، هب لهم غاية الخلاص، أعطهم السرور الأبدي. آمين.'
+  ]},
+  { name: 'الصلاة لمريم العذراء (أ)', sections: [
+    'يا مريم، أيتها العذراء الكلية الطهارة، أنت التي بحبلك بلا دنس، جعل منك الروح القدس بيت القربان الإلهي، صلي لأجلنا.',
+    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)'
+  ]},
+  { name: 'الصلاة لمريم العذراء (ب)', sections: [
+    'يا مريم، أيتها العذراء الكلية الطهارة، أنت التي بسر التجسد أصبحت بالروح القدس أم الله الحقيقية، صلي لأجلنا.',
+    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)'
+  ]},
+  { name: 'الصلاة لمريم العذراء (ث)', sections: [
+    'يا مريم، أيتها العذراء الكلية الطهارة، أنت التي صلّيت في العلية مع الرسل فامتلأت بفيض من الروح القدس، صلي لأجلنا.',
+    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)'
+  ]},
+  { name: 'صلاة لاستمداد مواهب الروح القدس', sections: [
+    'يا حبيبي يسوع، يا ذا الجود والصلاح يا من قبل صعودك إلى السماء، وعدت تلاميذك بإرسال روحك القدوس إليهم، ليعزيهم ويُشددهم.',
+    'تعطف وأرسل إلينا هذا الروح الذي يقدس النفوس ليحل فينا ويقدسنا ويملأنا من مواهبه السنية. آمين.'
+  ]}
+];
+
+const houseInfo = [
+  {name:'الحكمة', super:'تعال يا روح الحكمة، وحل فينا لتدلنا على الخير الحقيقي وتوفر لنا وسائل الحصول عليه. (أبانا الذي...)'},
+  {name:'الفهم', super:'تعال يا روح الفهم، وحل فينا، وأنر عقولنا لندرك حقائق ديانتنا وأسرارها العميقة. (أبانا الذي...)'},
+  {name:'العلم', super:'تعال يا روح العلم، وحل فينا لنعرف الله ونعرف ذواتنا والآخرين، لأن المعرفة أساس المحبة. (أبانا الذي...)'},
+  {name:'المشورة', super:'تعال يا روح المشورة، وحل فينا، ونوّرنا لنعرف مشيئة الله، وقوّنا على إتمامها. (أبانا الذي...)'},
+  {name:'القوة', super:'تعال يا روح القوة، وحل فينا، واملأ قلوبنا م الله، وقونا على إتمام واجباتنا بكل أمانة وإخلاص. (أبانا الذي...)'},
+  {name:'مخافة الله', super:'تعال يا روح المخافة، وحل فينا، وقوّنا على أن نحترم الله وأوامر الله ووصاياه. (أبانا الذي...)'},
+  {name:'التقوى', super:'تعال يا روح التقوى، وحل فينا، وأنعم علينا بأن نختبر أن نيرك طيب وحملك خفيف ونستطيع حمله. (أبانا الذي...)'}
+];
+
+const postPrayers = [
+  {name: 'صلاة الختام: لمريم سيدة جميع الشعوب', sections:[
+    'أيها الرب يسوع يا ابن ألآب، أفض الآن روحك على الأرض، وأسكن الروح القدس في قلوب جميع الشعوب، ليُحفظوا من الفساد ومن الحرب ومن الآفات، ولتكن سيدة جميع الشعوب، وهي مريم محامية لنا، آمين.',
+    'كما تتطاير رقع الثلج وتتساقط وكما يذوب الثلج في الأرض هكذا ينزل الروح القدس في قلوب الذين يتلون هذه الصلاة كل يوم.'
+  ]}
+];
+
+const beadsPerHouse = 8;
+const totalBeads = houseInfo.length * beadsPerHouse;
+
+const beadsGroup = document.getElementById('beads');
+const prayer = document.getElementById('prayer');
+const counter = document.getElementById('counter');
+
+let index = 0;
+let preIndex = 0, preSection = 0;
+let postIndex = 0, postSection = 0;
+
+const cx = 300, cy = 270, r = 205;
+const superSpacing = 1.15;
+
+// --- create beads ---
+for(let i=0;i<totalBeads;i++){
+  const angle = (Math.PI*2/totalBeads)*i - Math.PI/2;
+  const pulse = (i % beadsPerHouse === 0) ? superSpacing : 1;
+  const x = cx + r*pulse*Math.cos(angle);
+  const y = cy + r*pulse*Math.sin(angle);
+
+  const bead = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  bead.setAttribute('cx', x);
+  bead.setAttribute('cy', y);
+  bead.setAttribute('r', (i % beadsPerHouse === 0) ? 12 : 8);
+  bead.classList.add('bead');
+  if(i % beadsPerHouse === 0) bead.classList.add('super');
+  else bead.classList.add('small');
+
+  beadsGroup.appendChild(bead);
+}
+
+const beadEls = beadsGroup.querySelectorAll('.bead');
+
+function update() {
+  // Reset all beads
+  beadEls.forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('stroke',''); 
+    b.setAttribute('stroke-width','');
+  });
+
+  // Remove previous arrows
+  document.querySelectorAll('.arrow').forEach(a => a.remove());
+
+  if(index < prePrayers.length){
+    const step = prePrayers[preIndex];
+    prayer.innerHTML = `<h3>${step.name}</h3><p>${step.sections[preSection]}</p>`;
+    counter.textContent = `التمهيد ${preIndex+1} - قسم ${preSection+1} / ${step.sections.length}`;
+  }
+  else if(index >= prePrayers.length && index < prePrayers.length + totalBeads){
+    const beadIndex = index - prePrayers.length;
+    const houseIndex = Math.floor(beadIndex / beadsPerHouse);
+    const withinHouse = beadIndex % beadsPerHouse;
+
+    const activeBead = beadEls[beadIndex];
+    activeBead.classList.add('active');
+    activeBead.setAttribute('stroke','#a6ff00'); // lime hoop
+    activeBead.setAttribute('stroke-width','4');
+
+    // Optional arrow above
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    arrow.setAttribute('points','0,-10 5,0 -5,0'); // small triangle
+    arrow.setAttribute('fill','#a6ff00');
+    arrow.setAttribute('class','arrow');
+    arrow.setAttribute('transform', `translate(${activeBead.cx.baseVal.value},${activeBead.cy.baseVal.value-20})`);
+    beadsGroup.appendChild(arrow);
+
+    if(withinHouse === 0) {
+      prayer.innerHTML = `✦ عطية ${houseInfo[houseIndex].name}<br>${houseInfo[houseIndex].super}`;
+    } else if(withinHouse === 7){
+      prayer.innerHTML = 'تعال أيها الروح القدس واملأ قلوب المؤمنين. المجد للآب الأزلي، والابن الوحيد الفادي، والروح الحي المعزي الآن وإلى الأبد آمين.';
+    } else {
+      prayer.textContent = 'تعال أيها الروح القدس واملأ قلوب المؤمنين.';
+    }
+
+    counter.textContent = `عطية ${houseIndex+1} / ${houseInfo.length} • حبة ${withinHouse+1} / ${beadsPerHouse}`;
+  }
+  else{
+    const postStep = postPrayers[postIndex];
+    prayer.innerHTML = `<h3>${postStep.name}</h3><p>${postStep.sections[postSection]}</p>`;
+    counter.textContent = `الختام ${postIndex+1} - قسم ${postSection+1} / ${postStep.sections.length}`;
+  }
+}
+
+function next(){
+  if(index < prePrayers.length){
+    if(preSection < prePrayers[preIndex].sections.length-1){
+      preSection++;
+    } else {
+      preSection = 0;
+      preIndex++;
+      index++;
+    }
+  }
+  else if(index >= prePrayers.length && index < prePrayers.length + totalBeads){
+    index++;
+  }
+  else if(index >= prePrayers.length + totalBeads){
+    const postStep = postPrayers[postIndex];
+    if(postSection < postStep.sections.length-1){
+      postSection++;
+    } else {
+      postSection = 0;
+      postIndex++;
+      index++;
+    }
+  }
+  update();
+}
+
+function prev(){
+  if(index > prePrayers.length + totalBeads){
+    const postStep = postPrayers[postIndex];
+    if(postSection>0){
+      postSection--;
+    } else {
+      postIndex--;
+      postStep.sections.length && (postSection = postPrayers[postIndex].sections.length-1);
+      index--;
+    }
+  }
+  else if(index > prePrayers.length){
+    index--;
+  }
+  else if(index > 0){
+    if(preSection>0) preSection--;
+    else{
+      preIndex--;
+      preSection = prePrayers[preIndex].sections.length-1;
+      index--;
+    }
+  }
+  update();
+}
+
+document.querySelector('.zone.right').onclick = next;
+document.querySelector('.zone.left').onclick = prev;
+document.querySelector('.nav.right').onclick = next;
+document.querySelector('.nav.left').onclick = prev;
+
+window.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight') next();
+  if(e.key==='ArrowLeft') prev();
+});
+
+update();
+</script>
+
+
+</body>
+</html>
