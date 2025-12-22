@@ -82,6 +82,19 @@ svg{
   font-size:14px;
   color:var(--muted);
   letter-spacing:.5px;
+  position: fixed;              /* keep counter visible at viewport bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  z-index: 70;
+  background: transparent;
+  padding: 6px 10px;
+  pointer-events: none;        /* allow clicks to pass through if necessary */
+}
+
+/* wrapper for prayers to allow a controlled vertical offset */
+.prayer-wrap {
+  margin-top: 50px; /* small nudge on mobile */
 }
 
 svg{
@@ -173,7 +186,7 @@ svg{
 @media (min-width: 800px) {
   /* Use the `.app.layout` parent as the fixed split container (60% text, 40% rosary)
      so both columns are independent and won't reflow each other when content changes. */
-  :root { --rosary-width: clamp(360px, 40vw, 520px); --top-offset: 28px; }
+  :root { --rosary-width: clamp(360px, 40vw, 520px); --top-offset: 36px; }
 
   .app.layout {
     position: relative;
@@ -270,21 +283,31 @@ svg{
           <feMergeNode in="SourceGraphic" />
         </feMerge>
       </filter>
+      <!-- circular clip for the dove image to avoid square edges over the halo -->
+      <clipPath id="dove-clip" clipPathUnits="userSpaceOnUse">
+        <!-- center roughly where the dove is drawn; radius slightly smaller than image half-size -->
+        <circle cx="300" cy="270" r="130" />
+      </clipPath>
     </defs>
 
     <!-- halo behind the dove to give a modern holy glow -->
-    <circle cx="300" cy="275" r="165" class="dove-halo" fill="url(#halo-grad)" filter="url(#halo-blur)" />
+    <circle cx="300" cy="270" r="165" class="dove-halo" fill="url(#halo-grad)" filter="url(#halo-blur)" />
 
     <!-- subtle background disk to help image blend with page background -->
-    <circle cx="300" cy="275" r="130" class="dove-bg" />
+    <circle cx="300" cy="270" r="130" class="dove-bg" />
 
     <!-- dove image with soft alpha-edge filter so borders feather into the background -->
-    <image href="radiant-holy-dove-stockcake.webp" x="165" y="140" width="265" height="270" preserveAspectRatio="xMidYMid slice" class="dove-blend" filter="url(#soft-edge)"/>
+    <image href="radiant-holy-dove-stockcake.webp" x="165" y="140" width="265" height="270" preserveAspectRatio="xMidYMid slice" class="dove-blend" filter="url(#soft-edge)" clip-path="url(#dove-clip)"/>
+  </svg>
   </svg>
 
   <!-- TEXT -->
-  <div class="text content" id="prayer"></div>
-  <div class="counter" id="counter"></div>
+  <div class="text content">
+    <div class="prayer-wrap">
+      <div id="prayer"></div>
+      <div class="counter" id="counter"></div>
+    </div>
+  </div>
 </div>
 
 <div class="zone left"></div>
