@@ -110,15 +110,42 @@ svg{
 }
 
 .dove-blend {
-  opacity: 0.9;
-  mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
-  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+  opacity: 0.98;
+  /* soft radial mask so the dove feathers out toward edges */
+  mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 95%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 95%);
   mask-repeat: no-repeat;
-  mask-size: cover;
   -webkit-mask-repeat: no-repeat;
+  mask-size: cover;
   -webkit-mask-size: cover;
   border-radius: 50%;
+  mix-blend-mode: screen; /* helps integrate colors with page background */
+  transition: opacity .4s ease, transform .4s ease;
+  will-change: opacity, transform;
+  pointer-events: none;
 }
+
+.dove-bg {
+  fill: var(--bg);
+  opacity: 0.95;
+  filter: blur(6px);
+}
+
+.dove-halo {
+  mix-blend-mode: screen;
+  opacity: 0.95;
+  transition: opacity .6s ease, transform .6s ease;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+@keyframes halo-pulse {
+  0% { transform: scale(0.98); opacity: .9; }
+  50% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(0.98); opacity: .9; }
+}
+
+.dove-halo.animate { animation: halo-pulse 3.6s ease-in-out infinite; }
 
 .nav:hover{ opacity:.7; background:rgba(255,255,255,.12); box-shadow: 0 0 10px 2px rgba(255,255,255,0.25); }
 .nav.left{ left:10px; }
@@ -142,33 +169,121 @@ svg{
   animation: pulse 1s infinite;
 }
 
-/* optional subtle pulsing effect for the ring */
-@keyframes pulse {
-  0% { stroke-width: 4; }
-  50% { stroke-width: 7; }
-  100% { stroke-width: 4; }
+
+@media (min-width: 800px) {
+  /* Use the `.app.layout` parent as the fixed split container (60% text, 40% rosary)
+     so both columns are independent and won't reflow each other when content changes. */
+  :root { --rosary-width: clamp(360px, 40vw, 520px); --top-offset: 28px; }
+
+  .app.layout {
+    position: relative;
+    height: calc(100vh - var(--top-offset));
+    width: 100%;
+    max-width: 1200px;          /* center container */
+    margin: var(--top-offset) auto 0;
+    padding: 0 24px;           /* horizontal padding applied to container */
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  /* Left: text column (60%) — absolutely positioned and independently scrollable */
+  .app.layout .content {
+    position: absolute;
+    left: 0;                   /* starts at container's left padding edge */
+    top: 0;
+    bottom: 0;
+    right: calc(var(--rosary-width) + 24px); /* leave room for rosary + gutter */
+    padding: 20px 0;           /* vertical padding inside content only */
+    box-sizing: border-box;
+    overflow: auto;
+    scrollbar-gutter: stable both-edges;
+    overscroll-behavior: contain;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Right: rosary column (40%) — positioned inside the same parent so it won't shift */
+  .app.layout .rosary {
+    position: absolute;
+    right: 24px;               /* honor container padding as gutter */
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--rosary-width);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    contain: paint;
+    transition: none !important;
+  }
+
+  /* Make the SVG fill most of the rosary column while preserving aspect ratio */
+  .app.layout .rosary svg {
+    width: 88%;
+    height: auto;
+    max-height: 90vh;
+    display: block;
+    transition: none !important;
+    backface-visibility: hidden;
+  }
+
+  /* Put nav and zones above columns */
+  .zone, .nav { z-index: 60; }
 }
-
-
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app.layout">
 
   <!-- NAV -->
   <button class="nav right" aria-label="التالي">❮</button>
   <button class="nav left" aria-label="السابق">❯</button>
 
   <!-- ROSARY -->
-  <svg viewBox="0 0 600 600" aria-label="مسبحة الروح القدس">
+  <svg viewBox="0 0 600 600" aria-label="مسبحة الروح القدس" class="rosary">
     <circle cx="300" cy="270" r="205" class="string" />
     <g id="beads"></g>
-    <image href="radiant-holy-dove-stockcake.webp" x="200" y="180" width="200" height="200" class="dove-blend"/>
+    <defs>
+      <filter id="soft-edge" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+      <!-- halo gradient + subtle glow filter -->
+      <radialGradient id="halo-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fff8c2" stop-opacity="0.9" />
+        <stop offset="35%" stop-color="#ffe680" stop-opacity="0.65" />
+        <stop offset="70%" stop-color="#ffd964" stop-opacity="0.18" />
+        <stop offset="100%" stop-color="#ffd964" stop-opacity="0" />
+      </radialGradient>
+
+      <filter id="halo-blur" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="hb" />
+        <feMerge>
+          <feMergeNode in="hb" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- halo behind the dove to give a modern holy glow -->
+    <circle cx="300" cy="275" r="165" class="dove-halo" fill="url(#halo-grad)" filter="url(#halo-blur)" />
+
+    <!-- subtle background disk to help image blend with page background -->
+    <circle cx="300" cy="275" r="130" class="dove-bg" />
+
+    <!-- dove image with soft alpha-edge filter so borders feather into the background -->
+    <image href="radiant-holy-dove-stockcake.webp" x="165" y="140" width="265" height="270" preserveAspectRatio="xMidYMid slice" class="dove-blend" filter="url(#soft-edge)"/>
   </svg>
 
   <!-- TEXT -->
-  <div class="text" id="prayer"></div>
+  <div class="text content" id="prayer"></div>
   <div class="counter" id="counter"></div>
 </div>
 
