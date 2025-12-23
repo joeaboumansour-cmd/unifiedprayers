@@ -314,22 +314,20 @@ svg{
 <div class="zone right"></div>
 
 <script>
+// --- Arabic source texts ---
 const prePrayers = [
   { name: 'تقديم الذات للروح القدس', sections: [
-    'يا روح الله، إنا نقدم لك ذواتنا وصلواتنا مع صلاة مريم العذراء والرسل طالبين منك أن تأتي وتجددنا وتجدد وجه الأرض.',
-    'هلم أيها الروح القدس، وأرسل من السماء شعاع نورك هلم يا أبا المساكين. هلم يا معطي المواهب.',
-    'أنتَ في التعب راحة وفي الحر اعتدال وفي البكاء تعزية، أيها النور الطوباوي، إملأ باطن قلوب المؤمنين.',
-    'أعط مؤمنيك المتكلين عليك المواهب السبع، إمنحهم ثواب الفضيلة، هب لهم غاية الخلاص، أعطهم السرور الأبدي. آمين.'
+    'يا روح الله، إنا نقدم لك ذواتنا وصلواتنا مع صلاة مريم العذراء والرسل المجتمعين في العلية طالبين منك أن تأتي وتجددنا وتجدد وجه الأرض.',
+    'هلم أيها الروح القدس، وأرسل من السماء شعاع نورك هلم يا أبا المساكين. هلم يا معطي المواهب. هلم يا ضياء القلوب، أيها المعزي الجليل، يا ساكن القلوب العذب، أيتها الاستراحة اللذيذة.',
+    'أنتَ في التعب راحة وفي الحر اعتدال وفي البكاء تعزية، أيها النور الطوباوي، إملأ باطن قلوب المؤمنين، لأنه بدون قدرتك لا شيء في الإنسان ولا شيء طاهر.',
+    'طهر ما كان دنساً، إسق ما كان يابساً، اشف ما كان معلولا، لين ما كان صلباً، أضرم ما كان بارداً، دبّر ما كان حائداً.',
+    'أعط مؤمنيك المتكلين عليك المواهب السبع، إمنحهم ثواب الفضيلة، هب لهم غاية الخلاص، أعطهم السرور الأبدي. آمین.',
   ]},
-  { name: 'الصلاة لمريم العذراء (أ)', sections: [
+  { name: 'الصلاة لمريم العذراء', sections: [
     'يا مريم، أيتها العذراء الكلية الطهارة، أنت التي بحبلك بلا دنس، جعل منك الروح القدس بيت القربان الإلهي، صلي لأجلنا.',
-    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)'
-  ]},
-  { name: 'الصلاة لمريم العذراء (ب)', sections: [
+    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)',
     'يا مريم، أيتها العذراء الكلية الطهارة، أنت التي بسر التجسد أصبحت بالروح القدس أم الله الحقيقية، صلي لأجلنا.',
-    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)'
-  ]},
-  { name: 'الصلاة لمريم العذراء (ث)', sections: [
+    'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)',
     'يا مريم، أيتها العذراء الكلية الطهارة، أنت التي صلّيت في العلية مع الرسل فامتلأت بفيض من الروح القدس، صلي لأجلنا.',
     'لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)'
   ]},
@@ -391,6 +389,13 @@ for(let i=0;i<totalBeads;i++){
 const beadEls = beadsGroup.querySelectorAll('.bead');
 
 function update() {
+  // determine current language from selector
+  const sel = document.getElementById('langSelect');
+  const isEn = sel && sel.value === 'en';
+  const preArr = isEn ? prePrayersEn : prePrayers;
+  const houseArr = isEn ? houseInfoEn : houseInfo;
+  const postArr = isEn ? postPrayersEn : postPrayers;
+
   // Reset all beads
   beadEls.forEach(b => {
     b.classList.remove('active');
@@ -401,13 +406,18 @@ function update() {
   // Remove previous arrows
   document.querySelectorAll('.arrow').forEach(a => a.remove());
 
-  if(index < prePrayers.length){
-    const step = prePrayers[preIndex];
-    prayer.innerHTML = `<h3>${step.name}</h3><p>${step.sections[preSection]}</p>`;
-    counter.textContent = `التمهيد ${preIndex+1} - قسم ${preSection+1} / ${step.sections.length}`;
+  if(index < preArr.length){
+    const step = preArr[preIndex];
+    if(isEn) {
+      prayer.innerHTML = `<h3>${step.name}</h3><p>${step.sections[preSection]}</p>`;
+      counter.textContent = `Intro ${preIndex+1} - section ${preSection+1} / ${step.sections.length}`;
+    } else {
+      prayer.innerHTML = `<h3>${step.name}</h3><p>${step.sections[preSection]}</p>`;
+      counter.textContent = `التمهيد ${preIndex+1} - قسم ${preSection+1} / ${step.sections.length}`;
+    }
   }
   else if(index >= prePrayers.length && index < prePrayers.length + totalBeads){
-    const beadIndex = index - prePrayers.length;
+    const beadIndex = index - preArr.length;
     const houseIndex = Math.floor(beadIndex / beadsPerHouse);
     const withinHouse = beadIndex % beadsPerHouse;
 
@@ -425,19 +435,28 @@ function update() {
     beadsGroup.appendChild(arrow);
 
     if(withinHouse === 0) {
-      prayer.innerHTML = `✦ عطية ${houseInfo[houseIndex].name}<br>${houseInfo[houseIndex].super}`;
+      if(isEn) prayer.innerHTML = `✦ Gift of ${houseArr[houseIndex].name}<br>${houseArr[houseIndex].super}`;
+      else prayer.innerHTML = `✦ موهبة ${houseArr[houseIndex].name}<br>${houseArr[houseIndex].super}`;
     } else if(withinHouse === 7){
-      prayer.innerHTML = 'تعال أيها الروح القدس واملأ قلوب المؤمنين. المجد للآب الأزلي، والابن الوحيد الفادي، والروح الحي المعزي الآن وإلى الأبد آمين.';
+      if(isEn) prayer.innerHTML = 'Come, Holy Spirit, and fill the hearts of the faithful. Glory to the eternal Father, the only-begotten Son, and the living Spirit, now and forever. Amen.';
+      else prayer.innerHTML = 'أرسل روحك فيُخلقوا، ويتجدد وجه الأرض. المجد للآب الأزلي، والابن الوحيد الفادي، والروح الحي المعزي الآن وإلى الأبد آمين.';
     } else {
-      prayer.textContent = 'تعال أيها الروح القدس واملأ قلوب المؤمنين.';
+      if(isEn) prayer.textContent = 'Come, Holy Spirit, and renew the face of the earth.';
+      else prayer.textContent = 'أرسل روحك فيُخلقوا، ويتجدد وجه الأرض.';
     }
 
-    counter.textContent = `عطية ${houseIndex+1} / ${houseInfo.length} • حبة ${withinHouse+1} / ${beadsPerHouse}`;
+    if(isEn) counter.textContent = `Gift ${houseIndex+1} of ${houseArr.length} • Bead ${withinHouse+1} of ${beadsPerHouse}`;
+    else counter.textContent = `موهبة ${houseIndex+1} / ${houseArr.length} • حبة ${withinHouse+1} / ${beadsPerHouse}`;
   }
   else{
-    const postStep = postPrayers[postIndex];
-    prayer.innerHTML = `<h3>${postStep.name}</h3><p>${postStep.sections[postSection]}</p>`;
-    counter.textContent = `الختام ${postIndex+1} - قسم ${postSection+1} / ${postStep.sections.length}`;
+    const postStep = postArr[postIndex];
+    if(isEn){
+      prayer.innerHTML = `<h3>${postStep.name}</h3><p>${postStep.sections[postSection]}</p>`;
+      counter.textContent = `Closing ${postIndex+1} - section ${postSection+1} / ${postStep.sections.length}`;
+    } else {
+      prayer.innerHTML = `<h3>${postStep.name}</h3><p>${postStep.sections[postSection]}</p>`;
+      counter.textContent = `الختام ${postIndex+1} - قسم ${postSection+1} / ${postStep.sections.length}`;
+    }
   }
 }
 
@@ -505,6 +524,134 @@ window.addEventListener('keydown', e=>{
 update();
 </script>
 
+<script>
+// --- English translation data (mirrors Arabic arrays) ---
+const prePrayersEn = [
+  { name: 'Offering of Self to the Holy Spirit', sections: [
+    'O Spirit of God, we offer you our persons and our prayers with the prayer of Mary and the apostles gathered in the upper room, asking you to come, renew us, and renew the face of the earth.',
+    'Come, O Holy Spirit, and send from heaven the ray of your light. Come, Father of the poor. Come, giver of gifts. Come, O light of hearts, O glorious Comforter, O sweet inhabitant of hearts, delightful rest.',
+    'You are rest in labor, temperance in heat, and consolation in weeping, O beatific light; fill the inner hearts of the faithful, for without your power nothing in man is pure.',
+    'Purify what was defiled, water what was dry, heal what was sick, soften what was rigid, inflame what was cold, correct what has gone astray.',
+    'Grant to your faithful who trust in you the seven gifts; grant them the reward of virtue; give them the goal of salvation and eternal joy. Amen.'
+  ]},
+  { name: 'Prayer to the Virgin Mary', sections: [
+    'O Mary, immaculate Virgin, you who by your sinless womb became through the Holy Spirit the dwelling of the Divine Sacrament, pray for us.',
+    'That the Holy Spirit may come soon and renew the face of the earth. (Hail Mary...)',
+    'O Mary, immaculate Virgin, who by the mystery of the Incarnation through the Holy Spirit became the true Mother of God, pray for us.',
+    'That the Holy Spirit may come soon and renew the face of the earth. (Hail Mary...)',
+    'O Mary, immaculate Virgin, who prayed in the upper room with the apostles and was filled with an outpouring of the Holy Spirit, pray for us.',
+    'That the Holy Spirit may come soon and renew the face of the earth. (Hail Mary...)'
+  ]},
+  { name: 'Prayer to Receive the Gifts of the Holy Spirit', sections: [
+    'My beloved Jesus, O generous and good One, You who before Your ascension promised Your disciples to send them Your Holy Spirit to console and strengthen them.',
+    'Have mercy and send upon us this Spirit who sanctifies souls to dwell in us, sanctify us, and fill us with His holy gifts. Amen.'
+  ]}
+];
+
+const houseInfoEn = [
+  {name:'Wisdom', super:'Come, O Spirit of Wisdom, and dwell in us to guide us to true good and provide the means to obtain it. (Our Father...)'},
+  {name:'Understanding', super:'Come, O Spirit of Understanding, and dwell in us, enlighten our minds to perceive the truths and mysteries of our faith. (Our Father...)'},
+  {name:'Knowledge', super:'Come, O Spirit of Knowledge, and dwell in us to know God, ourselves and others, for knowledge is the foundation of love. (Our Father...)'},
+  {name:'Counsel', super:'Come, O Spirit of Counsel, and dwell in us, enlighten us to know God\'s will and strengthen us to accomplish it. (Our Father...)'},
+  {name:'Fortitude', super:'Come, O Spirit of Fortitude, and dwell in us, fill our hearts with courage and strengthen us to fulfill our duties faithfully. (Our Father...)'},
+  {name:'Fear of the Lord', super:'Come, O Spirit of the Fear of the Lord, and dwell in us, strengthen us to revere God and keep His commandments. (Our Father...)'},
+  {name:'Piety', super:'Come, O Spirit of Piety, and dwell in us, grant us to know your sweet yoke and bear it lightly. (Our Father...)'}
+];
+
+const postPrayersEn = [
+  {name: 'Closing Prayer: For Mary, Lady of All Peoples', sections:[
+    'Lord Jesus, Son of the Father, pour out now Your Spirit upon the earth and let the Holy Spirit dwell in the hearts of all peoples, that they may be preserved from corruption, war and afflictions, and may Mary be Lady of all peoples and our advocate. Amen.',
+    'As snowflakes scatter and fall and as snow melts into the ground, so the Holy Spirit descends into the hearts of those who recite this prayer each day.'
+  ]}
+];
+
+// --- UI: language selector + translations panel ---
+(function(){
+  let lang = 'ar';
+  const headStyle = document.createElement('style');
+  headStyle.innerHTML = `
+    .lang-toggle{ position:fixed; top:12px; left:12px; z-index:9999; background:rgba(255,255,255,0.06); padding:6px 8px; border-radius:6px; backdrop-filter: blur(4px); display:flex; gap:8px; align-items:center; }
+    .lang-toggle select, .lang-toggle button{ font-family: Cairo, sans-serif; font-size:14px; padding:6px 8px; border-radius:4px; border:1px solid rgba(0,0,0,0.12); }
+    #translationsPanel{ position:fixed; top:60px; right:12px; bottom:12px; width:380px; max-width:calc(100% - 40px); overflow:auto; background: #fff; color:#111; padding:16px; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.35); z-index:9998; display:none; direction:ltr; }
+    #translationsPanel h3{ margin-top:14px; margin-bottom:6px; font-size:16px; }
+    #translationsPanel p{ margin:6px 0 12px; line-height:1.45; }
+    #translationsPanel .arabic{ direction:rtl; font-family: 'Cairo', sans-serif; font-size:15px; color:#222; }
+    #translationsPanel .english{ font-family: 'Cairo', sans-serif; font-size:14px; color:#333; }
+  `;
+  document.head.appendChild(headStyle);
+
+  const langDiv = document.createElement('div'); langDiv.className = 'lang-toggle';
+  langDiv.innerHTML = `
+    <select id="langSelect" aria-label="Language selector">
+      <option value="ar">العربية</option>
+      <option value="en">English</option>
+    </select>
+    <button id="toggleTranslations">Show Translations</button>
+  `;
+  document.body.appendChild(langDiv);
+
+  const panel = document.createElement('div'); panel.id = 'translationsPanel';
+  document.body.appendChild(panel);
+
+  function populatePanel(){
+    const p = []; // build html
+    const source = (lang === 'ar') ? prePrayersEn : prePrayersEn; // always show English in panel
+    p.push('<h2 style="margin:0 0 8px;">English Translations — Prayers of the Holy Spirit</h2>');
+
+    prePrayersEn.forEach(item => {
+      p.push(`<section><h3 class="arabic">${item.name}</h3>`);
+      item.sections.forEach(s => p.push(`<p class="english">${s}</p>`));
+      p.push('</section>');
+    });
+
+    p.push('<section><h3 class="arabic">Gifts of the Holy Spirit</h3>');
+    houseInfoEn.forEach(h=>{
+      p.push(`<p class="english"><strong>${h.name}:</strong> ${h.super}</p>`);
+    });
+    p.push('</section>');
+
+    postPrayersEn.forEach(item=>{
+      p.push(`<section><h3 class="arabic">${item.name}</h3>`);
+      item.sections.forEach(s => p.push(`<p class="english">${s}</p>`));
+      p.push('</section>');
+    });
+
+    panel.innerHTML = p.join('');
+  }
+  populatePanel();
+
+  // language switch behaviour
+  const select = document.getElementById('langSelect');
+  const toggleBtn = document.getElementById('toggleTranslations');
+  let panelVisible = false;
+  toggleBtn.addEventListener('click', ()=>{
+    panelVisible = !panelVisible;
+    panel.style.display = panelVisible ? 'block' : 'none';
+    toggleBtn.textContent = panelVisible ? 'Hide Translations' : 'Show Translations';
+  });
+
+  select.addEventListener('change', e=>{
+    lang = e.target.value;
+    // update main UI by calling update() defined in the other script
+    if(typeof window.update === 'function') window.update();
+    // ensure panel still shows English texts
+    populatePanel();
+  });
+
+})();
+
+</script>
+
 
 </body>
 </html>
+
+<script>
+// ensure any translation popup UI stays hidden — main UI will switch languages
+document.addEventListener('DOMContentLoaded', function(){
+  const t = document.getElementById('toggleTranslations');
+  if(t) t.style.display = 'none';
+  const p = document.getElementById('translationsPanel');
+  if(p) p.style.display = 'none';
+});
+</script>
