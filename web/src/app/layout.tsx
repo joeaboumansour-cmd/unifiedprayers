@@ -23,6 +23,11 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   formatDetection: { telephone: false },
+  other: {
+    // Next emits only `mobile-web-app-capable`; iOS before 17.4 needs the
+    // apple-prefixed name to launch standalone instead of inside Safari.
+    "apple-mobile-web-app-capable": "yes",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
