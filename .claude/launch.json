@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "unified-prayers",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--prefix", "web"],
+      "port": 3000
+    },
+    {
+      "name": "legacy-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8777", "-d", "unifiedprayers"],
+      "port": 8777
+    }
+  ]
+}

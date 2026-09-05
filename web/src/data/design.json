@@ -1,0 +1,409 @@
+{
+  "AR": {
+    "intro": [
+      {
+        "name": "تقديم الذات للروح القدس",
+        "sections": [
+          "يا روح الله، إنا نقدم لك ذواتنا وصلواتنا مع صلاة مريم العذراء والرسل المجتمعين في العلية طالبين منك أن تأتي وتجددنا وتجدد وجه الأرض.",
+          "هلم أيها الروح القدس، وأرسل من السماء شعاع نورك هلم يا أبا المساكين. هلم يا معطي المواهب. هلم يا ضياء القلوب، أيها المعزي الجليل، يا ساكن القلوب العذب، أيتها الاستراحة اللذيذة.",
+          "أنتَ في التعب راحة وفي الحر اعتدال وفي البكاء تعزية، أيها النور الطوباوي، إملأ باطن قلوب المؤمنين، لأنه بدون قدرتك لا شيء في الإنسان ولا شيء طاهر.",
+          "طهر ما كان دنساً، إسق ما كان يابساً، اشف ما كان معلولا، لين ما كان صلباً، أضرم ما كان بارداً، دبّر ما كان حائداً.",
+          "أعط مؤمنيك المتكلين عليك المواهب السبع، إمنحهم ثواب الفضيلة، هب لهم غاية الخلاص، أعطهم السرور الأبدي. آمین."
+        ]
+      },
+      {
+        "name": "الصلاة لمريم العذراء",
+        "sections": [
+          "يا مريم، أيتها العذراء الكلية الطهارة، أنت التي بحبلك بلا دنس، جعل منك الروح القدس بيت القربان الإلهي، صلي لأجلنا.",
+          "لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)",
+          "يا مريم، أيتها العذراء الكلية الطهارة، أنت التي بسر التجسد أصبحت بالروح القدس أم الله الحقيقية، صلي لأجلنا.",
+          "لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)",
+          "يا مريم، أيتها العذراء الكلية الطهارة، أنت التي صلّيت في العلية مع الرسل فامتلأت بفيض من الروح القدس، صلي لأجلنا.",
+          "لكي يأتي الروح القدس الله قريباً، ويجدّد وجه الأرض. (السلام عليك...)"
+        ]
+      },
+      {
+        "name": "صلاة لاستمداد مواهب الروح القدس",
+        "sections": [
+          "يا حبيبي يسوع، يا ذا الجود والصلاح يا من قبل صعودك إلى السماء، وعدت تلاميذك بإرسال روحك القدوس إليهم، ليعزيهم ويُشددهم.",
+          "تعطف وأرسل إلينا هذا الروح الذي يقدس النفوس ليحل فينا ويقدسنا ويملأنا من مواهبه السنية. آمين."
+        ]
+      }
+    ],
+    "gifts": [
+      {
+        "name": "الحكمة",
+        "super": "تعال يا روح الحكمة، وحل فينا لتدلنا على الخير الحقيقي وتوفر لنا وسائل الحصول عليه. (أبانا الذي...)"
+      },
+      {
+        "name": "الفهم",
+        "super": "تعال يا روح الفهم، وحل فينا، وأنر عقولنا لندرك حقائق ديانتنا وأسرارها العميقة. (أبانا الذي...)"
+      },
+      {
+        "name": "العلم",
+        "super": "تعال يا روح العلم، وحل فينا لنعرف الله ونعرف ذواتنا والآخرين، لأن المعرفة أساس المحبة. (أبانا الذي...)"
+      },
+      {
+        "name": "المشورة",
+        "super": "تعال يا روح المشورة، وحل فينا، ونوّرنا لنعرف مشيئة الله، وقوّنا على إتمامها. (أبانا الذي...)"
+      },
+      {
+        "name": "القوة",
+        "super": "تعال يا روح القوة، وحل فينا، واملأ قلوبنا م الله، وقونا على إتمام واجباتنا بكل أمانة وإخلاص. (أبانا الذي...)"
+      },
+      {
+        "name": "مخافة الله",
+        "super": "تعال يا روح المخافة، وحل فينا، وقوّنا على أن نحترم الله وأوامر الله ووصاياه. (أبانا الذي...)"
+      },
+      {
+        "name": "التقوى",
+        "super": "تعال يا روح التقوى، وحل فينا، وأنعم علينا بأن نختبر أن نيرك طيب وحملك خفيف ونستطيع حمله. (أبانا الذي...)"
+      }
+    ],
+    "beadText": "أرسل روحك فيُخلقوا، ويتجدد وجه الأرض.",
+    "gloryText": "أرسل روحك فيُخلقوا، ويتجدد وجه الأرض. المجد للآب الأزلي، والابن الوحيد الفادي، والروح الحي المعزي الآن وإلى الأبد آمين.",
+    "closing": [
+      {
+        "name": "صلاة الختام: لمريم سيدة جميع الشعوب",
+        "sections": [
+          "أيها الرب يسوع يا ابن ألآب، أفض الآن روحك على الأرض، وأسكن الروح القدس في قلوب جميع الشعوب، ليُحفظوا من الفساد ومن الحرب ومن الآفات، ولتكن سيدة جميع الشعوب، وهي مريم محامية لنا، آمين.",
+          "كما تتطاير رقع الثلج وتتساقط وكما يذوب الثلج في الأرض هكذا ينزل الروح القدس في قلوب الذين يتلون هذه الصلاة كل يوم."
+        ]
+      }
+    ]
+  },
+  "EN": {
+    "intro": [
+      {
+        "name": "Offering of Self to the Holy Spirit",
+        "sections": [
+          "O Spirit of God, we offer you our persons and our prayers with the prayer of Mary and the apostles gathered in the upper room, asking you to come, renew us, and renew the face of the earth.",
+          "Come, O Holy Spirit, and send from heaven the ray of your light. Come, Father of the poor. Come, giver of gifts. Come, O light of hearts, O glorious Comforter, O sweet inhabitant of hearts, delightful rest.",
+          "You are rest in labor, temperance in heat, and consolation in weeping, O beatific light; fill the inner hearts of the faithful, for without your power nothing in man is pure.",
+          "Purify what was defiled, water what was dry, heal what was sick, soften what was rigid, inflame what was cold, correct what has gone astray.",
+          "Grant to your faithful who trust in you the seven gifts; grant them the reward of virtue; give them the goal of salvation and eternal joy. Amen."
+        ]
+      },
+      {
+        "name": "Prayer to the Virgin Mary",
+        "sections": [
+          "O Mary, immaculate Virgin, you who by your sinless womb became through the Holy Spirit the dwelling of the Divine Sacrament, pray for us.",
+          "That the Holy Spirit may come soon and renew the face of the earth. (Hail Mary...)",
+          "O Mary, immaculate Virgin, who by the mystery of the Incarnation through the Holy Spirit became the true Mother of God, pray for us.",
+          "That the Holy Spirit may come soon and renew the face of the earth. (Hail Mary...)",
+          "O Mary, immaculate Virgin, who prayed in the upper room with the apostles and was filled with an outpouring of the Holy Spirit, pray for us.",
+          "That the Holy Spirit may come soon and renew the face of the earth. (Hail Mary...)"
+        ]
+      },
+      {
+        "name": "Prayer to Receive the Gifts of the Holy Spirit",
+        "sections": [
+          "My beloved Jesus, O generous and good One, You who before Your ascension promised Your disciples to send them Your Holy Spirit to console and strengthen them.",
+          "Have mercy and send upon us this Spirit who sanctifies souls to dwell in us, sanctify us, and fill us with His holy gifts. Amen."
+        ]
+      }
+    ],
+    "gifts": [
+      {
+        "name": "Wisdom",
+        "super": "Come, O Spirit of Wisdom, and dwell in us to guide us to true good and provide the means to obtain it. (Our Father...)"
+      },
+      {
+        "name": "Understanding",
+        "super": "Come, O Spirit of Understanding, and dwell in us, enlighten our minds to perceive the truths and mysteries of our faith. (Our Father...)"
+      },
+      {
+        "name": "Knowledge",
+        "super": "Come, O Spirit of Knowledge, and dwell in us to know God, ourselves and others, for knowledge is the foundation of love. (Our Father...)"
+      },
+      {
+        "name": "Counsel",
+        "super": "Come, O Spirit of Counsel, and dwell in us, enlighten us to know God's will and strengthen us to accomplish it. (Our Father...)"
+      },
+      {
+        "name": "Fortitude",
+        "super": "Come, O Spirit of Fortitude, and dwell in us, fill our hearts with courage and strengthen us to fulfill our duties faithfully. (Our Father...)"
+      },
+      {
+        "name": "Fear of the Lord",
+        "super": "Come, O Spirit of the Fear of the Lord, and dwell in us, strengthen us to revere God and keep His commandments. (Our Father...)"
+      },
+      {
+        "name": "Piety",
+        "super": "Come, O Spirit of Piety, and dwell in us, grant us to know your sweet yoke and bear it lightly. (Our Father...)"
+      }
+    ],
+    "beadText": "Send forth your Spirit, and they shall be created; and you shall renew the face of the earth.",
+    "gloryText": "Send forth your Spirit, and they shall be created. Glory to the eternal Father, the only-begotten Son, and the living Spirit, now and forever. Amen.",
+    "closing": [
+      {
+        "name": "Closing Prayer: For Mary, Lady of All Peoples",
+        "sections": [
+          "Lord Jesus, Son of the Father, pour out now Your Spirit upon the earth and let the Holy Spirit dwell in the hearts of all peoples, that they may be preserved from corruption, war and afflictions, and may Mary be Lady of all peoples and our advocate. Amen.",
+          "As snowflakes scatter and fall and as snow melts into the ground, so the Holy Spirit descends into the hearts of those who recite this prayer each day."
+        ]
+      }
+    ]
+  },
+  "HAIL": {
+    "ar": "السلام عليك يا مريم، يا ممتلئة نعمة، الرب معك. مباركة أنت في النساء ومباركة ثمرة بطنك. يا قديسة مريم، يا والدة الله، صلي لأجلنا نحن الخاطئين، الآن وفي ساعة موتنا. آمين.",
+    "en": "Hail Mary, full of grace, the Lord is with thee. Blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen."
+  },
+  "GLORY": {
+    "ar": "المجد للآب والابن والروح القدس، كما كان في البدء والآن وعلى الدوام وإلى دهر الداهرين. آمين.",
+    "en": "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen."
+  },
+  "SETS": [
+    "joyful",
+    "sorrowful",
+    "glorious",
+    "luminous"
+  ],
+  "SET_LABEL": {
+    "ar": {
+      "joyful": "الأسرار الفرحة",
+      "sorrowful": "الأسرار الحزينة",
+      "glorious": "الأسرار المجيدة",
+      "luminous": "أسرار النور"
+    },
+    "en": {
+      "joyful": "Joyful Mysteries",
+      "sorrowful": "Sorrowful Mysteries",
+      "glorious": "Glorious Mysteries",
+      "luminous": "Luminous Mysteries"
+    }
+  },
+  "SET_DAYS": {
+    "ar": {
+      "joyful": "الاثنين والسبت",
+      "sorrowful": "الثلاثاء والجمعة",
+      "glorious": "الأربعاء والأحد",
+      "luminous": "الخميس"
+    },
+    "en": {
+      "joyful": "Monday & Saturday",
+      "sorrowful": "Tuesday & Friday",
+      "glorious": "Wednesday & Sunday",
+      "luminous": "Thursday"
+    }
+  },
+  "DAY_SET": [
+    "glorious",
+    "joyful",
+    "sorrowful",
+    "glorious",
+    "luminous",
+    "sorrowful",
+    "joyful"
+  ],
+  "STYLES": [
+    "arc",
+    "ring",
+    "chain",
+    "orb"
+  ],
+  "STYLE_LABEL": {
+    "ar": {
+      "arc": "قوس",
+      "ring": "حلقة",
+      "chain": "سلسلة",
+      "orb": "هالة"
+    },
+    "en": {
+      "arc": "Arc",
+      "ring": "Ring",
+      "chain": "Chain",
+      "orb": "Orb"
+    }
+  },
+  "UI": {
+    "ar": {
+      "greeting": [
+        "ليلة مباركة",
+        "صباح الخير",
+        "نهار مبارك",
+        "مساء الخير"
+      ],
+      "langSwap": "English",
+      "resumeKicker": "تابع الصلاة",
+      "libraryLabel": "الصلوات",
+      "comingLabel": "قريباً",
+      "soon": "قريباً",
+      "spiritName": "مسبحة الروح القدس",
+      "maryName": "مسبحة مريم العذراء",
+      "back": "رجوع",
+      "tapHint": "اضغط في أي مكان للمتابعة",
+      "tabs": [
+        "الصلوات",
+        "اليوم",
+        "المكتبة",
+        "الإعدادات"
+      ],
+      "pages": [
+        "الصلوات",
+        "اليوم",
+        "المكتبة",
+        "الإعدادات"
+      ],
+      "coming": [
+        "القداس الماروني",
+        "القراءات اليومية",
+        "الكتاب المقدس",
+        "النافلات"
+      ],
+      "spiritMeta": "٧ مواهب · ٥٦ حبة · ١٥ دقيقة",
+      "maryMeta": "٥ أسرار · ٦٠ حبة · ٢٠ دقيقة",
+      "sheetTitle": "اختر مجموعة الأسرار",
+      "sheetHint": "لكل يوم أسراره. اختر المجموعة التي تريد التأمل بها.",
+      "startPraying": "ابدأ الصلاة",
+      "todayKicker": "أسرار اليوم",
+      "todaySetHint": "خمسة أسرار للتأمل، مع صلوات التمهيد والختام.",
+      "thisWeek": "هذا الأسبوع",
+      "days": [
+        "أحد",
+        "إثن",
+        "ثلا",
+        "أرب",
+        "خمي",
+        "جمع",
+        "سبت"
+      ],
+      "verseLabel": "آية اليوم",
+      "verse": "أرسل روحك فيُخلقوا، وتجدد وجه الأرض.",
+      "verseRef": "مزمور ١٠٤",
+      "statLabels": [
+        "يوم متتابع",
+        "صلاة هذا الشهر",
+        "دقيقة"
+      ],
+      "search": "ابحث في الصلوات",
+      "beadStyleLabel": "شكل الحبات",
+      "readingLabel": "القراءة والصوت",
+      "textSize": "حجم النص",
+      "sizes": [
+        "ص",
+        "م",
+        "ك"
+      ],
+      "language": "اللغة",
+      "toggles": [
+        [
+          "الوضع الليلي",
+          "إضاءة دافئة خفيفة للصلاة في الليل"
+        ],
+        [
+          "الاهتزاز",
+          "نبضة خفيفة عند كل حبة"
+        ],
+        [
+          "الصوت المحيط",
+          "خلفية هادئة أثناء الصلاة"
+        ],
+        [
+          "إبقاء الشاشة مضاءة",
+          "لا تنطفئ الشاشة أثناء الصلاة"
+        ]
+      ],
+      "about": "عن التطبيق",
+      "version": "الإصدار ٢٠٢٦.١",
+      "groups": [
+        "المسابح",
+        "قريباً"
+      ]
+    },
+    "en": {
+      "greeting": [
+        "Blessed night",
+        "Good morning",
+        "Blessed day",
+        "Good evening"
+      ],
+      "langSwap": "العربية",
+      "resumeKicker": "Continue praying",
+      "libraryLabel": "Prayers",
+      "comingLabel": "Coming soon",
+      "soon": "Coming soon",
+      "spiritName": "Chaplet of the Holy Spirit",
+      "maryName": "Rosary of the Virgin Mary",
+      "back": "Back",
+      "tapHint": "Tap anywhere to continue",
+      "tabs": [
+        "Prayers",
+        "Today",
+        "Library",
+        "Settings"
+      ],
+      "pages": [
+        "Prayers",
+        "Today",
+        "Library",
+        "Settings"
+      ],
+      "coming": [
+        "Maronite Mass",
+        "Daily readings",
+        "Holy Scripture",
+        "Novenas"
+      ],
+      "spiritMeta": "7 gifts · 56 beads · 15 min",
+      "maryMeta": "5 mysteries · 60 beads · 20 min",
+      "sheetTitle": "Select mystery set",
+      "sheetHint": "Each day has its mysteries. Choose the set you want to meditate on.",
+      "startPraying": "Start praying",
+      "todayKicker": "Today's mysteries",
+      "todaySetHint": "Five mysteries to meditate, with opening and closing prayers.",
+      "thisWeek": "This week",
+      "days": [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "verseLabel": "Verse of the day",
+      "verse": "Send forth your Spirit, and they shall be created; and you shall renew the face of the earth.",
+      "verseRef": "Psalm 104",
+      "statLabels": [
+        "day streak",
+        "prayers this month",
+        "minutes"
+      ],
+      "search": "Search prayers",
+      "beadStyleLabel": "Bead style",
+      "readingLabel": "Reading & sound",
+      "textSize": "Text size",
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "language": "Language",
+      "toggles": [
+        [
+          "Night mode",
+          "Warm dim light for praying at night"
+        ],
+        [
+          "Haptics",
+          "A soft pulse on every bead"
+        ],
+        [
+          "Ambient sound",
+          "A calm drone while you pray"
+        ],
+        [
+          "Keep screen awake",
+          "The screen stays on while praying"
+        ]
+      ],
+      "about": "About",
+      "version": "Version 2026.1",
+      "groups": [
+        "Rosaries",
+        "Coming soon"
+      ]
+    }
+  }
+}

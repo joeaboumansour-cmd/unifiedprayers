@@ -1,0 +1,112 @@
+:root {
+  /* Palette lifted from the design file. */
+  --ink: #f4f1ea;
+  --gold: #f0c775;
+  --gold-soft: #ffe6b0;
+  --dim: #8d9dbe;
+  --dim-2: #7c8cae;
+  --dim-3: #75839f;
+  --line: rgba(255, 255, 255, 0.07);
+  --body: #dfe4f0;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
+  color-scheme: dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: #070a15;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background: #070a15;
+  color: var(--ink);
+  font-family: var(--font-plex), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* No pull-to-refresh or rubber-banding mid-prayer. */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Prayer text is the one thing worth selecting. */
+.selectable {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.scroll-y::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes upBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.055);
+    opacity: 1;
+  }
+}
+@keyframes upHalo {
+  0%,
+  100% {
+    transform: scale(0.97);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.82;
+  }
+}
+@keyframes upOrb {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,21 @@
+# dependencies / build output
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# local env
+.env*.local
+
+# decoded Claude Design bundle: 3 MB of vendored React/Babel blobs.
+# The design source itself is kept in design/.
+design-src/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# the previous static app, superseded by web/ (kept on disk only)
+unifiedprayers/
