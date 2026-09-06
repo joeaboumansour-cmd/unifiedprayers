@@ -4,14 +4,35 @@
    Every colour in the app resolves through these tokens, so switching
    palette is just setting data-palette on <html>.
 
-   All of them are dark. The dove art, the halo glow and the contrast
-   ratios are all built for a dark ground — a light theme would be a
-   different design rather than a recolour.
+   Each palette is built the way the original one is: a deep, cool ground
+   and a luminous accent from the OPPOSITE side of the colour wheel. The
+   original is a blue ground at ~224 degrees against gold at ~40 — 176
+   degrees apart. Every palette here holds that separation:
+
+     midnight   blue 224   / gold      40    176 apart
+     rose       pine 169   / rose     350    179 apart
+     lavender   moss  75   / lilac    258    177 apart
+     salmon     petrol 198 / salmon    15    177 apart
+     sand       slate 230  / cream     42    172 apart
+     sage       plum  311  / sage     143    168 apart
+
+   Monochrome palettes — a rose accent on a rose ground — read as a hue
+   wash laid over the app rather than as a colour scheme, which is why
+   they are avoided here.
+
+   The muted text ramp belongs to the GROUND, not the accent. Keeping the
+   greys in the ground's hue family is the other half of what stops a
+   palette looking tinted. Card fills stay neutral white at low alpha.
 
    `--accent-rgb` and friends are bare channel triplets so component code
    can derive translucent variants with rgb(var(--accent-rgb) / .12).
+
+   All of them are dark. The dove art, the halo glow and the contrast
+   ratios are built for a dark ground — a light theme would be a different
+   design rather than a recolour.
    --------------------------------------------------------------- */
 
+/* Blue ground, gold accent — the original. */
 :root,
 [data-palette="midnight"] {
   --accent-rgb: 240 199 117;
@@ -58,186 +79,191 @@
   --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #14161d, #08090c);
 }
 
+/* Deep pine ground, rose accent. */
 [data-palette="rose"] {
-  --accent-rgb: 240 168 181;
+  --accent-rgb: 242 162 176;
   --accent: rgb(var(--accent-rgb));
-  --accent-deep: #d98098;
-  --accent-soft-rgb: 255 214 220;
+  --accent-deep: #dc8494;
+  --accent-soft-rgb: 255 208 216;
   --accent-soft: rgb(var(--accent-soft-rgb));
   --accent-glow: #fff0f3;
-  --accent-text: #f0d3da;
-  --on-accent: #2a1016;
+  --accent-text: #f0c4cc;
+  --on-accent: #2b1016;
 
-  --ink-rgb: 246 238 240;
+  --ink-rgb: 240 245 242;
   --ink: rgb(var(--ink-rgb));
-  --body: #ecdde2;
-  --soft: #cdb2bd;
-  --soft-2: #e0c9d1;
-  --dim: #a9899a;
-  --dim-2: #96788a;
-  --dim-3: #8a6d7e;
-  --dim-4: #6f5566;
+  --body: #d8e6e1;
+  --soft: #aec6bf;
+  --soft-2: #c9ded8;
+  --dim: #86a49b;
+  --dim-2: #75918a;
+  --dim-3: #6a857e;
+  --dim-4: #546a64;
 
-  --bead-rgb: 240 219 226;
+  --bead-rgb: 214 234 228;
   --bead: rgb(var(--bead-rgb));
 
-  --bg-base-rgb: 20 10 16;
-  --bg-base: #140a10;
-  --surface: #2a1522;
-  --scrim: rgba(14, 5, 9, 0.62);
-  --resume-a: rgba(200, 120, 150, 0.22);
-  --resume-b: rgba(54, 28, 40, 0.5);
+  --bg-base-rgb: 5 17 15;
+  --bg-base: #05110f;
+  --surface: #102a25;
+  --scrim: rgba(4, 14, 12, 0.62);
+  --resume-a: rgba(90, 170, 150, 0.2);
+  --resume-b: rgba(16, 42, 37, 0.5);
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,
-    #3b1f2e 0%,
-    #22111b 45%,
-    #140a10 100%
+    #14322c 0%,
+    #0a1f1b 45%,
+    #05110f 100%
   );
   --grad-player: radial-gradient(
     110% 70% at 50% 6%,
-    #432334 0%,
-    #1e0f18 48%,
-    #0e070b 100%
+    #173a33 0%,
+    #091d19 48%,
+    #030c0a 100%
   );
-  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #241019, #100609);
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #0f2622, #050f0d);
 }
 
+/* Deep moss ground, lilac accent. */
 [data-palette="lavender"] {
-  --accent-rgb: 198 176 246;
+  --accent-rgb: 195 174 245;
   --accent: rgb(var(--accent-rgb));
-  --accent-deep: #a98ce4;
-  --accent-soft-rgb: 226 214 255;
+  --accent-deep: #a68ce8;
+  --accent-soft-rgb: 222 209 255;
   --accent-soft: rgb(var(--accent-soft-rgb));
-  --accent-glow: #f2ecff;
-  --accent-text: #ddd2f5;
-  --on-accent: #1b1430;
+  --accent-glow: #f3ecff;
+  --accent-text: #d8ccf2;
+  --on-accent: #1a1330;
 
-  --ink-rgb: 240 238 250;
+  --ink-rgb: 244 245 236;
   --ink: rgb(var(--ink-rgb));
-  --body: #ddd8ef;
-  --soft: #bab3d6;
-  --soft-2: #d2cbe8;
-  --dim: #9990bd;
-  --dim-2: #877ead;
-  --dim-3: #7a71a0;
-  --dim-4: #625a85;
+  --body: #e0e4d4;
+  --soft: #bcc2a9;
+  --soft-2: #d3d8c4;
+  --dim: #949b7f;
+  --dim-2: #838a70;
+  --dim-3: #777d66;
+  --dim-4: #5e6350;
 
-  --bead-rgb: 224 220 245;
+  --bead-rgb: 226 232 212;
   --bead: rgb(var(--bead-rgb));
 
-  --bg-base-rgb: 12 10 28;
-  --bg-base: #0c0a1c;
-  --surface: #1d1738;
-  --scrim: rgba(8, 6, 15, 0.62);
-  --resume-a: rgba(140, 120, 220, 0.24);
-  --resume-b: rgba(30, 24, 60, 0.5);
+  --bg-base-rgb: 13 15 9;
+  --bg-base: #0d0f09;
+  --surface: #1f2317;
+  --scrim: rgba(10, 12, 7, 0.62);
+  --resume-a: rgba(150, 140, 210, 0.22);
+  --resume-b: rgba(36, 40, 26, 0.5);
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,
-    #2c2350 0%,
-    #171232 45%,
-    #0c0a1c 100%
+    #2a2d22 0%,
+    #181a12 45%,
+    #0d0f09 100%
   );
   --grad-player: radial-gradient(
     110% 70% at 50% 6%,
-    #332957 0%,
-    #151027 48%,
-    #08060f 100%
+    #313527 0%,
+    #16180f 48%,
+    #090a06 100%
   );
-  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #191430, #0a0814);
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #1b1e14, #0b0d07);
 }
 
+/* Deep petrol ground, salmon accent. */
 [data-palette="salmon"] {
-  --accent-rgb: 245 165 137;
+  --accent-rgb: 246 161 132;
   --accent: rgb(var(--accent-rgb));
-  --accent-deep: #e08769;
+  --accent-deep: #e0805f;
   --accent-soft-rgb: 255 210 192;
   --accent-soft: rgb(var(--accent-soft-rgb));
   --accent-glow: #fff0e8;
-  --accent-text: #f3d2c3;
-  --on-accent: #2e150c;
+  --accent-text: #f3c9b8;
+  --on-accent: #2e130a;
 
-  --ink-rgb: 248 238 232;
+  --ink-rgb: 238 245 247;
   --ink: rgb(var(--ink-rgb));
-  --body: #eeddd4;
-  --soft: #cfb3a6;
-  --soft-2: #e3c9bd;
-  --dim: #ab8878;
-  --dim-2: #99776a;
-  --dim-3: #8c6d60;
-  --dim-4: #705548;
+  --body: #d5e5ea;
+  --soft: #a8c4cd;
+  --soft-2: #c6dce2;
+  --dim: #7fa2ad;
+  --dim-2: #6e909b;
+  --dim-3: #64848e;
+  --dim-4: #4e6871;
 
-  --bead-rgb: 244 222 212;
+  --bead-rgb: 210 232 238;
   --bead: rgb(var(--bead-rgb));
 
-  --bg-base-rgb: 21 11 7;
-  --bg-base: #150b07;
-  --surface: #2c1811;
-  --scrim: rgba(15, 7, 5, 0.62);
-  --resume-a: rgba(220, 140, 110, 0.22);
-  --resume-b: rgba(58, 30, 20, 0.5);
+  --bg-base-rgb: 4 17 22;
+  --bg-base: #041116;
+  --surface: #0f2b36;
+  --scrim: rgba(3, 13, 17, 0.62);
+  --resume-a: rgba(80, 160, 185, 0.2);
+  --resume-b: rgba(14, 40, 50, 0.5);
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,
-    #3f2419 0%,
-    #24130e 45%,
-    #150b07 100%
+    #123340 0%,
+    #08202a 45%,
+    #041116 100%
   );
   --grad-player: radial-gradient(
     110% 70% at 50% 6%,
-    #47281b 0%,
-    #1f110b 48%,
-    #0f0705 100%
+    #143b4a 0%,
+    #071d26 48%,
+    #020b0f 100%
   );
-  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #26140d, #110705);
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #0d2833, #030d11);
 }
 
+/* Slate-indigo ground, warm cream accent. */
 [data-palette="sand"] {
-  --accent-rgb: 232 214 181;
+  --accent-rgb: 236 220 184;
   --accent: rgb(var(--accent-rgb));
-  --accent-deep: #cbb388;
-  --accent-soft-rgb: 248 238 219;
+  --accent-deep: #d0bd91;
+  --accent-soft-rgb: 248 238 217;
   --accent-soft: rgb(var(--accent-soft-rgb));
   --accent-glow: #fffaf0;
-  --accent-text: #e9dec7;
-  --on-accent: #241d12;
+  --accent-text: #e6dbc2;
+  --on-accent: #241d10;
 
-  --ink-rgb: 246 242 234;
+  --ink-rgb: 244 243 240;
   --ink: rgb(var(--ink-rgb));
-  --body: #e6ded0;
-  --soft: #c6bba7;
-  --soft-2: #ded4c4;
-  --dim: #a3977f;
-  --dim-2: #918571;
-  --dim-3: #857a67;
-  --dim-4: #6a6152;
+  --body: #dcdeea;
+  --soft: #b4b9cd;
+  --soft-2: #cbcfdd;
+  --dim: #8a90a8;
+  --dim-2: #7a8098;
+  --dim-3: #6f758b;
+  --dim-4: #5a6074;
 
-  --bead-rgb: 234 227 214;
+  --bead-rgb: 216 220 236;
   --bead: rgb(var(--bead-rgb));
 
-  --bg-base-rgb: 19 17 14;
-  --bg-base: #13110e;
-  --surface: #262119;
-  --scrim: rgba(14, 12, 9, 0.62);
-  --resume-a: rgba(190, 170, 130, 0.2);
-  --resume-b: rgba(48, 42, 34, 0.5);
+  --bg-base-rgb: 11 13 25;
+  --bg-base: #0b0d19;
+  --surface: #191e34;
+  --scrim: rgba(8, 10, 19, 0.62);
+  --resume-a: rgba(120, 130, 190, 0.2);
+  --resume-b: rgba(24, 28, 48, 0.5);
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,
-    #37312a 0%,
-    #201d18 45%,
-    #13110e 100%
+    #232842 0%,
+    #14182b 45%,
+    #0b0d19 100%
   );
   --grad-player: radial-gradient(
     110% 70% at 50% 6%,
-    #3d362d 0%,
-    #1c1915 48%,
-    #0e0d0a 100%
+    #282d4b 0%,
+    #121628 48%,
+    #07080f 100%
   );
-  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #221f1a, #100f0c);
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #171b2c, #090b14);
 }
 
+/* Deep plum ground, sage accent. */
 [data-palette="sage"] {
   --accent-rgb: 169 214 186;
   --accent: rgb(var(--accent-rgb));
@@ -245,40 +271,40 @@
   --accent-soft-rgb: 208 238 219;
   --accent-soft: rgb(var(--accent-soft-rgb));
   --accent-glow: #edfaf1;
-  --accent-text: #cfe6d8;
-  --on-accent: #10251a;
+  --accent-text: #cbe4d5;
+  --on-accent: #0f2419;
 
-  --ink-rgb: 236 245 239;
+  --ink-rgb: 246 240 247;
   --ink: rgb(var(--ink-rgb));
-  --body: #d6e6dc;
-  --soft: #aec6b8;
-  --soft-2: #c9ded3;
-  --dim: #85a294;
-  --dim-2: #749084;
-  --dim-3: #6a8579;
-  --dim-4: #546a60;
+  --body: #e4d9e6;
+  --soft: #c0abc4;
+  --soft-2: #d6c7d9;
+  --dim: #9c85a1;
+  --dim-2: #8a748f;
+  --dim-3: #7e6a83;
+  --dim-4: #645269;
 
-  --bead-rgb: 216 234 224;
+  --bead-rgb: 232 220 234;
   --bead: rgb(var(--bead-rgb));
 
-  --bg-base-rgb: 8 18 16;
-  --bg-base: #081210;
-  --surface: #142822;
-  --scrim: rgba(5, 13, 11, 0.62);
-  --resume-a: rgba(110, 180, 150, 0.2);
-  --resume-b: rgba(22, 44, 38, 0.5);
+  --bg-base-rgb: 18 6 16;
+  --bg-base: #120610;
+  --surface: #2b1226;
+  --scrim: rgba(14, 5, 12, 0.62);
+  --resume-a: rgba(170, 110, 180, 0.2);
+  --resume-b: rgba(40, 24, 46, 0.5);
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,
-    #1c3830 0%,
-    #0f1f1b 45%,
-    #081210 100%
+    #3a1c33 0%,
+    #240f20 45%,
+    #120610 100%
   );
   --grad-player: radial-gradient(
     110% 70% at 50% 6%,
-    #204036 0%,
-    #0d1c18 48%,
-    #050d0b 100%
+    #42213a 0%,
+    #200d1c 48%,
+    #0c040a 100%
   );
-  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #12241f, #060f0d);
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #1f1224, #0a050d);
 }

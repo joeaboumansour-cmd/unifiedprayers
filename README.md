@@ -55,8 +55,14 @@ src/
 
 ## Notes
 
-- **Palettes.** Six dark palettes — midnight, rose, lavender, salmon, sand and
-  sage — chosen in Settings. Every colour in the app resolves through the
+- **Palettes.** Six dark palettes chosen in Settings. Each is built the way the
+  original is: a deep, cool ground with a luminous accent from the opposite
+  side of the colour wheel — blue against gold, pine against rose, moss
+  against lilac, petrol against salmon, slate against cream, plum against
+  sage, every pair 168-180 degrees apart. A monochrome scheme (rose accent on
+  a rose ground) reads as a hue wash laid over the app rather than as a colour
+  scheme, so it is avoided. The muted text ramp follows the ground, not the
+  accent, and card fills stay neutral white at low alpha. Every colour in the app resolves through the
   tokens in `src/app/palettes.css`, so a palette is applied by setting
   `data-palette` on `<html>`; the `theme-color` meta follows so the browser
   chrome and task-switcher card match. To add one, copy a block in that file

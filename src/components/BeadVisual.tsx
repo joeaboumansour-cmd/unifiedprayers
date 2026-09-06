@@ -103,10 +103,10 @@ function Beads({ beads }: { beads: Bead[] }) {
           cx={b.x}
           cy={b.y}
           r={b.r}
-          fill={b.fill}
           opacity={b.opacity}
           filter={b.glow ? "url(#upGlow)" : undefined}
           style={{
+            fill: b.fill,
             transition: `r .35s ${EASE}, opacity .35s ease, fill .35s ease`,
           }}
         />
@@ -238,12 +238,11 @@ export default function BeadVisual({
               cy={150}
               r={118}
               fill="none"
-              stroke={lit}
               strokeWidth={1.5}
               strokeLinecap="round"
               transform="rotate(-90 200 150)"
               strokeDasharray={dash}
-              style={strokeAnim}
+              style={{ ...strokeAnim, stroke: lit }}
             />
             <Beads beads={beads} />
           </g>
@@ -274,11 +273,10 @@ export default function BeadVisual({
             <path
               d="M24 45 H376"
               fill="none"
-              stroke={lit}
               strokeWidth={1.5}
               strokeLinecap="round"
               strokeDasharray={dash}
-              style={strokeAnim}
+              style={{ ...strokeAnim, stroke: lit }}
             />
             <Beads beads={beads} />
           </g>
@@ -322,11 +320,10 @@ export default function BeadVisual({
           <path
             d="M35.6 160.1 A175 175 0 0 1 364.4 160.1"
             fill="none"
-            stroke={lit}
             strokeWidth={1.5}
             strokeLinecap="round"
             strokeDasharray={dash}
-            style={strokeAnim}
+            style={{ ...strokeAnim, stroke: lit }}
           />
           <Beads beads={beads} />
         </g>
