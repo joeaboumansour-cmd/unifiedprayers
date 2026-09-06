@@ -3,13 +3,18 @@
 import { useEffect, useState } from "react";
 
 import type { Lang } from "@/lib/content";
+import { onForeground } from "@/lib/live";
 import { getSupabase } from "@/lib/supabase/client";
 import type { VerseRow } from "@/lib/supabase/types";
 
 /** Verses fetched previously, so today's still shows with no connection. */
 const CACHE_KEY = "up_verses_v1";
-/** Re-fetched at most this often; the list changes rarely and is small. */
-const MAX_AGE_MS = 6 * 60 * 60 * 1000;
+/**
+ * Re-fetched at most this often. The list changes rarely, but "rarely" is not
+ * "never": an admin who pins a verse for today wants it on the home screen
+ * today, not on whatever day the app next happens to be cold-started.
+ */
+const MAX_AGE_MS = 10 * 60 * 1000;
 
 export type Verse = { text: string; ref: string | null };
 
@@ -92,38 +97,52 @@ export function useVerse(lang: Lang): Verse | null {
 
   useEffect(() => {
     const cache = read();
+    // Unlike an announcement, a verse from an hour ago is not a decision that
+    // may have been reversed — it is text. Showing the stored one immediately
+    // and correcting it when the answer arrives is the right trade here.
     if (cache?.rows) setRows(cache.rows);
-    if (cache && Date.now() - cache.at < MAX_AGE_MS) return;
 
     const supabase = getSupabase();
     if (!supabase) return;
 
     let live = true;
-    (async () => {
-      const { data, error } = await supabase
-        .from("verses")
-        .select("id, text_ar, text_en, ref_ar, ref_en, show_on, active, sort, created_at")
-        .or(`show_on.is.null,show_on.eq.${today()}`)
-        // A cap, so a table someone has been adding to for years cannot turn
-        // the home screen into a large download.
-        .limit(400);
+    let fetchedAt = cache?.at ?? 0;
 
-      if (!live || error || !data) return;
-      setRows(data);
+    const refresh = async () => {
+      if (!live || Date.now() - fetchedAt < MAX_AGE_MS) return;
       try {
-        localStorage.setItem(
-          CACHE_KEY,
-          JSON.stringify({ at: Date.now(), rows: data } satisfies Cached),
-        );
+        const { data, error } = await supabase
+          .from("verses")
+          .select("id, text_ar, text_en, ref_ar, ref_en, show_on, active, sort, created_at")
+          .or(`show_on.is.null,show_on.eq.${today()}`)
+          // A cap, so a table someone has been adding to for years cannot turn
+          // the home screen into a large download.
+          .limit(400);
+
+        if (!live || error || !data) return;
+        fetchedAt = Date.now();
+        setRows(data);
+        try {
+          localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({ at: fetchedAt, rows: data } satisfies Cached),
+          );
+        } catch {
+          /* private mode — it just fetches again next launch */
+        }
       } catch {
-        /* private mode — it just fetches again next launch */
+        /* offline; the cache above, or the bundled verse, covers it */
       }
-    })().catch(() => {
-      /* offline; the cache above, or the bundled verse, covers it */
-    });
+    };
+
+    void refresh();
+    // A phone that has been on the home screen since yesterday is a day behind
+    // on a verse that changes daily. Asking again on the way back in fixes it.
+    const stop = onForeground(() => void refresh());
 
     return () => {
       live = false;
+      stop();
     };
   }, []);
 

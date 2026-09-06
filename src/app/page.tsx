@@ -25,6 +25,7 @@ import {
   readProgress,
   writeLocal,
 } from "@/lib/state";
+import { setAppBusy } from "@/lib/appBusy";
 import { playChime } from "@/lib/chime";
 import { buildSteps } from "@/lib/steps";
 import { useAdmin } from "@/lib/useAdmin";
@@ -73,7 +74,12 @@ export default function Page() {
   const isAdmin = useAdmin(auth.user?.id ?? null) === true;
   const push = usePush(prefs.lang);
   const verse = useVerse(prefs.lang);
-  const { banner, modal, dismiss } = useAnnouncements(auth.status === "signed-in");
+  // Tri-state on purpose: "loading" is not "signed out". Passing false while
+  // the session is still being read would flash a signed-out-only message at
+  // somebody who is signed in.
+  const { banner, modal, dismiss } = useAnnouncements(
+    auth.status === "loading" ? null : auth.status === "signed-in",
+  );
   // Counted from the device's own log of finished prayers, so the home screen
   // shows real numbers whether or not anyone is signed in.
   const { stats, record } = useStats(auth.user?.id ?? null, hydrated);
@@ -114,6 +120,14 @@ export default function Page() {
   );
   const total = steps.length;
   const progress = total > 1 ? step / (total - 1) : 0;
+
+  // Held while a prayer is open and while the closing moment reads. The
+  // service worker layer reads it to keep a new build from reloading the page
+  // out from under somebody mid-decade; it applies the moment this clears.
+  useEffect(() => {
+    setAppBusy(screen === "player" || done);
+    return () => setAppBusy(false);
+  }, [screen, done]);
 
   useWakeLock(prefs.awake && screen === "player");
   useAmbientDrone(prefs.audio && screen === "player");

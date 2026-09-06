@@ -1,7 +1,14 @@
 /* Service worker for Unified Prayers.
-   Bump CACHE_VERSION whenever the shell needs to be re-fetched. */
+   Bump CACHE_VERSION whenever the shell needs to be re-fetched.
 
-const CACHE_VERSION = 'v4';
+   The rule this file is built on: cache what cannot change under its own URL,
+   and never cache anything that carries a decision. Build output under
+   /_next/static/ is content-hashed and safe forever. A page, an API answer, an
+   RSC payload, an announcement -- all of those are state, and a stale copy of
+   state is how a message somebody switched off an hour ago is still sitting on
+   a stranger's screen. Those go to the network, every time. */
+
+const CACHE_VERSION = 'v5';
 const CACHE = `unified-prayers-${CACHE_VERSION}`;
 
 /* Enough to open the app and pray with no connection at all. Next's own
@@ -19,6 +26,11 @@ const PRECACHE = [
   '/icons/apple-touch-icon.png',
 ];
 
+/* How long a navigation waits for the network before the last good copy of the
+   page becomes the better answer. The fetch is not abandoned -- it still
+   refreshes the cache -- this is only about what goes on screen now. */
+const NAV_TIMEOUT_MS = 3500;
+
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
@@ -28,6 +40,10 @@ self.addEventListener('install', event => {
       cache.add(new Request(url, { cache: 'reload' })).catch(() => {})
     ));
   })());
+  // Deliberately no skipWaiting() here. Taking over the moment the download
+  // finishes reloads whatever page is open, and on this app that page is
+  // sometimes a prayer in progress. The page decides instead -- and it decides
+  // within milliseconds unless somebody is mid-decade. See PwaLayer.
 });
 
 self.addEventListener('activate', event => {
@@ -46,6 +62,19 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') { self.skipWaiting(); return; }
+
+  // The escape hatch for the state this file used to be able to get into:
+  // every stored page and asset dropped, without uninstalling the app.
+  if (event.data === 'CLEAR_CACHES') {
+    event.waitUntil((async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter(k => k.startsWith('unified-prayers-')).map(k => caches.delete(k))
+      );
+    })());
+    return;
+  }
+
   // The page tells the worker things the worker cannot look up for itself.
   if (event.data && event.data.type === 'PUSH_CONFIG') {
     event.waitUntil(writeConfig(event.data.config || {}));
@@ -191,6 +220,8 @@ self.addEventListener('pushsubscriptionchange', event => {
   })());
 });
 
+/* ----------------------------------------------------------------- fetch -- */
+
 const isFontHost = url =>
   url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
 
@@ -199,13 +230,42 @@ const isFontHost = url =>
 const isImmutable = url =>
   url.origin === self.location.origin && url.pathname.startsWith('/_next/static/');
 
+/* Pictures, icons, fonts and sounds we serve ourselves. They change only when
+   their name does, so a stale one is a stale picture -- never a stale
+   decision, which is the only kind of staleness that matters here. */
+const STATIC_EXT = /\.(?:webp|png|jpe?g|gif|svg|ico|woff2?|ttf|otf|mp3|ogg|wav)$/i;
+const isStaticAsset = url =>
+  url.origin === self.location.origin && STATIC_EXT.test(url.pathname);
+
+/* Next's flight payload for a client-side navigation: the rendered output of a
+   page, under a URL that does not change when the page does. That combination
+   makes it the single most dangerous thing in the app to store. */
+const isRscRequest = (req, url) =>
+  url.searchParams.has('_rsc') ||
+  req.headers.get('RSC') === '1' ||
+  req.headers.get('Next-Router-Prefetch') === '1';
+
+/* Only a plain, complete, storable answer is worth keeping. A redirect
+   replayed to a navigation throws outright, a partial is not the whole file,
+   and no-store means the server asked us not to. */
+function isCacheable(res) {
+  return Boolean(
+    res &&
+    res.ok &&
+    res.status === 200 &&
+    !res.redirected &&
+    res.type !== 'opaqueredirect' &&
+    !/(?:^|,)\s*no-store(?:\s*,|$)/i.test(res.headers.get('Cache-Control') || '')
+  );
+}
+
 async function cacheFirst(req) {
   const cache = await caches.open(CACHE);
   const hit = await cache.match(req);
   if (hit) return hit;
   try {
     const res = await fetch(req);
-    if (res && res.ok) cache.put(req, res.clone());
+    if (isCacheable(res)) cache.put(req, res.clone());
     return res;
   } catch (err) {
     return new Response('', { status: 504 });
@@ -216,10 +276,23 @@ async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE);
   const hit = await cache.match(req);
   const net = fetch(req).then(res => {
-    if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+    if (isCacheable(res) || (res && res.type === 'opaque')) cache.put(req, res.clone());
     return res;
   }).catch(() => null);
   return hit || (await net) || new Response('', { status: 504 });
+}
+
+/* The network is the answer; the cache is what is left when there is none.
+   Everything same-origin that is neither hashed nor a static asset. */
+async function networkFirst(req) {
+  const cache = await caches.open(CACHE);
+  try {
+    const res = await fetch(req);
+    if (isCacheable(res)) cache.put(req, res.clone());
+    return res;
+  } catch (err) {
+    return (await cache.match(req)) || new Response('', { status: 504 });
+  }
 }
 
 self.addEventListener('fetch', event => {
@@ -237,39 +310,74 @@ self.addEventListener('fetch', event => {
   // subscription has since changed. Straight to the network, always.
   if (url.pathname.startsWith('/api/')) return;
 
-  // Navigations: network first so a deploy lands immediately, shell as fallback.
+  // Flight payloads and prefetches. Storing one lets a client-side navigation
+  // render a page as it was days ago, with nothing in any URL to hint at it.
+  if (isRscRequest(req, url)) return;
+
+  // A query string means the request was parameterised for a reason, and the
+  // reason is rarely something a cache key of ours would honour.
+  if (
+    url.origin === self.location.origin &&
+    url.search &&
+    req.mode !== 'navigate' &&
+    !isImmutable(url)
+  ) {
+    return;
+  }
+
+  // Navigations: the network wins, and the shell is only what stands in when
+  // there is no network to win with.
   if (req.mode === 'navigate') {
     // Keyed by path, so the manifest shortcuts (/?set=mary) do not each store
     // their own copy of the same page.
     const key = url.origin + url.pathname;
+
     event.respondWith((async () => {
-      try {
+      const cache = await caches.open(CACHE);
+
+      // Caught here rather than at the await below, so the race can read a
+      // failure as "no answer yet" without ever leaving a rejection loose.
+      const network = (async () => {
         const preloaded = await event.preloadResponse;
         const res = preloaded || await fetch(req);
-        const cache = await caches.open(CACHE);
         // Each page under its own URL. Storing every navigation under '/'
         // would mean one visit to /login leaves the sign-in form as the
         // offline shell, and praying offline would open it instead of the app.
-        cache.put(key, res.clone());
+        if (isCacheable(res)) cache.put(key, res.clone());
         return res;
-      } catch (err) {
-        const cache = await caches.open(CACHE);
-        // This page if it has been seen before, otherwise the app shell:
-        // signing in needs the network anyway, and offline is for praying.
-        return (await cache.match(key)) ||
-               (await cache.match('/')) ||
-               new Response('Offline', {
-                 status: 503,
-                 headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-               });
-      }
+      })().catch(() => null);
+
+      const timeout = new Promise(resolve =>
+        setTimeout(() => resolve(null), NAV_TIMEOUT_MS)
+      );
+
+      const first = await Promise.race([network, timeout]);
+      if (first) return first;
+
+      // This page if it has been seen before, otherwise the app shell:
+      // signing in needs the network anyway, and offline is for praying.
+      const fallback = (await cache.match(key)) || (await cache.match('/'));
+      if (fallback) return fallback;
+
+      return (await network) || new Response('Offline', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
     })());
     return;
   }
 
   if (isImmutable(url)) { event.respondWith(cacheFirst(req)); return; }
   if (isFontHost(url)) { event.respondWith(staleWhileRevalidate(req)); return; }
+  if (isStaticAsset(url)) { event.respondWith(staleWhileRevalidate(req)); return; }
   if (url.origin === self.location.origin) {
-    event.respondWith(staleWhileRevalidate(req));
+    event.respondWith(networkFirst(req));
   }
+
+  // Everything else off-origin -- Supabase above all -- is left untouched for
+  // the browser to fetch. An announcement, a verse, a session: none of it may
+  // ever be served out of a cache this file controls.
 });
+
+
+

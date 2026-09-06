@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { isAppBusy, subscribeAppBusy } from "@/lib/appBusy";
+import { onForeground } from "@/lib/live";
+
 /** Chrome's install event, which the DOM lib does not type. */
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -15,6 +18,12 @@ const DISMISS_DAYS = 7;
 const SHOW_DELAY_MS = 800;
 /** If Chrome has not offered an install by now, it is not going to. */
 const PROMPT_WAIT_MS = 2500;
+/**
+ * How often an app left open asks whether a new build has shipped. Every
+ * resume asks too, so this only covers the phone sitting unlocked on a table;
+ * between the two, a deploy reaches a device about a minute after it lands.
+ */
+const UPDATE_POLL_MS = 60_000;
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
 
@@ -26,8 +35,6 @@ const C = {
   install: "Install app",
   later: "Later",
   got: "Got it",
-  updated: "A new version is ready",
-  update: "Update",
 };
 
 function isStandalone() {
@@ -56,46 +63,94 @@ function recentlyDismissed() {
 
 export default function PwaLayer() {
   const [sheet, setSheet] = useState<null | "prompt" | "ios">(null);
-  const [updateReady, setUpdateReady] = useState<ServiceWorker | null>(null);
   const deferred = useRef<BeforeInstallPromptEvent | null>(null);
   const reloading = useRef(false);
 
-  /* ---------------- service worker + update prompt ---------------- */
+  /* ---------------- service worker + automatic update ----------------
+
+     A new build applies itself. There is no "a new version is ready" toast to
+     tap, because a toast is a version that reaches only the readers who
+     noticed it — and the whole point of a message an admin publishes is that
+     it reaches everyone, on the day they publish it.
+
+     The one thing that is allowed to delay it is a prayer in progress: the
+     update takes effect through a page reload, and a reload mid-decade drops
+     the reader back to the home screen. So it waits for the closing moment,
+     which is never long. */
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
+    // Taking control with nothing to replace is the first install, not an
+    // update; reloading for it would restart the app on somebody's first
+    // ever visit. Only a worker succeeding another one warrants a reload.
+    const hadController = Boolean(navigator.serviceWorker.controller);
+
     const onControllerChange = () => {
-      if (reloading.current) return;
+      if (!hadController || reloading.current) return;
       reloading.current = true;
       window.location.reload();
     };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
+    // The downloaded-and-waiting worker, if there is one. Not state: nothing
+    // renders from it, and re-rendering the tree for it would buy nothing.
+    let pending: ServiceWorker | null = null;
+    let stopPolling: (() => void) | null = null;
+
+    const apply = () => {
+      if (!pending || isAppBusy()) return;
+      const worker = pending;
+      pending = null;
+      // The worker calls skipWaiting, takes control, and the controllerchange
+      // above reloads the page onto the new build.
+      worker.postMessage("SKIP_WAITING");
+    };
+
     navigator.serviceWorker
-      .register("/sw.js")
+      .register("/sw.js", {
+        // Without this the browser may answer the update check out of its own
+        // HTTP cache for up to a day — the difference between a deploy landing
+        // in a minute and landing tomorrow.
+        updateViaCache: "none",
+      })
       .then((reg) => {
         if (reg.waiting && navigator.serviceWorker.controller) {
-          setUpdateReady(reg.waiting);
+          pending = reg.waiting;
+          apply();
         }
+
         reg.addEventListener("updatefound", () => {
           const next = reg.installing;
           if (!next) return;
           next.addEventListener("statechange", () => {
-            // Installing while another worker is in control is an update,
-            // not a first install — only then is a reload worth offering.
             if (next.state === "installed" && navigator.serviceWorker.controller) {
-              setUpdateReady(next);
+              pending = next;
+              apply();
             }
           });
         });
+
+        // Registration checks once by itself; this is every resume afterwards,
+        // plus a slow beat while the app is on screen.
+        stopPolling = onForeground(() => {
+          reg.update().catch(() => {});
+        }, UPDATE_POLL_MS);
       })
       .catch(() => {});
 
-    return () =>
+    // A prayer ending is the moment a held-back build becomes safe to apply.
+    const stopWatchingBusy = subscribeAppBusy((busy) => {
+      if (!busy) apply();
+    });
+
+    return () => {
       navigator.serviceWorker.removeEventListener(
         "controllerchange",
         onControllerChange,
       );
+      stopWatchingBusy();
+      stopPolling?.();
+    };
   }, []);
 
   /* ---------------- install sheet ---------------- */
@@ -320,53 +375,6 @@ export default function PwaLayer() {
         </div>
       </div>
 
-      {/* update toast */}
-      {updateReady && (
-        <div
-          dir="ltr"
-          style={{
-            position: "fixed",
-            // Physical left, so centring holds in both text directions.
-            left: "50%",
-            transform: "translateX(-50%)",
-            bottom: "var(--toast-b)",
-            zIndex: 1200,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            width: "max-content",
-            maxWidth: "92vw",
-            padding: "10px 12px 10px 16px",
-            borderRadius: 999,
-            background: "var(--surface)",
-            border: "1px solid rgba(255,255,255,.12)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            boxShadow: "0 12px 32px rgba(0,0,0,.5)",
-            fontSize: 13,
-          }}
-        >
-          <span>{C.updated}</span>
-          <button
-            type="button"
-            onClick={() => {
-              updateReady.postMessage("SKIP_WAITING");
-              setUpdateReady(null);
-            }}
-            style={{
-              flex: "none",
-              padding: "7px 14px",
-              borderRadius: 999,
-              background: "var(--accent)",
-              color: "var(--on-accent)",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
-          >
-            {C.update}
-          </button>
-        </div>
-      )}
     </>
   );
 }

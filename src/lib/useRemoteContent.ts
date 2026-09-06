@@ -3,6 +3,8 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 import { applyContent, contentVersion, subscribeContent } from "@/lib/content";
+import { isAppBusy } from "@/lib/appBusy";
+import { onForeground } from "@/lib/live";
 import { getSupabase } from "@/lib/supabase/client";
 
 /** Documents fetched previously, so a correction survives going offline. */
@@ -57,7 +59,7 @@ export function useRemoteContent(): number {
   );
 
   useEffect(() => {
-    const cache = readCache();
+    let cache = readCache();
     if (cache.design || cache.prayers) {
       applyContent({ design: cache.design?.doc, prayers: cache.prayers?.doc });
     }
@@ -66,7 +68,12 @@ export function useRemoteContent(): number {
     if (!supabase) return;
 
     let live = true;
-    (async () => {
+
+    const refresh = async () => {
+      // A correction to the prayer text swapped in mid-decade would change the
+      // words under somebody's eyes. It waits for the closing moment; the
+      // subscription below asks again the next time the app comes forward.
+      if (!live || isAppBusy()) return;
       const { data, error } = await supabase
         .from("content_documents")
         .select("key, doc, version, updated_at")
@@ -94,12 +101,23 @@ export function useRemoteContent(): number {
       if (!adopted.design) next.design = cache.design;
       if (!adopted.prayers) next.prayers = cache.prayers;
       writeCache(next);
-    })().catch(() => {
-      /* offline, or the table does not exist yet — the bundle covers us */
-    });
+      // Held for the next comparison: without this every refresh re-adopts
+      // every document and bumps the version for no change at all.
+      cache = next;
+    };
+
+    const run = () => {
+      refresh().catch(() => {
+        /* offline, or the table does not exist yet — the bundle covers us */
+      });
+    };
+
+    run();
+    const stop = onForeground(run);
 
     return () => {
       live = false;
+      stop();
     };
   }, []);
 
