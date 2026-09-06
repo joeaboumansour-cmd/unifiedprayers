@@ -1,17 +1,17 @@
 {
   "id": "/",
-  "name": "مسبحة الروح القدس — Unified Prayers",
-  "short_name": "مسبحة",
-  "description": "مسبحة الروح القدس ومسبحة مريم — تطبيق صلاة تفاعلي بالعربية والإنجليزية.",
+  "name": "Unified Prayers",
+  "short_name": "Unified Prayers",
+  "description": "An interactive rosary in Arabic and English — the Holy Spirit chaplet and the Marian rosary, and both of them offline.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "orientation": "portrait",
-  "background_color": "#0b1324",
-  "theme_color": "#0b1324",
-  "lang": "ar",
-  "dir": "rtl",
+  "background_color": "#4f0305",
+  "theme_color": "#070a15",
+  "lang": "en",
+  "dir": "ltr",
   "categories": ["lifestyle", "books", "education"],
   "prefer_related_applications": false,
   "icons": [
@@ -23,9 +23,9 @@
     { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "مسبحة الروح القدس", "short_name": "الروح القدس", "url": "/?set=holy-spirit",
+    { "name": "Holy Spirit Rosary", "short_name": "Holy Spirit", "url": "/?set=holy-spirit",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "مسبحة مريم", "short_name": "مريم", "url": "/?set=mary",
+    { "name": "Marian Rosary", "short_name": "Mary", "url": "/?set=mary",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }

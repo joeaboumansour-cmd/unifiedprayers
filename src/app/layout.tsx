@@ -12,15 +12,20 @@ const plex = IBM_Plex_Sans_Arabic({
   variable: "--font-plex",
 });
 
+/* One name, in one language, everywhere the device shows it: the home screen,
+   the task switcher, the browser tab, the install sheet. The prayers stay
+   bilingual — this is the app's name, not its content. */
+const APP_NAME = "Unified Prayers";
+
 export const metadata: Metadata = {
-  title: "مسبحة الروح القدس",
+  title: APP_NAME,
   description:
-    "مسبحة الروح القدس ومسبحة مريم — تطبيق صلاة تفاعلي بالعربية والإنجليزية.",
-  applicationName: "مسبحة",
+    "An interactive rosary in Arabic and English — the Holy Spirit chaplet and the Marian rosary, and both of them offline.",
+  applicationName: APP_NAME,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "مسبحة",
+    title: APP_NAME,
     statusBarStyle: "black-translucent",
   },
   formatDetection: { telephone: false },

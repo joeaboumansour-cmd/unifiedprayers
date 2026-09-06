@@ -8,7 +8,7 @@
    state is how a message somebody switched off an hour ago is still sitting on
    a stranger's screen. Those go to the network, every time. */
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE = `unified-prayers-${CACHE_VERSION}`;
 
 /* Enough to open the app and pray with no connection at all. Next's own
@@ -21,6 +21,7 @@ const PRECACHE = [
   '/mary.webp',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/badge-96.png',
   '/icons/icon-maskable-192.png',
   '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon.png',
@@ -145,8 +146,14 @@ self.addEventListener('push', event => {
 
     await self.registration.showNotification(title, {
       body,
+      // Android draws these in two different places and wants two different
+      // pictures. `icon` is the large one in the shade, so it is the logo.
+      // `badge` is the small one stamped into the status bar: the system
+      // throws its colours away and keeps only its alpha, so an opaque
+      // square -- which is what the logo was doing here -- comes out a solid
+      // white blob. badge-96 is the dove cut out on nothing.
       icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      badge: '/icons/badge-96.png',
       // Right-to-left when the app is in Arabic, so the text is not reversed
       // in the shade on a device whose own language is English.
       dir: ar ? 'rtl' : 'ltr',
