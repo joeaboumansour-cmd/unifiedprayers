@@ -70,7 +70,7 @@ export default function TabBar({
               flexDirection: "column",
               alignItems: "center",
               gap: 5,
-              padding: "7px 0 3px",
+              padding: "7px 0 0",
             }}
           >
             <svg viewBox="0 0 22 22" style={{ width: 21, height: 21 }}>
@@ -84,7 +84,14 @@ export default function TabBar({
               />
               {r2 > 0 && <circle cx="11" cy="11" r={r2} fill={ink} />}
             </svg>
-            <span style={{ fontSize: 10.5, fontWeight: 500, color: ink }}>
+            <span
+              style={{
+                fontSize: 10.5,
+                fontWeight: 500,
+                color: ink,
+                lineHeight: 1.05,
+              }}
+            >
               {label}
             </span>
           </button>
