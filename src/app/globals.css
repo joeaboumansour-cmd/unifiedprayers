@@ -44,7 +44,11 @@ body {
   inset: 0;
   height: 100%;
   overflow: hidden;
-  background: #070a15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The backdrop only shows on wide windows, behind the centred app surface. */
+  background: radial-gradient(900px 600px at 50% 0%, #14161d, #08090c);
   color: var(--ink);
   font-family: var(--font-plex), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -120,5 +124,65 @@ button {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ---------------------------------------------------------------
+   The app surface
+   Full-bleed on a phone. On a roomier window it becomes a centred
+   surface rather than a phone layout stretched across the screen —
+   the same framing the design file used to present itself.
+   --------------------------------------------------------------- */
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(
+    120% 80% at 50% -10%,
+    #16213f 0%,
+    #0b1226 45%,
+    #070a15 100%
+  );
+  color: var(--ink);
+}
+
+/* Width alone decides the column: a wide but short window must not fall back
+   to the phone layout, or the bead arc stretches to the full window width. */
+@media (min-width: 680px) {
+  .app-shell {
+    width: 440px;
+    height: min(940px, 100dvh);
+    border-inline: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* With vertical room to spare it lifts off the backdrop as a rounded card. */
+@media (min-width: 680px) and (min-height: 700px) {
+  .app-shell {
+    height: min(940px, calc(100dvh - 48px));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px;
+  }
+}
+
+/* Pointer devices get a hover affordance; touch devices get none, so nothing
+   sticks in a hovered state after a tap. Transform and filter are used
+   because the components set their own colours inline. */
+@media (hover: hover) and (pointer: fine) {
+  .tap {
+    transition:
+      transform 0.25s var(--ease),
+      filter 0.2s ease;
+  }
+  .tap:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.18);
+  }
+  .tap:active {
+    transform: translateY(0);
+    filter: brightness(1.05);
   }
 }

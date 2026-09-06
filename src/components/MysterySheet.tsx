@@ -98,6 +98,7 @@ export default function MysterySheet({
               <button
                 key={k}
                 type="button"
+                className="tap"
                 onClick={() => onPick(k)}
                 aria-pressed={on}
                 style={{
@@ -155,6 +156,7 @@ export default function MysterySheet({
 
         <button
           type="button"
+          className="tap"
           onClick={onStart}
           style={{
             width: "100%",

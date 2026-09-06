@@ -216,17 +216,7 @@ export default function Page() {
   const isPlayer = screen === "player";
 
   return (
-    <main
-      dir={prefs.lang === "ar" ? "rtl" : "ltr"}
-      style={{
-        position: "fixed",
-        inset: 0,
-        overflow: "hidden",
-        background:
-          "radial-gradient(120% 80% at 50% -10%,#16213f 0%,#0b1226 45%,#070a15 100%)",
-        color: "#f4f1ea",
-      }}
-    >
+    <main className="app-shell" dir={prefs.lang === "ar" ? "rtl" : "ltr"}>
       <Home
         hidden={isPlayer}
         tab={tab}

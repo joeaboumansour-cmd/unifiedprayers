@@ -42,6 +42,7 @@ function Row({
   return (
     <div
       onClick={onClick}
+      className={onClick ? "tap" : undefined}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={
