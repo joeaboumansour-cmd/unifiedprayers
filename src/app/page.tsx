@@ -408,14 +408,12 @@ export default function Page() {
         beadStyle={prefs.beadStyle}
         size={prefs.size}
         dim={prefs.dim}
-        audio={prefs.audio}
         fading={fading}
         done={done}
         onAdvance={advance}
         onBack={back}
         onClose={closePlayer}
         onToggleDim={() => patch({ dim: !prefs.dim })}
-        onToggleAudio={() => patch({ audio: !prefs.audio })}
         onFinish={finish}
       />
 

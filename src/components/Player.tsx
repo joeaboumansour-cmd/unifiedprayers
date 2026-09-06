@@ -26,14 +26,12 @@ export type PlayerProps = {
   beadStyle: BeadStyle;
   size: number;
   dim: boolean;
-  audio: boolean;
   fading: boolean;
   done: boolean;
   onAdvance: () => void;
   onBack: () => void;
   onClose: () => void;
   onToggleDim: () => void;
-  onToggleAudio: () => void;
   onFinish: () => void;
 };
 
@@ -47,14 +45,12 @@ export default function Player({
   beadStyle,
   size,
   dim,
-  audio,
   fading,
   done,
   onAdvance,
   onBack,
   onClose,
   onToggleDim,
-  onToggleAudio,
   onFinish,
 }: PlayerProps) {
   const t = ui(lang);
@@ -303,59 +299,76 @@ export default function Player({
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 7 }}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleAudio();
+        {/* The one control in the header, and it says what it is: a moon and a
+            switch, so its state is readable without tapping it to find out. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleDim();
+          }}
+          aria-label={t.toggles[0][0]}
+          aria-pressed={dim}
+          style={{
+            flex: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            height: 34,
+            paddingInlineStart: 11,
+            paddingInlineEnd: 5,
+            borderRadius: 999,
+            background: dim
+              ? "rgb(var(--accent-rgb) / .16)"
+              : "rgba(255,255,255,.07)",
+            border: "1px solid rgba(255,255,255,.09)",
+            transition: `background .3s ${EASE}`,
+          }}
+        >
+          <span
+            style={{
+              width: 13,
+              height: 13,
+              borderRadius: "50%",
+              background: dim ? "var(--accent)" : "var(--soft)",
+              boxShadow: "inset -4px 0 0 0 rgba(0,0,0,.55)",
+              transition: `background .3s ${EASE}`,
             }}
-            aria-label={t.toggles[2][0]}
-            aria-pressed={audio}
-            style={round(audio)}
+          />
+          <span
+            style={{
+              // Explicit, because a span defaults to inline and would ignore
+              // both the size and the padding the knob travels inside.
+              display: "block",
+              width: 32,
+              height: 18,
+              borderRadius: 999,
+              padding: 2,
+              boxSizing: "border-box",
+              background: dim
+                ? "rgb(var(--accent-rgb) / .85)"
+                : "rgba(255,255,255,.14)",
+              transition: `background .3s ${EASE}`,
+            }}
           >
             <span
               style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: 2,
-                height: 13,
-              }}
-            >
-              {[6, 12, 8].map((h, i) => (
-                <span
-                  key={i}
-                  style={{
-                    width: 2,
-                    height: h,
-                    borderRadius: 2,
-                    background: audio ? "var(--accent)" : "var(--soft)",
-                  }}
-                />
-              ))}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleDim();
-            }}
-            aria-label={t.toggles[0][0]}
-            aria-pressed={dim}
-            style={round(dim)}
-          >
-            <span
-              style={{
-                width: 13,
-                height: 13,
+                display: "block",
+                width: 14,
+                height: 14,
                 borderRadius: "50%",
-                background: dim ? "var(--accent)" : "var(--soft)",
-                boxShadow: "inset -4px 0 0 0 rgba(0,0,0,.55)",
+                background: "#fff",
+                transition: `transform .3s ${EASE}`,
+                // Forward is whichever way the script runs, so the knob leaves
+                // its off position towards the end of the line, not to a fixed
+                // side of the screen.
+                transform: dim
+                  ? `translateX(${ar ? -14 : 14}px)`
+                  : "translateX(0)",
               }}
             />
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
 
       {/* beads */}
