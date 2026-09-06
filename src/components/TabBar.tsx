@@ -40,7 +40,7 @@ export default function TabBar({
         position: "absolute",
         insetInline: 0,
         bottom: 0,
-        padding: "8px 14px 10px",
+        padding: "8px 14px 6px",
         display: "flex",
         gap: 4,
         background:
@@ -70,7 +70,7 @@ export default function TabBar({
               flexDirection: "column",
               alignItems: "center",
               gap: 5,
-              padding: "7px 0",
+              padding: "7px 0 5px",
             }}
           >
             <svg viewBox="0 0 22 22" style={{ width: 21, height: 21 }}>
