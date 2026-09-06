@@ -7,6 +7,7 @@ import MysterySheet from "@/components/MysterySheet";
 import NotificationsPrompt from "@/components/NotificationsPrompt";
 import Player from "@/components/Player";
 import TabBar from "@/components/TabBar";
+import SafeDebug from "@/components/SafeDebug";
 import {
   type MysteryKey,
   type PrayerId,
@@ -312,6 +313,7 @@ export default function Page() {
   const isPlayer = screen === "player";
 
   return (
+    <><SafeDebug />
     <main className="app-shell" dir={prefs.lang === "ar" ? "rtl" : "ltr"}>
       <Home
         hidden={isPlayer}
@@ -433,5 +435,6 @@ export default function Page() {
         suppressed={isPlayer || done || sheet || Boolean(modal)}
       />
     </main>
+    </>
   );
 }
