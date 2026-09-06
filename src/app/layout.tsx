@@ -56,6 +56,19 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className={plex.variable}>
       <head>
         <AppleSplash />
+        {/* The tab bar hugs the bottom edge on iOS and keeps the system
+            inset everywhere else -- Android and Windows put their own
+            navigation there and would cover it. The flag has to land
+            before the first paint, so it is a blocking script rather than
+            an effect. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var n=navigator;if(/iphone|ipad|ipod/i.test(n.userAgent)||" +
+              "(n.platform==='MacIntel'&&n.maxTouchPoints>1))" +
+              "document.documentElement.dataset.ios='';}catch(e){}",
+          }}
+        />
       </head>
       <body>
         {children}

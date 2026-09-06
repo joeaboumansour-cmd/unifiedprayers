@@ -9,18 +9,34 @@
      counted twice. Only an installed app, which has no browser chrome, needs
      to clear the indicator.
 
-     Sheets and dialogs use max(base, var(--safe-b)) rather than adding the
-     two: iOS puts their content exactly at the top of the indicator strip,
-     and summing them leaves them floating well above the bottom.
-
-     The tab bar opts out of the inset entirely and sits on the bottom edge,
-     the way it does on Android. Reserving the full indicator strip there
-     read as a bar stranded in mid-air. */
+     Bottom-edge chrome uses max(base, var(--safe-b)) rather than adding the
+     two: iOS puts tab-bar icons exactly at the top of the indicator strip,
+     and summing them leaves the bar floating well above the bottom. */
   --safe-b: 0px;
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
 
+  /* Tab-bar metrics. These are the values every platform gets: the bar
+     clears whatever the system reserves at the bottom edge. Android's
+     gesture bar and Windows' taskbar live there and would cover it. */
+  --tab-pad-b: max(10px, var(--safe-b));
+  --tab-btn-pad-b: 7px;
+  --tab-label-lh: normal;
+  --tab-clear: calc(86px + max(10px, var(--safe-b)));
+  --toast-b: calc(74px + max(10px, var(--safe-b)));
+
   color-scheme: dark;
+}
+
+/* iOS only. The home indicator is a thin overlay rather than reserved
+   chrome, so the bar can sit on the bottom edge and let the indicator
+   pass over it. Set from layout.tsx before the first paint. */
+html[data-ios] {
+  --tab-pad-b: 0px;
+  --tab-btn-pad-b: 0px;
+  --tab-label-lh: 1.05;
+  --tab-clear: 78px;
+  --toast-b: 66px;
 }
 
 @media (display-mode: standalone), (display-mode: fullscreen) {
