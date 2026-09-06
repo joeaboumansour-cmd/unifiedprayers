@@ -27,17 +27,29 @@
 
 html {
   background: #070a15;
+  height: 100%;
+  overflow: hidden;
+  /* Chrome reads pull-to-refresh and rubber-banding off the root element, so
+     this has to be here and not only on body. */
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  min-height: 100dvh;
+  /* Pinned to the viewport: every scroller in the app is an inner .scroll-y,
+     so the document itself never needs to move. Nothing is left for the
+     browser to interpret as a pull-to-refresh drag. */
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  overflow: hidden;
   background: #070a15;
   color: var(--ink);
   font-family: var(--font-plex), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* No pull-to-refresh or rubber-banding mid-prayer. */
   overscroll-behavior: none;
+  overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   user-select: none;
