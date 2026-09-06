@@ -58,7 +58,6 @@ export default function MysterySheet({
           transition: `transform .48s ${EASE}`,
           transform: open ? "translateY(0)" : "translateY(105%)",
           pointerEvents: open ? "auto" : "none",
-          willChange: "transform",
         }}
       >
         <div

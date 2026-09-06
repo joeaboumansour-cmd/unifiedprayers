@@ -12,11 +12,21 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   --safe-t: env(safe-area-inset-top, 0px);
-  --safe-b: env(safe-area-inset-bottom, 0px);
+  /* In Safari the document is pinned to the small viewport, which already
+     sits above the browser's bottom bar — adding the home-indicator inset on
+     top of that lifts the tab bar noticeably too high. Only an installed app,
+     which has no browser chrome, actually needs to clear the indicator. */
+  --safe-b: 0px;
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
 
   color-scheme: dark;
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  :root {
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 * {
@@ -75,9 +85,14 @@ button {
 
 .scroll-y {
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  /* `-webkit-overflow-scrolling: touch` used to be here. On iOS it puts the
+     scroller on its own compositing layer, which mis-repaints and leaves
+     ghost copies of nearby text during momentum scrolling. It has been the
+     default behaviour since iOS 13, so it is only harmful now.
+     `contain: paint` keeps invalidation inside the scroller. */
+  contain: paint;
 }
 .scroll-y::-webkit-scrollbar {
   display: none;

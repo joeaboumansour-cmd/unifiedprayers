@@ -138,7 +138,6 @@ export default function Player({
         transition: `transform .52s ${EASE}`,
         transform: open ? "translateY(0)" : "translateY(100%)",
         cursor: "pointer",
-        willChange: "transform",
       }}
       aria-hidden={!open}
     >
@@ -310,6 +309,7 @@ export default function Player({
             letterSpacing: ".14em",
             textTransform: "uppercase",
             color: "#f0c775",
+            flex: "none",
             transition: "opacity .3s ease",
             opacity: fading ? 0 : 1,
           }}
@@ -322,6 +322,7 @@ export default function Player({
             fontWeight: 600,
             lineHeight: 1.5,
             letterSpacing: "-.01em",
+            flex: "none",
             transition: `opacity .3s ease, transform .3s ${EASE}`,
             ...fadeStyle,
           }}
@@ -338,7 +339,11 @@ export default function Player({
             color: "#dfe4f0",
             textWrap: "pretty",
             whiteSpace: "pre-line",
-            maxHeight: "34vh",
+            /* Bounded by the flex parent rather than a vh figure: on iOS vh
+               resolves against the large viewport, so 34vh overflowed the
+               space that was really on screen. */
+            flex: "0 1 auto",
+            minHeight: 0,
             transition: `opacity .34s ease, transform .34s ${EASE}`,
             ...fadeStyle,
           }}
