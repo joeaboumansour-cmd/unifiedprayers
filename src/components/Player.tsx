@@ -146,8 +146,9 @@ export default function Player({
   const arrow = (side: "back" | "fwd") => {
     const lit = flash === side;
     const muted = side === "back" && !canBack;
-    // Back points to the start of the reading direction, forward to its end.
-    const pointsLeft = side === "back" ? !ar : ar;
+    // Right is forward and left is back in either language: the directions a
+    // media control has everywhere, rather than ones that move with the script.
+    const pointsLeft = side === "back";
     return (
       <button
         type="button"
@@ -204,10 +205,7 @@ export default function Player({
         const sel = window.getSelection?.();
         if (sel && !sel.isCollapsed) return;
         const r = e.currentTarget.getBoundingClientRect();
-        const onRight = e.clientX - r.left > r.width / 2;
-        // Forward lives at the end of the reading direction: right in Latin
-        // script, left in Arabic — the same side a page turns towards.
-        go(ar ? !onRight : onRight);
+        go(e.clientX - r.left > r.width / 2);
       }}
       onTouchStart={(e) => {
         if (done || e.touches.length !== 1) return void (touch.current = null);
@@ -228,8 +226,9 @@ export default function Player({
         if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
         // Asks the browser not to synthesise a click from a touch we handled.
         e.preventDefault();
-        // In RTL, dragging rightward turns the page forward.
-        go(ar ? dx > 0 : dx < 0);
+        // Dragging leftward pulls the next step in from the right, which is
+        // where forward lives — in Arabic too, so it agrees with the halves.
+        go(dx < 0);
       }}
       style={{
         position: "absolute",
@@ -468,6 +467,9 @@ export default function Player({
         <div
           style={{
             display: "flex",
+            /* Reversed under RTL so back stays on the physical left, the side
+               of the screen that goes back. */
+            flexDirection: ar ? "row-reverse" : "row",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 12,
@@ -495,7 +497,7 @@ export default function Player({
       {/* the half that was tapped answers with a brief wash of light, so the
           mapping between a side of the screen and a direction is learnable */}
       {(["left", "right"] as const).map((p) => {
-        const side = (p === "right") !== ar ? "fwd" : "back";
+        const side = p === "right" ? "fwd" : "back";
         return (
           <div
             key={p}

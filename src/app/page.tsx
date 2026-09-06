@@ -259,9 +259,9 @@ export default function Page() {
       if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
         e.preventDefault();
         if (done) return finish();
-        // The same mapping the tap halves use: forward is the end of the
-        // reading direction, which is the left arrow in Arabic.
-        if ((e.key === "ArrowRight") !== (prefs.lang === "ar")) advance();
+        // The same mapping the tap halves use, in either language: right is
+        // forward, left is back.
+        if (e.key === "ArrowRight") advance();
         else back();
         return;
       }
@@ -273,7 +273,7 @@ export default function Page() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, advance, back, done, finish, prefs.lang]);
+  }, [screen, advance, back, done, finish]);
 
   /* ---------------- transitions between screens ---------------- */
   const openSpirit = () => {
