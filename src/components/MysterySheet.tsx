@@ -3,9 +3,9 @@
 import {
   type Lang,
   type MysteryKey,
-  SETS,
-  SET_DAYS,
-  SET_LABEL,
+  setDays,
+  setLabel,
+  sets,
   ui,
 } from "@/lib/content";
 
@@ -91,7 +91,7 @@ export default function MysterySheet({
             marginBottom: 16,
           }}
         >
-          {SETS.map((k) => {
+          {sets().map((k) => {
             const on = k === selected;
             return (
               <button
@@ -132,10 +132,10 @@ export default function MysterySheet({
                       color: on ? "var(--accent)" : "var(--ink)",
                     }}
                   >
-                    {SET_LABEL[lang][k]}
+                    {setLabel(lang, k)}
                   </span>
                   <span style={{ fontSize: 11.5, color: "var(--dim)" }}>
-                    {SET_DAYS[lang][k]}
+                    {setDays(lang, k)}
                   </span>
                 </span>
                 <span

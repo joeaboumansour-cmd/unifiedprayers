@@ -6,9 +6,11 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:content": "node scripts/seed-content.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.115.0",
     "motion": "12.23.12",
     "next": "^15.5.25",
     "react": "19.1.1",

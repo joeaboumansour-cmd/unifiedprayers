@@ -1,5 +1,5 @@
-import design from "@/data/design.json";
-import prayers from "@/data/prayers.json";
+import bundledDesign from "@/data/design.json";
+import bundledPrayers from "@/data/prayers.json";
 
 export type Lang = "ar" | "en";
 export type PrayerId = "spirit" | "mary";
@@ -99,17 +99,132 @@ type Prayers = {
   maryMysterySetsEn: Record<MysteryKey, MysterySet>;
 };
 
-const D = design as unknown as Design;
-const P = prayers as unknown as Prayers;
+const BUNDLED_DESIGN = bundledDesign as unknown as Design;
+const BUNDLED_PRAYERS = bundledPrayers as unknown as Prayers;
 
-export const SETS = D.SETS;
-export const STYLES = D.STYLES;
-export const SET_LABEL = D.SET_LABEL;
-export const SET_DAYS = D.SET_DAYS;
-export const DAY_SET = D.DAY_SET;
-export const STYLE_LABEL = D.STYLE_LABEL;
-export const HAIL = D.HAIL;
-export const GLORY = D.GLORY;
+/* -------------------------------------------------------------------------
+ * The live content store.
+ *
+ * The two JSON files are the shipped copy: they are in the bundle, they are
+ * precached by the service worker, and they are what the app runs on before
+ * anything is fetched and whenever there is no network. Supabase may replace
+ * them at runtime through applyContent(), so the prayer text can be corrected
+ * without a redeploy — but it is an override, never a dependency. Nothing
+ * below awaits the network.
+ *
+ * Access goes through functions rather than exported constants precisely so
+ * this swap is possible: a `const` captured at import time could never see it.
+ * ---------------------------------------------------------------------- */
+
+let D: Design = BUNDLED_DESIGN;
+let P: Prayers = BUNDLED_PRAYERS;
+
+let version = 0;
+const listeners = new Set<() => void>();
+
+/** Bumped on every swap; React subscribes to it to know to re-render. */
+export const contentVersion = (): number => version;
+
+export function subscribeContent(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * A remote document is only adopted if it carries the keys the app will go on
+ * to read. This is a shape check, not a schema validation: it is here so that a
+ * half-written or truncated row degrades to the bundled text instead of
+ * throwing somewhere deep inside the player, mid-prayer.
+ */
+function looksLikeDesign(v: unknown): v is Design {
+  if (!isRecord(v)) return false;
+  const keys = ["AR", "EN", "HAIL", "GLORY", "SETS", "SET_LABEL", "SET_DAYS",
+                "DAY_SET", "STYLES", "STYLE_LABEL", "UI"];
+  if (!keys.every((k) => k in v)) return false;
+  return isRecord(v.UI) && isRecord(v.UI.ar) && isRecord(v.UI.en);
+}
+
+function looksLikePrayers(v: unknown): v is Prayers {
+  if (!isRecord(v)) return false;
+  const keys = ["maryPrePrayers", "maryPrePrayersEn", "maryPostPrayers",
+                "maryPostPrayersEn", "maryMysterySets", "maryMysterySetsEn"];
+  if (!keys.every((k) => k in v)) return false;
+  return isRecord(v.maryMysterySets) && "joyful" in v.maryMysterySets;
+}
+
+/**
+ * Swap in content fetched from Supabase. Documents that fail the shape check
+ * are ignored one by one — a bad `prayers` row does not cost you a good
+ * `design` one. Returns what was actually adopted.
+ */
+export function applyContent(docs: {
+  design?: unknown;
+  prayers?: unknown;
+}): { design: boolean; prayers: boolean } {
+  const adopted = { design: false, prayers: false };
+
+  if (docs.design !== undefined && looksLikeDesign(docs.design)) {
+    D = docs.design;
+    adopted.design = true;
+  }
+  if (docs.prayers !== undefined && looksLikePrayers(docs.prayers)) {
+    P = docs.prayers;
+    adopted.prayers = true;
+  }
+
+  if (adopted.design || adopted.prayers) {
+    version += 1;
+    listeners.forEach((fn) => fn());
+  }
+  return adopted;
+}
+
+/** Drop any override and go back to the text that shipped in the bundle. */
+export function resetContent(): void {
+  D = BUNDLED_DESIGN;
+  P = BUNDLED_PRAYERS;
+  version += 1;
+  listeners.forEach((fn) => fn());
+}
+
+/** The bundled documents, for seeding the database from what ships today. */
+export const bundledContent = () => ({
+  design: BUNDLED_DESIGN as unknown,
+  prayers: BUNDLED_PRAYERS as unknown,
+});
+
+/* ------------------------------- accessors ------------------------------- */
+
+export const sets = (): MysteryKey[] => D.SETS;
+export const styles = (): BeadStyle[] => D.STYLES;
+export const setLabel = (lang: Lang, key: MysteryKey): string =>
+  D.SET_LABEL[lang][key];
+export const setDays = (lang: Lang, key: MysteryKey): string =>
+  D.SET_DAYS[lang][key];
+export const styleLabel = (lang: Lang, style: BeadStyle): string =>
+  D.STYLE_LABEL[lang][style];
+export const hail = (lang: Lang): string => D.HAIL[lang];
+export const glory = (lang: Lang): string => D.GLORY[lang];
+
+export const ui = (lang: Lang): UIStrings => D.UI[lang];
+export const spirit = (lang: Lang): SpiritContent => (lang === "ar" ? D.AR : D.EN);
+
+export const maryPre = (lang: Lang): NamedPrayer[] =>
+  lang === "ar" ? P.maryPrePrayers : P.maryPrePrayersEn;
+export const maryPost = (lang: Lang): NamedPrayer[] =>
+  lang === "ar" ? P.maryPostPrayers : P.maryPostPrayersEn;
+export const marySet = (key: MysteryKey, lang: Lang): MysterySet =>
+  (lang === "ar" ? P.maryMysterySets : P.maryMysterySetsEn)[key];
+
+/** The mystery set traditionally prayed on a given weekday. */
+export const setForDay = (day: number): MysteryKey => D.DAY_SET[day] ?? "joyful";
+
+/* -------------------------------- palettes ------------------------------- */
 
 /**
  * The palettes offered in Settings. Each pairs a deep ground with an accent
@@ -118,6 +233,10 @@ export const GLORY = D.GLORY;
  * the pairing.
  * `theme` is what goes in the theme-color meta so the browser and task
  * switcher tint to match. Keep these in step with src/app/palettes.css.
+ *
+ * These are not part of the content documents: a palette is a block of CSS
+ * custom properties in palettes.css, so a database could name one that does
+ * not exist. They stay in the bundle, next to the stylesheet they describe.
  */
 export type PaletteInfo = {
   id: Palette;
@@ -147,16 +266,3 @@ export const paletteInfo = (id: Palette): PaletteInfo =>
 
 /** Section heading for the palette picker; not part of the design's strings. */
 export const PALETTE_LABEL = { ar: "لون التطبيق", en: "App colour" };
-
-export const ui = (lang: Lang): UIStrings => D.UI[lang];
-export const spirit = (lang: Lang): SpiritContent => (lang === "ar" ? D.AR : D.EN);
-
-export const maryPre = (lang: Lang): NamedPrayer[] =>
-  lang === "ar" ? P.maryPrePrayers : P.maryPrePrayersEn;
-export const maryPost = (lang: Lang): NamedPrayer[] =>
-  lang === "ar" ? P.maryPostPrayers : P.maryPostPrayersEn;
-export const marySet = (key: MysteryKey, lang: Lang): MysterySet =>
-  (lang === "ar" ? P.maryMysterySets : P.maryMysterySetsEn)[key];
-
-/** The mystery set traditionally prayed on a given weekday. */
-export const setForDay = (day: number): MysteryKey => DAY_SET[day] ?? "joyful";

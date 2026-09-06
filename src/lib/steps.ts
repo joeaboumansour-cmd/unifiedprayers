@@ -1,13 +1,13 @@
 import {
-  GLORY,
-  HAIL,
   type Lang,
   type MysteryKey,
   type PrayerId,
-  SET_LABEL,
+  glory,
+  hail,
   marySet,
   maryPost,
   maryPre,
+  setLabel,
   spirit,
 } from "./content";
 
@@ -116,7 +116,7 @@ function marySteps(lang: Lang, key: MysteryKey): Step[] {
   );
 
   (set?.mysteries ?? []).forEach((m, mi) => {
-    const kicker = SET_LABEL[lang][key];
+    const kicker = setLabel(lang, key);
     const fruitLine = m.fruit
       ? ar
         ? `\nثمرة السر: ${m.fruit}`
@@ -144,7 +144,7 @@ function marySteps(lang: Lang, key: MysteryKey): Step[] {
     );
 
     for (let b = 0; b < 12; b++) {
-      const text = b === 0 ? m.super : b === 11 ? GLORY[lang] : HAIL[lang];
+      const text = b === 0 ? m.super : b === 11 ? glory(lang) : hail(lang);
       const label =
         b === 0
           ? ar

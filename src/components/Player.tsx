@@ -7,7 +7,7 @@ import {
   type Lang,
   type MysteryKey,
   type PrayerId,
-  SET_LABEL,
+  setLabel,
   ui,
 } from "@/lib/content";
 import type { Step } from "@/lib/steps";
@@ -194,7 +194,7 @@ export default function Player({
           </div>
           <div style={{ fontSize: 10.5, color: "var(--accent)" }}>
             {prayer === "mary"
-              ? SET_LABEL[lang][mysterySet]
+              ? setLabel(lang, mysterySet)
               : ar
                 ? "المواهب السبع"
                 : "Seven gifts"}

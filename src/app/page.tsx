@@ -6,52 +6,36 @@ import MysterySheet from "@/components/MysterySheet";
 import Player from "@/components/Player";
 import TabBar from "@/components/TabBar";
 import {
-  type BeadStyle,
-  type Lang,
   type MysteryKey,
-  type Palette,
   type PrayerId,
   paletteInfo,
   setForDay,
   ui,
 } from "@/lib/content";
+import {
+  DEFAULT_PREFS,
+  PREFS_KEY,
+  PROGRESS_KEY,
+  type Prefs,
+  type Progress,
+  isFresh,
+  readPrefs,
+  readProgress,
+  writeLocal,
+} from "@/lib/state";
 import { buildSteps } from "@/lib/steps";
 import { useAmbientDrone } from "@/lib/useAmbientDrone";
+import { useAuth } from "@/lib/useAuth";
+import { useCloudSync } from "@/lib/useCloudSync";
+import { useRemoteContent } from "@/lib/useRemoteContent";
 import { useWakeLock } from "@/lib/useWakeLock";
 
-const PREFS_KEY = "up_prefs_v1";
-const PROGRESS_KEY = "up_progress_v1";
-/** After a day away it is a new prayer, not a resumed one. */
-const RESUME_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-type Prefs = {
-  lang: Lang;
-  beadStyle: BeadStyle;
-  palette: Palette;
-  size: number;
-  dim: boolean;
-  haptics: boolean;
-  audio: boolean;
-  awake: boolean;
-};
-
-type Progress = {
-  prayer: PrayerId;
-  mysterySet: MysteryKey;
-  spiritStep: number;
-  maryStep: number;
-  at: number;
-};
-
-const DEFAULT_PREFS: Prefs = {
-  lang: "ar",
-  beadStyle: "arc",
-  palette: "midnight",
-  size: 1,
-  dim: false,
-  haptics: true,
-  audio: false,
-  awake: true,
+const DEFAULT_PROGRESS: Progress = {
+  prayer: "spirit",
+  mysterySet: "joyful",
+  spiritStep: 0,
+  maryStep: 0,
+  at: 0,
 };
 
 export default function Page() {
@@ -67,9 +51,46 @@ export default function Page() {
   const [fading, setFading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
+  /* ---------------- content, account, sync ---------------- */
+
+  // Bumps when Supabase hands us newer prayer text; every string below is read
+  // through content.ts, so re-rendering on it is what makes the swap visible.
+  const contentVersion = useRemoteContent();
+  const auth = useAuth();
+
+  // The snapshot the sync layer mirrors. Held as state rather than derived so
+  // there is exactly one `at` per change, shared by localStorage and Supabase.
+  const [snapshot, setSnapshot] = useState<Progress>(DEFAULT_PROGRESS);
+  // Set when a snapshot arrives from another device: that copy's timestamp is
+  // when it was prayed, and adopting it must not reset the 24h resume window.
+  const keepAt = useRef<number | null>(null);
+
+  const adoptPrefs = useCallback((p: Prefs) => setPrefs(p), []);
+
+  const adoptProgress = useCallback((p: Progress) => {
+    keepAt.current = p.at;
+    setPrayer(p.prayer);
+    setMysterySet(p.mysterySet);
+    setSpiritStep(p.spiritStep);
+    setMaryStep(p.maryStep);
+    setStep(p.prayer === "mary" ? p.maryStep : p.spiritStep);
+  }, []);
+
+  const syncStatus = useCloudSync({
+    userId: auth.user?.id ?? null,
+    prefs,
+    progress: snapshot,
+    ready: hydrated,
+    onAdoptPrefs: adoptPrefs,
+    onAdoptProgress: adoptProgress,
+  });
+
   const steps = useMemo(
     () => buildSteps(prayer, prefs.lang, mysterySet),
-    [prayer, prefs.lang, mysterySet],
+    // contentVersion is not read in the body: it is here because buildSteps
+    // reads the content store, which the version is the signal for.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [prayer, prefs.lang, mysterySet, contentVersion],
   );
   const total = steps.length;
   const progress = total > 1 ? step / (total - 1) : 0;
@@ -79,24 +100,23 @@ export default function Page() {
 
   /* ---------------- restore ---------------- */
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(PREFS_KEY);
-      if (raw) setPrefs((p) => ({ ...p, ...(JSON.parse(raw) as Partial<Prefs>) }));
-    } catch {
-      /* private mode — defaults are fine */
-    }
-    try {
-      const raw = localStorage.getItem(PROGRESS_KEY);
-      const p = raw ? (JSON.parse(raw) as Progress) : null;
-      if (p && Date.now() - p.at < RESUME_WINDOW_MS) {
+    const storedPrefs = readPrefs();
+    if (storedPrefs) setPrefs(storedPrefs);
+
+    const p = readProgress();
+    if (p) {
+      // A stale snapshot still seeds the sync layer — it is this device's last
+      // known state, and the other device's copy has to be compared against
+      // something — but it does not resume the player.
+      keepAt.current = p.at;
+      setSnapshot(p);
+      if (isFresh(p)) {
         setPrayer(p.prayer);
         setMysterySet(p.mysterySet);
         setSpiritStep(p.spiritStep);
         setMaryStep(p.maryStep);
         setStep(p.prayer === "mary" ? p.maryStep : p.spiritStep);
       }
-    } catch {
-      /* a corrupt snapshot must never stop the app opening */
     }
 
     // Deep links from the manifest shortcuts.
@@ -122,27 +142,21 @@ export default function Page() {
   /* ---------------- persist ---------------- */
   useEffect(() => {
     if (!hydrated) return;
-    try {
-      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
-    } catch {
-      /* private mode */
-    }
+    writeLocal(PREFS_KEY, prefs);
   }, [hydrated, prefs]);
 
   useEffect(() => {
     if (!hydrated) return;
-    const snapshot: Progress = {
+    const next: Progress = {
       prayer,
       mysterySet,
       spiritStep: prayer === "spirit" ? step : spiritStep,
       maryStep: prayer === "mary" ? step : maryStep,
-      at: Date.now(),
+      at: keepAt.current ?? Date.now(),
     };
-    try {
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(snapshot));
-    } catch {
-      /* private mode */
-    }
+    keepAt.current = null;
+    writeLocal(PROGRESS_KEY, next);
+    setSnapshot(next);
   }, [hydrated, prayer, mysterySet, step, spiritStep, maryStep]);
 
   /* ---------------- navigation ---------------- */
@@ -222,7 +236,9 @@ export default function Page() {
     setScreen("home");
   };
 
-  const patch = (p: Partial<Prefs>) => setPrefs((v) => ({ ...v, ...p }));
+  // Every change is stamped, so the newer of two devices can be identified.
+  const patch = (p: Partial<Prefs>) =>
+    setPrefs((v) => ({ ...v, ...p, updatedAt: Date.now() }));
 
   const t = ui(prefs.lang);
   const activeName = prayer === "mary" ? t.maryName : t.spiritName;
@@ -242,6 +258,8 @@ export default function Page() {
         palette={prefs.palette}
         size={prefs.size}
         toggles={[prefs.dim, prefs.haptics, prefs.audio, prefs.awake]}
+        auth={auth}
+        syncStatus={syncStatus}
         onToggleLang={() =>
           patch({ lang: prefs.lang === "ar" ? "en" : "ar" })
         }

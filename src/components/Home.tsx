@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import AccountCard from "@/components/AccountCard";
 import {
   PALETTES,
   PALETTE_LABEL,
@@ -8,12 +9,14 @@ import {
   type Lang,
   type MysteryKey,
   type Palette,
-  SET_LABEL,
-  STYLES,
-  STYLE_LABEL,
   setForDay,
+  setLabel,
+  styleLabel,
+  styles,
   ui,
 } from "@/lib/content";
+import type { Auth } from "@/lib/useAuth";
+import type { SyncStatus } from "@/lib/useCloudSync";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
 const GOLD = "var(--accent)";
@@ -207,6 +210,8 @@ export type HomeProps = {
   palette: Palette;
   size: number;
   toggles: boolean[];
+  auth: Auth;
+  syncStatus: SyncStatus;
   onToggleLang: () => void;
   onSetLang: (l: Lang) => void;
   onResume: () => void;
@@ -230,6 +235,8 @@ export default function Home({
   palette,
   size,
   toggles,
+  auth,
+  syncStatus,
   onToggleLang,
   onSetLang,
   onResume,
@@ -598,7 +605,7 @@ export default function Home({
                 {t.todayKicker}
               </div>
               <div style={{ fontSize: 22, fontWeight: 600, lineHeight: 1.3 }}>
-                {SET_LABEL[lang][todaySet]}
+                {setLabel(lang, todaySet)}
               </div>
               <div style={{ fontSize: 13, color: "var(--soft-2)", lineHeight: 1.7 }}>
                 {t.todaySetHint}
@@ -921,7 +928,7 @@ export default function Home({
               marginBottom: 26,
             }}
           >
-            {STYLES.map((k) => {
+            {styles().map((k) => {
               const on = k === beadStyle;
               return (
                 <Row
@@ -954,7 +961,7 @@ export default function Home({
                       color: on ? GOLD : "var(--soft)",
                     }}
                   >
-                    {STYLE_LABEL[lang][k]}
+                    {styleLabel(lang, k)}
                   </div>
                 </Row>
               );
@@ -1067,6 +1074,8 @@ export default function Home({
             </div>
           </div>
 
+          <AccountCard lang={lang} auth={auth} syncStatus={syncStatus} />
+
           <div
             style={{
               display: "flex",
@@ -1076,6 +1085,7 @@ export default function Home({
               borderRadius: 18,
               background: "rgba(255,255,255,.03)",
               border: "1px solid rgba(255,255,255,.06)",
+              marginTop: 26,
             }}
           >
             <div style={{ fontSize: 13.5, color: "var(--soft)" }}>{t.about}</div>
