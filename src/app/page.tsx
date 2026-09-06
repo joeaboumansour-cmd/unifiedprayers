@@ -34,6 +34,7 @@ import { useAuth } from "@/lib/useAuth";
 import { useCloudSync } from "@/lib/useCloudSync";
 import { usePush } from "@/lib/usePush";
 import { useRemoteContent } from "@/lib/useRemoteContent";
+import { useStats } from "@/lib/useStats";
 import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
 
@@ -73,6 +74,9 @@ export default function Page() {
   const push = usePush(prefs.lang);
   const verse = useVerse(prefs.lang);
   const { banner, modal, dismiss } = useAnnouncements(auth.status === "signed-in");
+  // Counted from the device's own log of finished prayers, so the home screen
+  // shows real numbers whether or not anyone is signed in.
+  const { stats, record } = useStats(auth.user?.id ?? null, hydrated);
 
   // The snapshot the sync layer mirrors. Held as state rather than derived so
   // there is exactly one `at` per change, shared by localStorage and Supabase.
@@ -205,14 +209,29 @@ export default function Page() {
 
   /* ---------------- finishing ---------------- */
   const doneTimer = useRef<number | undefined>(undefined);
+  // When this sitting started. Minutes are counted per sitting, not from the
+  // first bead of a prayer that was put down yesterday and picked up today.
+  const openedAt = useRef(0);
+
+  useEffect(() => {
+    if (screen === "player") openedAt.current = Date.now();
+  }, [screen]);
 
   // Tapping past the last step ends the prayer rather than doing nothing.
   const complete = useCallback(() => {
     if (done) return;
     setDone(true);
+    // The only place a prayer is counted. Leaving the player part-way through
+    // saves the place but records nothing, which is what makes the streak mean
+    // "prayed" rather than "opened the app".
+    record(
+      prayer,
+      prayer === "mary" ? mysterySet : null,
+      openedAt.current ? (Date.now() - openedAt.current) / 1000 : 0,
+    );
     haptic([14, 70, 20, 60, 30]);
     if (prefs.audio) playChime();
-  }, [done, haptic, prefs.audio]);
+  }, [done, haptic, prefs.audio, record, prayer, mysterySet]);
 
   // A finished prayer starts again from the beginning, so the home screen
   // offers a fresh one instead of resuming a closing prayer.
@@ -317,7 +336,7 @@ export default function Page() {
         hidden={isPlayer}
         tab={tab}
         lang={prefs.lang}
-        streak={4}
+        stats={stats}
         progress={progress}
         activeName={activeName}
         mysterySet={mysterySet}

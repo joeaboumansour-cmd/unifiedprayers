@@ -18,6 +18,7 @@ import {
   styles,
   ui,
 } from "@/lib/content";
+import type { Stats } from "@/lib/sessions";
 import type { AnnouncementRow } from "@/lib/supabase/types";
 import type { Auth } from "@/lib/useAuth";
 import type { SyncStatus } from "@/lib/useCloudSync";
@@ -43,6 +44,23 @@ const AdminTab = dynamic(() => import("@/components/admin/AdminTab"), {
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
 const GOLD = "var(--accent)";
+
+/**
+ * Arabic counts in more than two shapes, so a bare `${n} days` is wrong for
+ * most numbers. Zero is not a streak at all and reads as an invitation.
+ */
+function streakLine(n: number, ar: boolean): string {
+  if (!ar) {
+    if (n === 0) return "Start your streak today";
+    return n === 1 ? "1 day of prayer in a row" : `${n} days of prayer in a row`;
+  }
+  const d = new Intl.NumberFormat("ar").format(n);
+  if (n === 0) return "ابدأ سلسلتك اليوم";
+  if (n === 1) return "يوم واحد متتالٍ من الصلاة";
+  if (n === 2) return "يومان متتاليان من الصلاة";
+  if (n <= 10) return `${d} أيام متتالية من الصلاة`;
+  return `${d} يومًا متتاليًا من الصلاة`;
+}
 
 const sectionLabel: CSSProperties = {
   fontSize: 12,
@@ -225,7 +243,8 @@ export type HomeProps = {
   hidden: boolean;
   tab: number;
   lang: Lang;
-  streak: number;
+  /** Real counts from the device's log of finished prayers. */
+  stats: Stats;
   progress: number;
   activeName: string;
   mysterySet: MysteryKey;
@@ -258,7 +277,7 @@ export default function Home({
   hidden,
   tab,
   lang,
-  streak,
+  stats,
   progress,
   activeName,
   beadStyle,
@@ -289,6 +308,9 @@ export default function Home({
   const hour = today.getHours();
   const greet = hour < 5 ? 0 : hour < 12 ? 1 : hour < 17 ? 2 : 3;
   const todaySet = setForDay(today.getDay());
+
+  // Arabic-Indic digits beside the Arabic date line, Latin ones beside English.
+  const num = new Intl.NumberFormat(ar ? "ar" : "en");
 
   const dateLine = new Intl.DateTimeFormat(ar ? "ar" : "en", {
     weekday: "long",
@@ -409,16 +431,15 @@ export default function Home({
                     width: 7,
                     height: 7,
                     borderRadius: "50%",
-                    background:
-                      i < streak ? GOLD : "rgb(var(--accent-rgb) / .22)",
+                    background: stats.week[i]
+                      ? GOLD
+                      : "rgb(var(--accent-rgb) / .22)",
                   }}
                 />
               ))}
             </div>
             <div style={{ fontSize: 12.5, color: "var(--accent-text)", lineHeight: 1.5 }}>
-              {ar
-                ? `${streak} أيام متتالية من الصلاة`
-                : `${streak} days of prayer in a row`}
+              {streakLine(stats.streak, ar)}
             </div>
           </div>
 
@@ -658,7 +679,7 @@ export default function Home({
           </Row>
 
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
-            {[String(streak), "18", "240"].map((value, i) => (
+            {[stats.streak, stats.monthPrayers, stats.monthMinutes].map((n, i) => (
               <div
                 key={i}
                 style={{
@@ -680,7 +701,7 @@ export default function Home({
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
-                  {value}
+                  {num.format(n)}
                 </div>
                 <div
                   style={{ fontSize: 11.5, color: "var(--dim)", lineHeight: 1.4 }}

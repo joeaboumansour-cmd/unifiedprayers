@@ -29,6 +29,21 @@ export type ProgressRow = {
   updated_at: string;
 };
 
+/**
+ * One finished prayer, written by the device that finished it. See
+ * supabase/migrations/0005_sessions.sql for why the client owns the id and
+ * the calendar day.
+ */
+export type PrayerSessionRow = {
+  user_id: string;
+  client_id: string;
+  prayer: PrayerId;
+  mystery_set: MysteryKey | null;
+  finished_at: string;
+  local_date: string;
+  seconds: number;
+};
+
 export type ContentRow = {
   key: "design" | "prayers" | "teachings";
   doc: unknown;
@@ -192,6 +207,10 @@ export type Database = {
       user_progress: Table<
         ProgressRow,
         Omit<ProgressRow, "updated_at"> & { updated_at?: string }
+      >;
+      prayer_sessions: Table<
+        PrayerSessionRow,
+        Omit<PrayerSessionRow, "finished_at"> & { finished_at?: string }
       >;
       content_documents: Table<ContentRow>;
       profiles: Table<
