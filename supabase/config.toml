@@ -224,6 +224,10 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
+# Off, to match the hosted project. This app sends no mail at all: there is no
+# confirmation step and no reset link, and a password is changed from Settings
+# with the current one as proof. Turning this back on without an SMTP sender
+# would lock every new account out, because the mail would never arrive.
 enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false

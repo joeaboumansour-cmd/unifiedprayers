@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import AppleSplash from "@/components/AppleSplash";
@@ -59,6 +60,9 @@ export default function RootLayout({
       <body>
         {children}
         <PwaLayer />
+        {/* Vercel's own page counts. Cookieless, and it no-ops off Vercel, so
+            local runs and any other host stay clean. */}
+        <Analytics />
       </body>
     </html>
   );

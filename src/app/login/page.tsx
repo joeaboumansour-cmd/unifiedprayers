@@ -24,7 +24,7 @@ import {
   passwordStrength,
 } from "@/lib/username";
 
-type Mode = "signin" | "signup" | "forgot";
+type Mode = "signin" | "signup";
 
 const COPY = {
   ar: {
@@ -32,8 +32,6 @@ const COPY = {
     signinSub: "لتنتقل إعداداتك وموضعك بين أجهزتك.",
     signupTitle: "إنشاء حساب",
     signupSub: "حساب واحد يكفي. التطبيق يعمل بدونه أيضًا.",
-    forgotTitle: "استعادة كلمة السر",
-    forgotSub: "أدخل بريدك وسنرسل لك رابطًا لتغيير كلمة السر.",
     email: "البريد الإلكتروني",
     password: "كلمة السر",
     newPassword: "كلمة السر",
@@ -46,8 +44,8 @@ const COPY = {
     passwordHint: `${PASSWORD_MIN} أحرف على الأقل. الأطول أفضل من الأعقد.`,
     signIn: "دخول",
     signUp: "إنشاء الحساب",
-    sendReset: "أرسل الرابط",
-    forgot: "نسيت كلمة السر؟",
+    forgotHint:
+      "نسيت كلمة السر؟ التطبيق لا يرسل رسائل بريد، فغيّرها من الإعدادات وأنت مسجّل الدخول.",
     noAccount: "ليس لديك حساب؟ أنشئ واحدًا",
     haveAccount: "لديك حساب؟ سجّل الدخول",
     checking: "جارٍ التحقق…",
@@ -55,10 +53,7 @@ const COPY = {
     taken: "محجوز",
     working: "لحظة…",
     confirmSent:
-      "أرسلنا رسالة تأكيد إلى بريدك. افتح الرابط فيها لتفعيل الحساب.",
-    resetSent:
-      "إن كان هناك حساب بهذا البريد فسيصلك رابط لتغيير كلمة السر. تفقّد بريدك.",
-    confirmed: "تم تأكيد بريدك. يمكنك تسجيل الدخول الآن.",
+      "الحساب أُنشئ، لكن المشروع ما زال يطلب تأكيد البريد. أوقف الخيار في لوحة Supabase، أو أكّد الحساب من هناك، ثم سجّل الدخول.",
     lockedFor: (s: number) => `محاولات كثيرة. حاول بعد ${s} ثانية.`,
     optional: "اختياري",
   },
@@ -67,8 +62,6 @@ const COPY = {
     signinSub: "So your settings and place follow you between devices.",
     signupTitle: "Create an account",
     signupSub: "One account is enough. The app works without one too.",
-    forgotTitle: "Reset your password",
-    forgotSub: "Enter your email and we will send you a link to set a new one.",
     email: "Email address",
     password: "Password",
     newPassword: "Password",
@@ -81,8 +74,8 @@ const COPY = {
     passwordHint: `At least ${PASSWORD_MIN} characters. Longer beats more complicated.`,
     signIn: "Sign in",
     signUp: "Create account",
-    sendReset: "Send the link",
-    forgot: "Forgot your password?",
+    forgotHint:
+      "Forgotten it? The app sends no email, so change your password from Settings while you are signed in.",
     noAccount: "No account? Create one",
     haveAccount: "Already have an account? Sign in",
     checking: "Checking…",
@@ -90,10 +83,7 @@ const COPY = {
     taken: "Taken",
     working: "One moment…",
     confirmSent:
-      "We sent a confirmation message to your email. Open the link in it to activate your account.",
-    resetSent:
-      "If an account exists for that address, a link to set a new password is on its way. Check your email.",
-    confirmed: "Your email is confirmed. You can sign in now.",
+      "The account was created, but this project still asks for email confirmation. Turn that off in the Supabase dashboard, or confirm the account there, then sign in.",
     lockedFor: (s: number) => `Too many attempts. Try again in ${s}s.`,
     optional: "Optional",
   },
@@ -119,7 +109,6 @@ export default function LoginPage() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
-  const [confirmed, setConfirmed] = useState(false);
 
   const t = COPY[lang];
 
@@ -136,9 +125,7 @@ export default function LoginPage() {
         ?.setAttribute("content", theme);
     }
     const params = new URLSearchParams(window.location.search);
-    const m = params.get("mode");
-    if (m === "signup" || m === "forgot") setMode(m);
-    if (params.get("confirmed") === "1") setConfirmed(true);
+    if (params.get("mode") === "signup") setMode("signup");
     setReady(true);
   }, []);
 
@@ -183,7 +170,6 @@ export default function LoginPage() {
     setMode(next);
     setError(null);
     setDone(null);
-    setConfirmed(false);
     setPassword("");
   }, []);
 
@@ -194,16 +180,6 @@ export default function LoginPage() {
     if (pending || auth.lockedForSeconds > 0) return;
     setError(null);
     setDone(null);
-
-    if (mode === "forgot") {
-      setPending(true);
-      const res = await auth.requestPasswordReset(email, lang);
-      setPending(false);
-      // Success either way: whether that address has an account is not this
-      // form's to reveal.
-      if (!res.ok) return setError(res.message);
-      return setDone(t.resetSent);
-    }
 
     if (mode === "signin") {
       setPending(true);
@@ -229,7 +205,11 @@ export default function LoginPage() {
     );
     setPending(false);
     if (!res.ok) return setError(res.message);
-    setDone(t.confirmSent);
+    // Email confirmation is off, so signing up signs you in and the redirect
+    // effect above takes over. No session means the project has confirmation
+    // on and no mail is coming, which has to be said rather than swallowed.
+    if (res.pendingConfirmation) return setDone(t.confirmSent);
+    router.replace("/");
   };
 
   if (!ready || auth.status === "loading") {
@@ -237,10 +217,8 @@ export default function LoginPage() {
   }
 
   const locked = auth.lockedForSeconds > 0;
-  const title =
-    mode === "signin" ? t.signinTitle : mode === "signup" ? t.signupTitle : t.forgotTitle;
-  const subtitle =
-    mode === "signin" ? t.signinSub : mode === "signup" ? t.signupSub : t.forgotSub;
+  const title = mode === "signin" ? t.signinTitle : t.signupTitle;
+  const subtitle = mode === "signin" ? t.signinSub : t.signupSub;
   const strength = passwordStrength(password);
 
   return (
@@ -250,7 +228,6 @@ export default function LoginPage() {
         noValidate
         style={{ display: "flex", flexDirection: "column", gap: 16 }}
       >
-        {confirmed && <Notice tone="ok">{t.confirmed}</Notice>}
         {done && <Notice tone="ok">{done}</Notice>}
         {error && <Notice tone="error">{error}</Notice>}
         {locked && <Notice tone="error">{t.lockedFor(auth.lockedForSeconds)}</Notice>}
@@ -320,11 +297,10 @@ export default function LoginPage() {
           )}
         </Field>
 
-        {mode !== "forgot" && (
-          <Field
-            label={t.password}
-            hint={mode === "signup" ? t.passwordHint : undefined}
-          >
+        <Field
+          label={t.password}
+          hint={mode === "signup" ? t.passwordHint : undefined}
+        >
             {(id, describedBy) => (
               <>
                 <PasswordInput
@@ -355,8 +331,7 @@ export default function LoginPage() {
                 )}
               </>
             )}
-          </Field>
-        )}
+        </Field>
 
         {mode === "signup" && (
           <>
@@ -400,13 +375,7 @@ export default function LoginPage() {
           disabled={pending || locked}
           style={primaryButton(pending || locked)}
         >
-          {pending
-            ? t.working
-            : mode === "signin"
-              ? t.signIn
-              : mode === "signup"
-                ? t.signUp
-                : t.sendReset}
+          {pending ? t.working : mode === "signin" ? t.signIn : t.signUp}
         </button>
       </form>
 
@@ -423,15 +392,22 @@ export default function LoginPage() {
       >
         {mode === "signin" && (
           <>
-            <button type="button" style={linkButton} onClick={() => switchMode("forgot")}>
-              {t.forgot}
-            </button>
             <button type="button" style={linkButton} onClick={() => switchMode("signup")}>
               {t.noAccount}
             </button>
+            <div
+              style={{
+                fontSize: 11.5,
+                lineHeight: 1.6,
+                color: "var(--dim-3)",
+                textAlign: "center",
+              }}
+            >
+              {t.forgotHint}
+            </div>
           </>
         )}
-        {mode !== "signin" && (
+        {mode === "signup" && (
           <button type="button" style={linkButton} onClick={() => switchMode("signin")}>
             {t.haveAccount}
           </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import BeadVisual from "@/components/BeadVisual";
+import Completion from "@/components/Completion";
 import {
   type BeadStyle,
   type Lang,
@@ -27,11 +28,13 @@ export type PlayerProps = {
   dim: boolean;
   audio: boolean;
   fading: boolean;
+  done: boolean;
   onAdvance: () => void;
   onBack: () => void;
   onClose: () => void;
   onToggleDim: () => void;
   onToggleAudio: () => void;
+  onFinish: () => void;
 };
 
 export default function Player({
@@ -46,11 +49,13 @@ export default function Player({
   dim,
   audio,
   fading,
+  done,
   onAdvance,
   onBack,
   onClose,
   onToggleDim,
   onToggleAudio,
+  onFinish,
 }: PlayerProps) {
   const t = ui(lang);
   const ar = lang === "ar";
@@ -106,9 +111,11 @@ export default function Player({
 
   return (
     <div
-      onClick={onAdvance}
+      onClick={() => {
+        if (!done) onAdvance();
+      }}
       onTouchStart={(e) => {
-        if (e.touches.length !== 1) return void (touch.current = null);
+        if (done || e.touches.length !== 1) return void (touch.current = null);
         touch.current = {
           x: e.touches[0].clientX,
           y: e.touches[0].clientY,
@@ -118,7 +125,7 @@ export default function Player({
       onTouchEnd={(e) => {
         const s = touch.current;
         touch.current = null;
-        if (!s) return;
+        if (!s || done) return;
         const dx = e.changedTouches[0].clientX - s.x;
         const dy = e.changedTouches[0].clientY - s.y;
         if (Date.now() - s.t > 700) return;
@@ -410,6 +417,9 @@ export default function Player({
             "linear-gradient(rgba(60,26,0,.42),rgba(40,16,0,.5)),rgba(0,0,0,.28)",
         }}
       />
+
+      {/* the closing moment sits above the dim, so the tick keeps its colour */}
+      <Completion open={done} lang={lang} onDismiss={onFinish} />
     </div>
   );
 }

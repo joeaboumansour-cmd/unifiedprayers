@@ -233,6 +233,8 @@
       "maryName": "مسبحة مريم العذراء",
       "back": "رجوع",
       "tapHint": "اضغط في أي مكان للمتابعة",
+      "doneTitle": "آمين",
+      "doneNote": "تمّت الصلاة. شكراً لوقتك مع الله.",
       "tabs": [
         "الصلوات",
         "اليوم",
@@ -297,7 +299,7 @@
         ],
         [
           "الصوت المحيط",
-          "خلفية هادئة أثناء الصلاة"
+          "خلفية هادئة أثناء الصلاة، وجرس عند الختام"
         ],
         [
           "إبقاء الشاشة مضاءة",
@@ -327,6 +329,8 @@
       "maryName": "Rosary of the Virgin Mary",
       "back": "Back",
       "tapHint": "Tap anywhere to continue",
+      "doneTitle": "Amen",
+      "doneNote": "Prayer complete. Thank you for this time.",
       "tabs": [
         "Prayers",
         "Today",
@@ -391,7 +395,7 @@
         ],
         [
           "Ambient sound",
-          "A calm drone while you pray"
+          "A calm drone while you pray, and a bell at the end"
         ],
         [
           "Keep screen awake",

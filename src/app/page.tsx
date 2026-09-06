@@ -23,6 +23,7 @@ import {
   readProgress,
   writeLocal,
 } from "@/lib/state";
+import { playChime } from "@/lib/chime";
 import { buildSteps } from "@/lib/steps";
 import { useAmbientDrone } from "@/lib/useAmbientDrone";
 import { useAuth } from "@/lib/useAuth";
@@ -49,6 +50,9 @@ export default function Page() {
   const [maryStep, setMaryStep] = useState(0);
   const [sheet, setSheet] = useState(false);
   const [fading, setFading] = useState(false);
+  // The closing moment: shown after the last step is tapped past, and the only
+  // way a prayer is counted as finished rather than merely left.
+  const [done, setDone] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   /* ---------------- content, account, sync ---------------- */
@@ -161,7 +165,7 @@ export default function Page() {
 
   /* ---------------- navigation ---------------- */
   const haptic = useCallback(
-    (ms = 8) => {
+    (ms: number | number[] = 8) => {
       if (!prefs.haptics || !navigator.vibrate) return;
       try {
         navigator.vibrate(ms);
@@ -183,31 +187,68 @@ export default function Page() {
     );
   }, []);
 
+  /* ---------------- finishing ---------------- */
+  const doneTimer = useRef<number | undefined>(undefined);
+
+  // Tapping past the last step ends the prayer rather than doing nothing.
+  const complete = useCallback(() => {
+    if (done) return;
+    setDone(true);
+    haptic([14, 70, 20, 60, 30]);
+    if (prefs.audio) playChime();
+  }, [done, haptic, prefs.audio]);
+
+  // A finished prayer starts again from the beginning, so the home screen
+  // offers a fresh one instead of resuming a closing prayer.
+  const finish = useCallback(() => {
+    window.clearTimeout(doneTimer.current);
+    if (prayer === "mary") setMaryStep(0);
+    else setSpiritStep(0);
+    setStep(0);
+    setScreen("home");
+    // Held until the player has slid away, so the overlay does not blink off
+    // and reveal the first step on the way out.
+    window.setTimeout(() => setDone(false), 560);
+  }, [prayer]);
+
+  // The overlay reads for a moment on its own, then hands back to home. A tap
+  // during it goes to Completion, which calls finish early.
+  useEffect(() => {
+    if (!done) return;
+    doneTimer.current = window.setTimeout(finish, 3400);
+    return () => window.clearTimeout(doneTimer.current);
+  }, [done, finish]);
+
   const advance = useCallback(() => {
-    if (step >= total - 1) return haptic(24);
+    if (step >= total - 1) return complete();
     haptic(8);
     crossfade(step + 1);
-  }, [step, total, haptic, crossfade]);
+  }, [step, total, haptic, crossfade, complete]);
 
   const back = useCallback(() => {
-    if (step === 0) return;
+    if (step === 0 || done) return;
     haptic(6);
     crossfade(step - 1);
-  }, [step, haptic, crossfade]);
+  }, [step, done, haptic, crossfade]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (screen !== "player") return;
       if (e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === " ") {
         e.preventDefault();
-        advance();
+        if (done) finish();
+        else advance();
+        return;
       }
-      if (e.key === "Escape") closePlayer();
+      if (e.key === "Escape") {
+        if (done) finish();
+        else closePlayer();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, advance]);
+  }, [screen, advance, done, finish]);
 
   /* ---------------- transitions between screens ---------------- */
   const openSpirit = () => {
@@ -231,6 +272,7 @@ export default function Page() {
     setScreen("player");
   };
   const closePlayer = () => {
+    if (done) return finish();
     if (prayer === "mary") setMaryStep(step);
     else setSpiritStep(step);
     setScreen("home");
@@ -318,11 +360,13 @@ export default function Page() {
         dim={prefs.dim}
         audio={prefs.audio}
         fading={fading}
+        done={done}
         onAdvance={advance}
         onBack={back}
         onClose={closePlayer}
         onToggleDim={() => patch({ dim: !prefs.dim })}
         onToggleAudio={() => patch({ audio: !prefs.audio })}
+        onFinish={finish}
       />
 
       <MysterySheet

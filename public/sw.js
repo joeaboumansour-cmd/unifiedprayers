@@ -85,6 +85,10 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(req.url);
 
+  // Vercel's analytics script and its beacons: always live, never stored. A
+  // cached copy of a measurement script is the one thing it must not be.
+  if (url.pathname.startsWith('/_vercel/')) return;
+
   // Navigations: network first so a deploy lands immediately, shell as fallback.
   if (req.mode === 'navigate') {
     // Keyed by path, so the manifest shortcuts (/?set=mary) do not each store

@@ -47,6 +47,8 @@ type UIStrings = {
   maryName: string;
   back: string;
   tapHint: string;
+  doneTitle: string;
+  doneNote: string;
   tabs: string[];
   pages: string[];
   coming: string[];
@@ -211,7 +213,15 @@ export const styleLabel = (lang: Lang, style: BeadStyle): string =>
 export const hail = (lang: Lang): string => D.HAIL[lang];
 export const glory = (lang: Lang): string => D.GLORY[lang];
 
-export const ui = (lang: Lang): UIStrings => D.UI[lang];
+/**
+ * Remote documents are written by hand and may predate a string the app has
+ * since started reading, so the bundled copy fills any gap. Without this a
+ * newer build against an older row would render an empty label.
+ */
+export const ui = (lang: Lang): UIStrings => ({
+  ...BUNDLED_DESIGN.UI[lang],
+  ...D.UI[lang],
+});
 export const spirit = (lang: Lang): SpiritContent => (lang === "ar" ? D.AR : D.EN);
 
 export const maryPre = (lang: Lang): NamedPrayer[] =>

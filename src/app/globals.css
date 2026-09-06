@@ -128,6 +128,50 @@ button {
   }
 }
 
+/* The closing moment of a prayer: the ring and the tick draw themselves,
+   the ring expands away, and the words rise after it. */
+@keyframes doneRing {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes doneTick {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes donePulse {
+  0% {
+    transform: scale(0.78);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+@keyframes doneRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes doneGlow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.07);
+    opacity: 0.9;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

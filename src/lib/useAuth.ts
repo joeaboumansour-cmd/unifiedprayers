@@ -18,7 +18,17 @@ export type AuthStatus =
  * written for the person reading it, in their language, and is deliberately
  * vague wherever being specific would answer a question an attacker asked.
  */
-export type AuthResult = { ok: true } | { ok: false; message: string };
+export type AuthResult =
+  | {
+      ok: true;
+      /**
+       * Set by signUp when Supabase withheld the session: the project still
+       * has email confirmation switched on. This build sends no mail, so the
+       * signup would otherwise look like it silently did nothing.
+       */
+      pendingConfirmation?: boolean;
+    }
+  | { ok: false; message: string };
 
 export type SignUpInput = {
   email: string;
@@ -31,14 +41,20 @@ export type SignUpInput = {
 export type Auth = {
   status: AuthStatus;
   user: User | null;
-  /** True when this page load came from a password-reset link. */
-  recovering: boolean;
   /** Seconds the sign-in form should stay disabled after repeated failures. */
   lockedForSeconds: number;
   signIn: (email: string, password: string, lang: Lang) => Promise<AuthResult>;
   signUp: (input: SignUpInput, lang: Lang) => Promise<AuthResult>;
-  requestPasswordReset: (email: string, lang: Lang) => Promise<AuthResult>;
-  updatePassword: (password: string, lang: Lang) => Promise<AuthResult>;
+  /**
+   * Changes the password of the signed-in account. The current password is
+   * required: this app sends no mail, so there is no reset link, and the old
+   * password is the only proof of ownership left.
+   */
+  changePassword: (
+    current: string,
+    next: string,
+    lang: Lang,
+  ) => Promise<AuthResult>;
   signOut: () => Promise<void>;
 };
 
@@ -63,7 +79,8 @@ const T = {
     // One message for "no such account" and "wrong password" alike. Telling
     // them apart is how an attacker learns which addresses are registered.
     badCredentials: "البريد الإلكتروني أو كلمة السر غير صحيحة.",
-    unconfirmed: "لم يتم تأكيد بريدك بعد. تفقّد رسالة التأكيد.",
+    wrongCurrent: "كلمة السر الحالية غير صحيحة.",
+    samePassword: "كلمة السر الجديدة هي نفسها الحالية.",
     usernameTaken: "اسم المستخدم محجوز، جرّب غيره.",
     phoneTaken: "رقم الهاتف مستخدم في حساب آخر.",
     locked: "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
@@ -73,7 +90,8 @@ const T = {
   },
   en: {
     badCredentials: "That email or password is incorrect.",
-    unconfirmed: "Your email is not confirmed yet — check for the confirmation message.",
+    wrongCurrent: "That is not your current password.",
+    samePassword: "The new password is the same as the current one.",
     usernameTaken: "That username is taken, try another.",
     phoneTaken: "That phone number is already on another account.",
     locked: "Too many attempts. Wait a moment and try again.",
@@ -90,8 +108,10 @@ function explain(error: { message?: string; code?: string } | null, lang: Lang):
   const code = error?.code || "";
 
   if (raw.includes("failed to fetch") || raw.includes("network")) return t.offline;
-  if (code === "email_not_confirmed" || raw.includes("not confirmed")) return t.unconfirmed;
   if (code === "invalid_credentials" || raw.includes("invalid login")) return t.badCredentials;
+  if (code === "same_password" || raw.includes("should be different")) {
+    return t.samePassword;
+  }
   if (code === "weak_password" || raw.includes("pwned") || raw.includes("weak")) {
     return t.weakPassword;
   }
@@ -109,7 +129,6 @@ export function useAuth(): Auth {
     isSupabaseConfigured ? "loading" : "disabled",
   );
   const [user, setUser] = useState<User | null>(null);
-  const [recovering, setRecovering] = useState(false);
   const [lockedForSeconds, setLockedForSeconds] = useState(0);
 
   const failures = useRef(0);
@@ -134,10 +153,7 @@ export function useAuth(): Auth {
       .then(({ data }) => apply(data.session))
       .catch(() => apply(null));
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      // Fired when the link from a reset email is opened. The session it comes
-      // with is real but exists only to authorise setting a new password.
-      if (event === "PASSWORD_RECOVERY") setRecovering(true);
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       apply(session);
     });
 
@@ -195,7 +211,7 @@ export function useAuth(): Auth {
       if (!supabase) return { ok: false, message: T[lang].generic };
 
       const phone = input.phone ? normalisePhone(input.phone) : "";
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: input.email.trim().toLowerCase(),
         password: input.password,
         options: {
@@ -207,47 +223,39 @@ export function useAuth(): Auth {
             display_name: input.displayName?.trim() || "",
             phone,
           },
-          emailRedirectTo: `${window.location.origin}/login?confirmed=1`,
         },
       });
 
       if (error) return { ok: false, message: explain(error, lang) };
-      return { ok: true };
+      return { ok: true, pendingConfirmation: !data.session };
     },
     [],
   );
 
-  const requestPasswordReset = useCallback(
-    async (email: string, lang: Lang): Promise<AuthResult> => {
+  const changePassword = useCallback(
+    async (current: string, next: string, lang: Lang): Promise<AuthResult> => {
       const supabase = getSupabase();
       if (!supabase) return { ok: false, message: T[lang].generic };
 
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase(),
-        { redirectTo: `${window.location.origin}/reset-password` },
-      );
+      const { data } = await supabase.auth.getSession();
+      const email = data.session?.user.email;
+      if (!email) return { ok: false, message: T[lang].generic };
 
-      // Only a transport failure is worth reporting. Anything else -- including
-      // "no such user" -- is reported as success by the caller, because saying
-      // otherwise turns this form into a test for whether an address has an
-      // account. Supabase already declines to say; we must not undo that.
-      if (error && (error.message || "").toLowerCase().includes("fetch")) {
-        return { ok: false, message: T[lang].offline };
+      // Supabase lets a live session set a new password without proving the
+      // old one. That is fine when a reset link did the proving; here nothing
+      // did, so an unattended phone would be enough to take the account over.
+      // Signing in again with the current password is that proof.
+      const check = await supabase.auth.signInWithPassword({
+        email,
+        password: current,
+      });
+      if (check.error) {
+        return { ok: false, message: T[lang].wrongCurrent };
       }
-      return { ok: true };
-    },
-    [],
-  );
 
-  const updatePassword = useCallback(
-    async (password: string, lang: Lang): Promise<AuthResult> => {
-      const supabase = getSupabase();
-      if (!supabase) return { ok: false, message: T[lang].generic };
-
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await supabase.auth.updateUser({ password: next });
       if (error) return { ok: false, message: explain(error, lang) };
 
-      setRecovering(false);
       // A password change should not leave whoever prompted it still signed in
       // somewhere else. This session stays; every other one is revoked.
       await supabase.auth.signOut({ scope: "others" }).catch(() => {});
@@ -267,12 +275,10 @@ export function useAuth(): Auth {
   return {
     status,
     user,
-    recovering,
     lockedForSeconds,
     signIn,
     signUp,
-    requestPasswordReset,
-    updatePassword,
+    changePassword,
     signOut,
   };
 }
