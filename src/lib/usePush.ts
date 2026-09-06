@@ -37,6 +37,15 @@ export type Push = {
   /** Local hour 0–23 for the nightly reminder, or null when it is off. */
   reminderHour: number | null;
   busy: boolean;
+  /**
+   * Why the last attempt to turn them on failed, in the reader's language.
+   *
+   * Worth its own field because the failure is otherwise invisible: permission
+   * is granted, the subscribe call fails, and the switch simply goes back to
+   * where it was. Someone watching that has no way to tell a refusal from a
+   * bug, and would reasonably conclude the app is broken.
+   */
+  error: string | null;
   /** Asks permission and registers the device. Safe to call when already on. */
   enable: () => Promise<boolean>;
   disable: () => Promise<void>;
@@ -108,10 +117,24 @@ function tellWorker(config: Record<string, unknown>): void {
     .catch(() => {});
 }
 
+const FAIL = {
+  ar: {
+    subscribe: "تعذّر تفعيل الإشعارات على هذا الجهاز. حاول مجددًا.",
+    server: "تم السماح بالإشعارات، لكن تعذّر تسجيل الجهاز. تحقق من الاتصال وحاول مجددًا.",
+    dismissed: "لم تُمنح الإشعارات. اضغط «سماح» عند سؤال المتصفح.",
+  },
+  en: {
+    subscribe: "Could not turn notifications on for this device. Try again.",
+    server: "Notifications were allowed, but the device could not be registered. Check your connection and try again.",
+    dismissed: "Permission was not granted. Choose Allow when the browser asks.",
+  },
+} as const;
+
 export function usePush(lang: "ar" | "en"): Push {
   const [state, setState] = useState<PushState>("checking");
   const [reminderHour, setHour] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const endpoint = useRef<string | null>(null);
 
   /* ------------------------------ discovery ------------------------------ */
@@ -229,6 +252,7 @@ export function usePush(lang: "ar" | "en"): Push {
   const enable = useCallback(async (): Promise<boolean> => {
     if (busy || !VAPID) return false;
     setBusy(true);
+    setError(null);
     try {
       // Must be called from the user's tap — Safari discards the prompt
       // otherwise, and the state machine here exists so nothing awaits before
@@ -236,23 +260,32 @@ export function usePush(lang: "ar" | "en"): Push {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         setState(permission === "denied" ? "blocked" : "off");
+        // "denied" gets its own screen explaining browser settings; only the
+        // dismissed-without-choosing case needs saying here.
+        if (permission !== "denied") setError(FAIL[lang].dismissed);
         return false;
       }
 
       const ok = await register(reminderHour);
       setState(ok ? "on" : "off");
+      // Permission granted but the server would not take the subscription --
+      // offline, or the deployment has no VAPID private key. Distinguished
+      // from the throw below because the browser side worked fine.
+      if (!ok) setError(FAIL[lang].server);
       return ok;
     } catch {
       setState("off");
+      setError(FAIL[lang].subscribe);
       return false;
     } finally {
       setBusy(false);
     }
-  }, [busy, register, reminderHour]);
+  }, [busy, register, reminderHour, lang]);
 
   const disable = useCallback(async (): Promise<void> => {
     if (busy) return;
     setBusy(true);
+    setError(null);
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
@@ -289,5 +322,5 @@ export function usePush(lang: "ar" | "en"): Push {
     [register, state],
   );
 
-  return { state, reminderHour, busy, enable, disable, setReminderHour };
+  return { state, reminderHour, busy, error, enable, disable, setReminderHour };
 }

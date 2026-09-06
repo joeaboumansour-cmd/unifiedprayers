@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnnouncementModal } from "@/components/Announcements";
 import Home from "@/components/Home";
 import MysterySheet from "@/components/MysterySheet";
+import NotificationsPrompt from "@/components/NotificationsPrompt";
 import Player from "@/components/Player";
 import TabBar from "@/components/TabBar";
 import {
@@ -412,6 +413,16 @@ export default function Page() {
           onDismiss={() => dismiss(modal.id)}
         />
       )}
+
+      {/* Asked on every launch while notifications are off. Suppressed while a
+          prayer is open, while the closing moment reads, and whenever an
+          announcement is already covering the app -- two sheets arriving
+          together is a pile-up, and the announcement was scheduled by a person
+          for a reason. */}
+      <NotificationsPrompt
+        push={push}
+        suppressed={isPlayer || done || sheet || Boolean(modal)}
+      />
     </main>
   );
 }

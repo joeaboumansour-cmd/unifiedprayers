@@ -141,6 +141,18 @@ export default function NotificationsCard({
         </button>
       )}
 
+      {/* Below the button rather than replacing it: whatever went wrong, the
+          next thing to do is almost always to tap it again. */}
+      {push.error && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ fontSize: 12.5, color: "#f2a2b0", lineHeight: 1.8 }}
+        >
+          {push.error}
+        </div>
+      )}
+
       {push.state === "on" && (
         <>
           <div style={{ fontSize: 13.5, color: "var(--accent)" }}>{s.enabled}</div>
