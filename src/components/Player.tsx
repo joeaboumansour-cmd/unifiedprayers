@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BeadVisual from "@/components/BeadVisual";
 import Completion from "@/components/Completion";
 import {
@@ -85,6 +85,37 @@ export default function Player({
 
   /* Swipe as an alternative to tapping, so a stray drag never skips a bead. */
   const touch = useRef<{ x: number; y: number; t: number } | null>(null);
+  /* A drag is followed by a click, and its x is where the finger lifted — the
+     other half of the screen. Left alone that click would undo the swipe, so
+     the touch is remembered and a click that lands away from where the finger
+     went down is discarded. A tap lands within a few pixels of its own start. */
+  const down = useRef<{ x: number; t: number } | null>(null);
+
+  /* The arrows are the only thing on screen that says the halves are tappable,
+     so they answer a tap: the side that was used lights up for a moment. */
+  const [flash, setFlash] = useState<"back" | "fwd" | null>(null);
+  const flashTimer = useRef<number | null>(null);
+  useEffect(() => () => window.clearTimeout(flashTimer.current ?? 0), []);
+
+  /* And they introduce themselves once, as the player slides up. */
+  const [intro, setIntro] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    setIntro(true);
+    const id = window.setTimeout(() => setIntro(false), 1900);
+    return () => window.clearTimeout(id);
+  }, [open]);
+
+  const canBack = step > 0;
+
+  const go = (forward: boolean) => {
+    if (done || (!forward && !canBack)) return;
+    setFlash(forward ? "fwd" : "back");
+    window.clearTimeout(flashTimer.current ?? 0);
+    flashTimer.current = window.setTimeout(() => setFlash(null), 300);
+    if (forward) onAdvance();
+    else onBack();
+  };
 
   /* The body scroller must not swallow taps meant to advance. */
   const textRef = useRef<HTMLDivElement>(null);
@@ -109,10 +140,74 @@ export default function Player({
     flex: "none",
   });
 
+  /* The arrows are a signpost, not the control: the whole half of the screen
+     they sit in is tappable, so they stay quiet until they are used. They are
+     still real buttons, so the affordance also works with a keyboard. */
+  const arrow = (side: "back" | "fwd") => {
+    const lit = flash === side;
+    const muted = side === "back" && !canBack;
+    // Back points to the start of the reading direction, forward to its end.
+    const pointsLeft = side === "back" ? !ar : ar;
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          go(side === "fwd");
+        }}
+        // Not from the design document: a remote copy of it replaces the whole
+        // UI block, so a key added here would read as undefined on older rows.
+        aria-label={side === "back" ? t.back : ar ? "التالي" : "Next"}
+        disabled={muted}
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: "none",
+          background: lit ? "rgb(var(--accent-rgb) / .16)" : "transparent",
+          // Lit wins over muted: a tap back onto the first step should still
+          // show the arrow answering, not blink out mid-flash.
+          opacity: lit ? 1 : muted ? 0.07 : intro ? 0.58 : 0.26,
+          transition: "opacity .55s ease, background .3s ease",
+        }}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          aria-hidden
+          style={{ transform: pointsLeft ? undefined : "scaleX(-1)" }}
+        >
+          <path
+            d="M12.4 4.6 L6.6 10 L12.4 15.4"
+            fill="none"
+            stroke={lit ? "var(--accent)" : "var(--ink)"}
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    );
+  };
+
   return (
     <div
-      onClick={() => {
-        if (!done) onAdvance();
+      onClick={(e) => {
+        if (done) return;
+        const d = down.current;
+        if (d && Date.now() - d.t < 1500 && Math.abs(e.clientX - d.x) > 30) return;
+        /* A tap that ends a text selection is a reading gesture, not a turn. */
+        const sel = window.getSelection?.();
+        if (sel && !sel.isCollapsed) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        const onRight = e.clientX - r.left > r.width / 2;
+        // Forward lives at the end of the reading direction: right in Latin
+        // script, left in Arabic — the same side a page turns towards.
+        go(ar ? !onRight : onRight);
       }}
       onTouchStart={(e) => {
         if (done || e.touches.length !== 1) return void (touch.current = null);
@@ -121,6 +216,7 @@ export default function Player({
           y: e.touches[0].clientY,
           t: Date.now(),
         };
+        down.current = { x: touch.current.x, t: touch.current.t };
       }}
       onTouchEnd={(e) => {
         const s = touch.current;
@@ -130,10 +226,10 @@ export default function Player({
         const dy = e.changedTouches[0].clientY - s.y;
         if (Date.now() - s.t > 700) return;
         if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+        // Asks the browser not to synthesise a click from a touch we handled.
+        e.preventDefault();
         // In RTL, dragging rightward turns the page forward.
-        const forward = ar ? dx > 0 : dx < 0;
-        if (forward) onAdvance();
-        else onBack();
+        go(ar ? dx > 0 : dx < 0);
       }}
       style={{
         position: "absolute",
@@ -371,39 +467,54 @@ export default function Player({
       >
         <div
           style={{
-            fontSize: 11.5,
-            color: "var(--dim)",
-            fontVariantNumeric: "tabular-nums",
-            transition: "opacity .3s ease",
-            opacity: fading ? 0 : 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            width: "100%",
           }}
         >
-          {cur?.counter}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onBack();
-            }}
+          {arrow("back")}
+          <div
             style={{
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 999,
-              display: "flex",
-              alignItems: "center",
-              background: "rgba(255,255,255,.06)",
-              border: "1px solid rgba(255,255,255,.08)",
-              fontSize: 12.5,
-              color: "var(--soft-2)",
+              fontSize: 11.5,
+              color: "var(--dim)",
+              fontVariantNumeric: "tabular-nums",
+              transition: "opacity .3s ease",
+              opacity: fading ? 0 : 1,
+              textAlign: "center",
+              minWidth: 0,
             }}
           >
-            {t.back}
-          </button>
-          <div style={{ fontSize: 11.5, color: "var(--dim-4)" }}>{t.tapHint}</div>
+            {cur?.counter}
+          </div>
+          {arrow("fwd")}
         </div>
       </div>
+
+      {/* the half that was tapped answers with a brief wash of light, so the
+          mapping between a side of the screen and a direction is learnable */}
+      {(["left", "right"] as const).map((p) => {
+        const side = (p === "right") !== ar ? "fwd" : "back";
+        return (
+          <div
+            key={p}
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              width: "40%",
+              ...(p === "left" ? { left: 0 } : { right: 0 }),
+              pointerEvents: "none",
+              opacity: flash === side ? 1 : 0,
+              transition: `opacity ${flash === side ? ".1s" : ".55s"} ease`,
+              background: `linear-gradient(to ${p === "left" ? "right" : "left"},
+                rgb(var(--accent-rgb) / .085), transparent)`,
+            }}
+          />
+        );
+      })}
 
       {/* night dim */}
       <div

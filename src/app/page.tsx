@@ -250,10 +250,19 @@ export default function Page() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (screen !== "player") return;
-      if (e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === " ") {
+      if (e.key === " ") {
         e.preventDefault();
         if (done) finish();
         else advance();
+        return;
+      }
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (done) return finish();
+        // The same mapping the tap halves use: forward is the end of the
+        // reading direction, which is the left arrow in Arabic.
+        if ((e.key === "ArrowRight") !== (prefs.lang === "ar")) advance();
+        else back();
         return;
       }
       if (e.key === "Escape") {
@@ -264,7 +273,7 @@ export default function Page() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, advance, done, finish]);
+  }, [screen, advance, back, done, finish, prefs.lang]);
 
   /* ---------------- transitions between screens ---------------- */
   const openSpirit = () => {
