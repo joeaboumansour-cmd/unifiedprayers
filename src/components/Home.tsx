@@ -313,7 +313,7 @@ export default function Home({
         position: "absolute",
         inset: 0,
         padding:
-          "calc(20px + var(--safe-t)) 20px calc(86px + max(10px, var(--safe-b)))",
+          "calc(20px + var(--safe-t)) 20px 96px",
         boxSizing: "border-box",
         transition: `transform .5s ${EASE}, opacity .4s ease`,
         transform: hidden ? "scale(.965)" : "scale(1)",

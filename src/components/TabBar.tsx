@@ -40,7 +40,7 @@ export default function TabBar({
         position: "absolute",
         insetInline: 0,
         bottom: 0,
-        padding: "8px 14px max(10px, var(--safe-b))",
+        padding: "8px 14px 10px",
         display: "flex",
         gap: 4,
         background:
