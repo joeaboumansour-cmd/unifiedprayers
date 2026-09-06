@@ -196,7 +196,7 @@ export default function PwaLayer() {
           style={{
             width: "100%",
             maxWidth: 460,
-            margin: "0 10px calc(10px + var(--safe-b))",
+            margin: "0 10px max(10px, var(--safe-b))",
             borderRadius: "28px 28px 22px 22px",
             background: "var(--surface)",
             border: "1px solid rgba(255,255,255,.1)",
@@ -329,7 +329,7 @@ export default function PwaLayer() {
             // Physical left, so centring holds in both text directions.
             left: "50%",
             transform: "translateX(-50%)",
-            bottom: "calc(84px + var(--safe-b))",
+            bottom: "calc(74px + max(10px, var(--safe-b)))",
             zIndex: 1200,
             display: "flex",
             alignItems: "center",

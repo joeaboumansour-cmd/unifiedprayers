@@ -53,7 +53,7 @@ export default function MysterySheet({
           borderRadius: "28px 28px 0 0",
           background: "var(--surface)",
           borderTop: "1px solid rgba(255,255,255,.1)",
-          padding: "14px 18px calc(22px + var(--safe-b))",
+          padding: "14px 18px max(22px, var(--safe-b))",
           boxShadow: "0 -20px 60px rgba(0,0,0,.5)",
           transition: `transform .48s ${EASE}`,
           transform: open ? "translateY(0)" : "translateY(105%)",

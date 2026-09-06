@@ -5,9 +5,13 @@
 
   --safe-t: env(safe-area-inset-top, 0px);
   /* In Safari the document is pinned to the small viewport, which already
-     sits above the browser's bottom bar - adding the home-indicator inset on
-     top of that lifts the tab bar noticeably too high. Only an installed app,
-     which has no browser chrome, actually needs to clear the indicator. */
+     sits above the browser's bottom bar, so the home-indicator inset would be
+     counted twice. Only an installed app, which has no browser chrome, needs
+     to clear the indicator.
+
+     Bottom-edge chrome uses max(base, var(--safe-b)) rather than adding the
+     two: iOS puts tab-bar icons exactly at the top of the indicator strip,
+     and summing them leaves the bar floating well above the bottom. */
   --safe-b: 0px;
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);

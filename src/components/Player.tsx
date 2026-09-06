@@ -359,7 +359,7 @@ export default function Player({
           flexDirection: "column",
           alignItems: "center",
           gap: 10,
-          padding: "0 20px calc(20px + var(--safe-b))",
+          padding: "0 20px max(20px, var(--safe-b))",
         }}
       >
         <div
