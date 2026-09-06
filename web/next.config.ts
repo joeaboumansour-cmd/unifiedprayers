@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // A stray lockfile above this directory otherwise confuses trace collection.
-  outputFileTracingRoot: __dirname,
   async headers() {
     return [
       {
