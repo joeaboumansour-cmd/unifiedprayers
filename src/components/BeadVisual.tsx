@@ -46,7 +46,7 @@ function Centre({
           inset: 0,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle,rgba(255,241,199,.5) 0%,rgba(240,199,117,.22) 42%,rgba(240,199,117,0) 72%)",
+            "radial-gradient(circle,rgb(var(--accent-soft-rgb) / .5) 0%,rgb(var(--accent-rgb) / .22) 42%,rgb(var(--accent-rgb) / 0) 72%)",
           filter: "blur(6px)",
           animation: "upHalo 6.5s ease-in-out infinite",
         }}
@@ -80,8 +80,8 @@ function Defs() {
   return (
     <defs>
       <radialGradient id="upActive" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#fff6dd" />
-        <stop offset="100%" stopColor="#f0c775" />
+        <stop offset="0%" style={{ stopColor: "var(--accent-glow)" }} />
+        <stop offset="100%" style={{ stopColor: "var(--accent)" }} />
       </radialGradient>
       <filter id="upGlow" x="-300%" y="-300%" width="700%" height="700%">
         <feGaussianBlur stdDeviation="5" result="b" />
@@ -136,7 +136,7 @@ export default function BeadVisual({
   // The arc and ring read right-to-left in Arabic, so mirror the whole group.
   const flip = lang === "ar" ? "translate(400,0) scale(-1,1)" : undefined;
   const track = "rgba(255,255,255,.09)";
-  const lit = "rgba(240,199,117,.5)";
+  const lit = "rgb(var(--accent-rgb) / .5)";
   const strokeAnim = { transition: `stroke-dasharray .55s ${EASE}` };
 
   if (style === "orb") {
@@ -166,7 +166,7 @@ export default function BeadVisual({
               position: "absolute",
               inset: -6,
               borderRadius: "50%",
-              border: "1px solid rgba(240,199,117,.25)",
+              border: "1px solid rgb(var(--accent-rgb) / .25)",
               animation: "upOrb 4.5s ease-in-out infinite",
             }}
           />

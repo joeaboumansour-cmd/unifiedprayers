@@ -9,7 +9,9 @@ import {
   type BeadStyle,
   type Lang,
   type MysteryKey,
+  type Palette,
   type PrayerId,
+  paletteInfo,
   setForDay,
   ui,
 } from "@/lib/content";
@@ -25,6 +27,7 @@ const RESUME_WINDOW_MS = 24 * 60 * 60 * 1000;
 type Prefs = {
   lang: Lang;
   beadStyle: BeadStyle;
+  palette: Palette;
   size: number;
   dim: boolean;
   haptics: boolean;
@@ -43,6 +46,7 @@ type Progress = {
 const DEFAULT_PREFS: Prefs = {
   lang: "ar",
   beadStyle: "arc",
+  palette: "midnight",
   size: 1,
   dim: false,
   haptics: true,
@@ -105,6 +109,15 @@ export default function Page() {
     }
     setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    const { theme } = paletteInfo(prefs.palette);
+    document.documentElement.dataset.palette = prefs.palette;
+    // Keep the browser chrome and task-switcher card in step with the palette.
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", theme);
+  }, [prefs.palette]);
 
   /* ---------------- persist ---------------- */
   useEffect(() => {
@@ -226,6 +239,7 @@ export default function Page() {
         activeName={activeName}
         mysterySet={mysterySet}
         beadStyle={prefs.beadStyle}
+        palette={prefs.palette}
         size={prefs.size}
         toggles={[prefs.dim, prefs.haptics, prefs.audio, prefs.awake]}
         onToggleLang={() =>
@@ -245,6 +259,10 @@ export default function Page() {
         onSetStyle={(beadStyle) => {
           haptic(6);
           patch({ beadStyle });
+        }}
+        onSetPalette={(palette) => {
+          haptic(8);
+          patch({ palette });
         }}
         onSetSize={(size) => patch({ size })}
         onToggle={(i) => {

@@ -1,0 +1,284 @@
+/* ---------------------------------------------------------------
+   Palettes
+
+   Every colour in the app resolves through these tokens, so switching
+   palette is just setting data-palette on <html>.
+
+   All of them are dark. The dove art, the halo glow and the contrast
+   ratios are all built for a dark ground — a light theme would be a
+   different design rather than a recolour.
+
+   `--accent-rgb` and friends are bare channel triplets so component code
+   can derive translucent variants with rgb(var(--accent-rgb) / .12).
+   --------------------------------------------------------------- */
+
+:root,
+[data-palette="midnight"] {
+  --accent-rgb: 240 199 117;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #e0ac4d;
+  --accent-soft-rgb: 255 230 176;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #fff6dd;
+  --accent-text: #e8d8b4;
+  --on-accent: #20180a;
+
+  --ink-rgb: 244 241 234;
+  --ink: rgb(var(--ink-rgb));
+  --body: #dfe4f0;
+  --soft: #b9c3d8;
+  --soft-2: #cfd8ea;
+  --dim: #8d9dbe;
+  --dim-2: #7c8cae;
+  --dim-3: #75839f;
+  --dim-4: #5f6f8f;
+
+  --bead-rgb: 219 226 245;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 7 10 21;
+  --bg-base: #070a15;
+  --surface: #101a33;
+  --scrim: rgba(3, 5, 12, 0.62);
+  --resume-a: rgba(96, 120, 200, 0.22);
+  --resume-b: rgba(20, 28, 54, 0.5);
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #16213f 0%,
+    #0b1226 45%,
+    #070a15 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #1a2547 0%,
+    #0a1023 48%,
+    #05080f 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #14161d, #08090c);
+}
+
+[data-palette="rose"] {
+  --accent-rgb: 240 168 181;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #d98098;
+  --accent-soft-rgb: 255 214 220;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #fff0f3;
+  --accent-text: #f0d3da;
+  --on-accent: #2a1016;
+
+  --ink-rgb: 246 238 240;
+  --ink: rgb(var(--ink-rgb));
+  --body: #ecdde2;
+  --soft: #cdb2bd;
+  --soft-2: #e0c9d1;
+  --dim: #a9899a;
+  --dim-2: #96788a;
+  --dim-3: #8a6d7e;
+  --dim-4: #6f5566;
+
+  --bead-rgb: 240 219 226;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 20 10 16;
+  --bg-base: #140a10;
+  --surface: #2a1522;
+  --scrim: rgba(14, 5, 9, 0.62);
+  --resume-a: rgba(200, 120, 150, 0.22);
+  --resume-b: rgba(54, 28, 40, 0.5);
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #3b1f2e 0%,
+    #22111b 45%,
+    #140a10 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #432334 0%,
+    #1e0f18 48%,
+    #0e070b 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #241019, #100609);
+}
+
+[data-palette="lavender"] {
+  --accent-rgb: 198 176 246;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #a98ce4;
+  --accent-soft-rgb: 226 214 255;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #f2ecff;
+  --accent-text: #ddd2f5;
+  --on-accent: #1b1430;
+
+  --ink-rgb: 240 238 250;
+  --ink: rgb(var(--ink-rgb));
+  --body: #ddd8ef;
+  --soft: #bab3d6;
+  --soft-2: #d2cbe8;
+  --dim: #9990bd;
+  --dim-2: #877ead;
+  --dim-3: #7a71a0;
+  --dim-4: #625a85;
+
+  --bead-rgb: 224 220 245;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 12 10 28;
+  --bg-base: #0c0a1c;
+  --surface: #1d1738;
+  --scrim: rgba(8, 6, 15, 0.62);
+  --resume-a: rgba(140, 120, 220, 0.24);
+  --resume-b: rgba(30, 24, 60, 0.5);
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #2c2350 0%,
+    #171232 45%,
+    #0c0a1c 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #332957 0%,
+    #151027 48%,
+    #08060f 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #191430, #0a0814);
+}
+
+[data-palette="salmon"] {
+  --accent-rgb: 245 165 137;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #e08769;
+  --accent-soft-rgb: 255 210 192;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #fff0e8;
+  --accent-text: #f3d2c3;
+  --on-accent: #2e150c;
+
+  --ink-rgb: 248 238 232;
+  --ink: rgb(var(--ink-rgb));
+  --body: #eeddd4;
+  --soft: #cfb3a6;
+  --soft-2: #e3c9bd;
+  --dim: #ab8878;
+  --dim-2: #99776a;
+  --dim-3: #8c6d60;
+  --dim-4: #705548;
+
+  --bead-rgb: 244 222 212;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 21 11 7;
+  --bg-base: #150b07;
+  --surface: #2c1811;
+  --scrim: rgba(15, 7, 5, 0.62);
+  --resume-a: rgba(220, 140, 110, 0.22);
+  --resume-b: rgba(58, 30, 20, 0.5);
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #3f2419 0%,
+    #24130e 45%,
+    #150b07 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #47281b 0%,
+    #1f110b 48%,
+    #0f0705 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #26140d, #110705);
+}
+
+[data-palette="sand"] {
+  --accent-rgb: 232 214 181;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #cbb388;
+  --accent-soft-rgb: 248 238 219;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #fffaf0;
+  --accent-text: #e9dec7;
+  --on-accent: #241d12;
+
+  --ink-rgb: 246 242 234;
+  --ink: rgb(var(--ink-rgb));
+  --body: #e6ded0;
+  --soft: #c6bba7;
+  --soft-2: #ded4c4;
+  --dim: #a3977f;
+  --dim-2: #918571;
+  --dim-3: #857a67;
+  --dim-4: #6a6152;
+
+  --bead-rgb: 234 227 214;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 19 17 14;
+  --bg-base: #13110e;
+  --surface: #262119;
+  --scrim: rgba(14, 12, 9, 0.62);
+  --resume-a: rgba(190, 170, 130, 0.2);
+  --resume-b: rgba(48, 42, 34, 0.5);
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #37312a 0%,
+    #201d18 45%,
+    #13110e 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #3d362d 0%,
+    #1c1915 48%,
+    #0e0d0a 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #221f1a, #100f0c);
+}
+
+[data-palette="sage"] {
+  --accent-rgb: 169 214 186;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #7fbb98;
+  --accent-soft-rgb: 208 238 219;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #edfaf1;
+  --accent-text: #cfe6d8;
+  --on-accent: #10251a;
+
+  --ink-rgb: 236 245 239;
+  --ink: rgb(var(--ink-rgb));
+  --body: #d6e6dc;
+  --soft: #aec6b8;
+  --soft-2: #c9ded3;
+  --dim: #85a294;
+  --dim-2: #749084;
+  --dim-3: #6a8579;
+  --dim-4: #546a60;
+
+  --bead-rgb: 216 234 224;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 8 18 16;
+  --bg-base: #081210;
+  --surface: #142822;
+  --scrim: rgba(5, 13, 11, 0.62);
+  --resume-a: rgba(110, 180, 150, 0.2);
+  --resume-b: rgba(22, 44, 38, 0.5);
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #1c3830 0%,
+    #0f1f1b 45%,
+    #081210 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #204036 0%,
+    #0d1c18 48%,
+    #050d0b 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #12241f, #060f0d);
+}

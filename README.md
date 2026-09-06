@@ -34,6 +34,7 @@ public/
   dove.webp mary.webp    the two centre images
 src/
   app/                   layout (fonts, metadata, viewport) and the one page
+    palettes.css         the six colour palettes, as CSS custom properties
   components/
     Home.tsx             the four tabs: Prayers, Today, Library, Settings
     Player.tsx           full-screen prayer player
@@ -54,8 +55,14 @@ src/
 
 ## Notes
 
-- **State.** `up_prefs_v1` holds language, bead style, text size and the four
-  toggles. `up_progress_v1` holds where you were; it resumes for 24 hours and
+- **Palettes.** Six dark palettes — midnight, rose, lavender, salmon, sand and
+  sage — chosen in Settings. Every colour in the app resolves through the
+  tokens in `src/app/palettes.css`, so a palette is applied by setting
+  `data-palette` on `<html>`; the `theme-color` meta follows so the browser
+  chrome and task-switcher card match. To add one, copy a block in that file
+  and add an entry to `PALETTES` in `src/lib/content.ts`.
+- **State.** `up_prefs_v1` holds language, palette, bead style, text size and
+  the four toggles. `up_progress_v1` holds where you were; it resumes for 24 hours and
   then starts fresh.
 - **Install prompt.** Appears shortly after first load. Chrome and Edge get a
   real install button via `beforeinstallprompt`; iOS Safari gets Add to Home

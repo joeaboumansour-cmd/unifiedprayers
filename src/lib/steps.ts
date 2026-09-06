@@ -247,15 +247,15 @@ export function beadGeometry(
       x: Number(x.toFixed(1)),
       y: Number(y.toFixed(1)),
       r: isActive ? (style === "chain" ? 9 : 11) : i === 0 ? 7 : 5.5,
-      fill: isActive ? "url(#upActive)" : done ? "#f0c775" : "#dbe2f5",
+      fill: isActive ? "url(#upActive)" : done ? "var(--accent)" : "var(--bead)",
       opacity: active < 0 ? 0.2 : isActive ? 1 : done ? 0.75 : 0.34,
       glow: isActive,
       dot: isActive ? 13 : 8,
       dotBg: isActive
-        ? "#f0c775"
+        ? "var(--accent)"
         : done
-          ? "rgba(240,199,117,.6)"
-          : "rgba(219,226,245,.5)",
+          ? "rgb(var(--accent-rgb) / .6)"
+          : "rgb(var(--bead-rgb) / .5)",
     });
   }
   return beads;

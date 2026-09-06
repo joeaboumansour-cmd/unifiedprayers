@@ -69,9 +69,9 @@ export default function Player({
           w: state === 1 ? 26 : 11,
           bg:
             state === 1
-              ? "#f0c775"
+              ? "var(--accent)"
               : state === 2
-                ? "rgba(240,199,117,.45)"
+                ? "rgb(var(--accent-rgb) / .45)"
                 : "rgba(255,255,255,.14)",
         };
       }),
@@ -99,7 +99,7 @@ export default function Player({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: on ? "rgba(240,199,117,.18)" : "rgba(255,255,255,.07)",
+    background: on ? "rgb(var(--accent-rgb) / .18)" : "rgba(255,255,255,.07)",
     border: "1px solid rgba(255,255,255,.09)",
     flex: "none",
   });
@@ -133,8 +133,7 @@ export default function Player({
         inset: 0,
         display: "flex",
         flexDirection: "column",
-        background:
-          "radial-gradient(110% 70% at 50% 6%,#1a2547 0%,#0a1023 48%,#05080f 100%)",
+        background: "var(--grad-player)",
         transition: `transform .52s ${EASE}`,
         transform: open ? "translateY(0)" : "translateY(100%)",
         cursor: "pointer",
@@ -165,8 +164,8 @@ export default function Player({
             style={{
               width: 8,
               height: 8,
-              borderTop: "1.5px solid #dfe6f4",
-              borderInlineStart: "1.5px solid #dfe6f4",
+              borderTop: "1.5px solid var(--ink)",
+              borderInlineStart: "1.5px solid var(--ink)",
               transform: ar ? "rotate(135deg)" : "rotate(-45deg)",
             }}
           />
@@ -185,7 +184,7 @@ export default function Player({
             style={{
               fontSize: 12.5,
               fontWeight: 500,
-              color: "#9dabc8",
+              color: "var(--soft)",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -193,7 +192,7 @@ export default function Player({
           >
             {prayer === "mary" ? t.maryName : t.spiritName}
           </div>
-          <div style={{ fontSize: 10.5, color: "#f0c775" }}>
+          <div style={{ fontSize: 10.5, color: "var(--accent)" }}>
             {prayer === "mary"
               ? SET_LABEL[lang][mysterySet]
               : ar
@@ -228,7 +227,7 @@ export default function Player({
                     width: 2,
                     height: h,
                     borderRadius: 2,
-                    background: audio ? "#f0c775" : "#b9c3d8",
+                    background: audio ? "var(--accent)" : "var(--soft)",
                   }}
                 />
               ))}
@@ -249,7 +248,7 @@ export default function Player({
                 width: 13,
                 height: 13,
                 borderRadius: "50%",
-                background: dim ? "#f0c775" : "#b9c3d8",
+                background: dim ? "var(--accent)" : "var(--soft)",
                 boxShadow: "inset -4px 0 0 0 rgba(0,0,0,.55)",
               }}
             />
@@ -308,7 +307,7 @@ export default function Player({
             fontWeight: 500,
             letterSpacing: ".14em",
             textTransform: "uppercase",
-            color: "#f0c775",
+            color: "var(--accent)",
             flex: "none",
             transition: "opacity .3s ease",
             opacity: fading ? 0 : 1,
@@ -336,7 +335,7 @@ export default function Player({
             fontSize: Math.round(17 * TEXT_SIZES[size]),
             fontWeight: 300,
             lineHeight: 2,
-            color: "#dfe4f0",
+            color: "var(--body)",
             textWrap: "pretty",
             whiteSpace: "pre-line",
             /* Bounded by the flex parent rather than a vh figure: on iOS vh
@@ -366,7 +365,7 @@ export default function Player({
         <div
           style={{
             fontSize: 11.5,
-            color: "#8092b3",
+            color: "var(--dim)",
             fontVariantNumeric: "tabular-nums",
             transition: "opacity .3s ease",
             opacity: fading ? 0 : 1,
@@ -390,12 +389,12 @@ export default function Player({
               background: "rgba(255,255,255,.06)",
               border: "1px solid rgba(255,255,255,.08)",
               fontSize: 12.5,
-              color: "#cfd8ea",
+              color: "var(--soft-2)",
             }}
           >
             {t.back}
           </button>
-          <div style={{ fontSize: 11.5, color: "#5f6f8f" }}>{t.tapHint}</div>
+          <div style={{ fontSize: 11.5, color: "var(--dim-4)" }}>{t.tapHint}</div>
         </div>
       </div>
 

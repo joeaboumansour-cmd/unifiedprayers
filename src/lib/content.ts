@@ -5,6 +5,13 @@ export type Lang = "ar" | "en";
 export type PrayerId = "spirit" | "mary";
 export type MysteryKey = "joyful" | "sorrowful" | "glorious" | "luminous";
 export type BeadStyle = "arc" | "ring" | "chain" | "orb";
+export type Palette =
+  | "midnight"
+  | "rose"
+  | "lavender"
+  | "salmon"
+  | "sand"
+  | "sage";
 
 export type NamedPrayer = { name: string; sections: string[] };
 export type Gift = { name: string; super: string };
@@ -103,6 +110,41 @@ export const DAY_SET = D.DAY_SET;
 export const STYLE_LABEL = D.STYLE_LABEL;
 export const HAIL = D.HAIL;
 export const GLORY = D.GLORY;
+
+/**
+ * The palettes offered in Settings. `swatch` is the accent and `ground` the
+ * darkest background stop, which is all the picker chips need to preview one.
+ * `theme` is what goes in the theme-color meta so the browser and task
+ * switcher tint to match. Keep these in step with src/app/palettes.css.
+ */
+export type PaletteInfo = {
+  id: Palette;
+  label: { ar: string; en: string };
+  swatch: string;
+  ground: string;
+  theme: string;
+};
+
+export const PALETTES: PaletteInfo[] = [
+  { id: "midnight", label: { ar: "ليلي", en: "Midnight" },
+    swatch: "#f0c775", ground: "#0b1226", theme: "#070a15" },
+  { id: "rose", label: { ar: "وردي", en: "Rose" },
+    swatch: "#f0a8b5", ground: "#22111b", theme: "#140a10" },
+  { id: "lavender", label: { ar: "بنفسجي", en: "Lavender" },
+    swatch: "#c6b0f6", ground: "#171232", theme: "#0c0a1c" },
+  { id: "salmon", label: { ar: "سلموني", en: "Salmon" },
+    swatch: "#f5a589", ground: "#24130e", theme: "#150b07" },
+  { id: "sand", label: { ar: "رملي", en: "Sand" },
+    swatch: "#e8d6b5", ground: "#201d18", theme: "#13110e" },
+  { id: "sage", label: { ar: "زيتي", en: "Sage" },
+    swatch: "#a9d6ba", ground: "#0f1f1b", theme: "#081210" },
+];
+
+export const paletteInfo = (id: Palette): PaletteInfo =>
+  PALETTES.find((p) => p.id === id) ?? PALETTES[0];
+
+/** Section heading for the palette picker; not part of the design's strings. */
+export const PALETTE_LABEL = { ar: "لون التطبيق", en: "App colour" };
 
 export const ui = (lang: Lang): UIStrings => D.UI[lang];
 export const spirit = (lang: Lang): SpiritContent => (lang === "ar" ? D.AR : D.EN);

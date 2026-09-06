@@ -2,9 +2,12 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import {
+  PALETTES,
+  PALETTE_LABEL,
   type BeadStyle,
   type Lang,
   type MysteryKey,
+  type Palette,
   SET_LABEL,
   STYLES,
   STYLE_LABEL,
@@ -13,14 +16,14 @@ import {
 } from "@/lib/content";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
-const GOLD = "#f0c775";
+const GOLD = "var(--accent)";
 
 const sectionLabel: CSSProperties = {
   fontSize: 12,
   fontWeight: 500,
   letterSpacing: ".1em",
   textTransform: "uppercase",
-  color: "#7c8cae",
+  color: "var(--dim-2)",
   marginBottom: 12,
 };
 
@@ -64,10 +67,10 @@ function Row({
 
 /** The small rosary glyphs on the two prayer rows. */
 function SpiritGlyph() {
-  const pale = (o: number) => `rgba(244,241,234,${o})`;
+  const pale = (o: number) => `rgb(var(--ink-rgb) / ${o})`;
   return (
     <svg viewBox="0 0 44 44" style={{ width: 42, height: 42, flex: "none" }}>
-      <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(240,199,117,.22)" />
+      <circle cx="22" cy="22" r="19" fill="none" stroke="rgb(var(--accent-rgb) / .22)" />
       <circle cx="22" cy="3.4" r="2.6" fill={GOLD} />
       <circle cx="35.4" cy="9.9" r="1.9" fill={pale(0.8)} />
       <circle cx="40.4" cy="22" r="1.9" fill={pale(0.55)} />
@@ -81,10 +84,10 @@ function SpiritGlyph() {
 }
 
 function MaryGlyph() {
-  const pale = (o: number) => `rgba(244,241,234,${o})`;
+  const pale = (o: number) => `rgb(var(--ink-rgb) / ${o})`;
   return (
     <svg viewBox="0 0 44 44" style={{ width: 42, height: 42, flex: "none" }}>
-      <path d="M6 34 A18 18 0 0 1 38 34" fill="none" stroke="rgba(240,199,117,.22)" />
+      <path d="M6 34 A18 18 0 0 1 38 34" fill="none" stroke="rgb(var(--accent-rgb) / .22)" />
       <circle cx="22" cy="16.2" r="2.6" fill={GOLD} />
       <circle cx="11.2" cy="21.6" r="1.9" fill={pale(0.7)} />
       <circle cx="32.8" cy="21.6" r="1.9" fill={pale(0.7)} />
@@ -175,7 +178,7 @@ function Toggle({ on }: { on: boolean }) {
         padding: 3,
         boxSizing: "border-box",
         transition: "background .3s ease",
-        background: on ? "rgba(240,199,117,.85)" : "rgba(255,255,255,.14)",
+        background: on ? "rgb(var(--accent-rgb) / .85)" : "rgba(255,255,255,.14)",
       }}
     >
       <div
@@ -201,6 +204,7 @@ export type HomeProps = {
   activeName: string;
   mysterySet: MysteryKey;
   beadStyle: BeadStyle;
+  palette: Palette;
   size: number;
   toggles: boolean[];
   onToggleLang: () => void;
@@ -210,6 +214,7 @@ export type HomeProps = {
   onOpenSheet: () => void;
   onStartToday: () => void;
   onSetStyle: (s: BeadStyle) => void;
+  onSetPalette: (p: Palette) => void;
   onSetSize: (i: number) => void;
   onToggle: (i: number) => void;
 };
@@ -222,6 +227,7 @@ export default function Home({
   progress,
   activeName,
   beadStyle,
+  palette,
   size,
   toggles,
   onToggleLang,
@@ -231,6 +237,7 @@ export default function Home({
   onOpenSheet,
   onStartToday,
   onSetStyle,
+  onSetPalette,
   onSetSize,
   onToggle,
 }: HomeProps) {
@@ -253,8 +260,8 @@ export default function Home({
     fontSize: 12.5,
     fontWeight: 500,
     transition: "background .25s ease",
-    background: active ? "rgba(240,199,117,.9)" : "transparent",
-    color: active ? "#20180a" : "#b9c3d8",
+    background: active ? "rgb(var(--accent-rgb) / .9)" : "transparent",
+    color: active ? "var(--on-accent)" : "var(--soft)",
   });
 
   return (
@@ -293,7 +300,7 @@ export default function Home({
             minWidth: 0,
           }}
         >
-          <div style={{ fontSize: 13, color: "#8d9dbe" }}>{dateLine}</div>
+          <div style={{ fontSize: 13, color: "var(--dim)" }}>{dateLine}</div>
           <div
             style={{
               fontSize: 25,
@@ -319,7 +326,7 @@ export default function Home({
             border: "1px solid rgba(255,255,255,.09)",
             fontSize: 12.5,
             fontWeight: 500,
-            color: "#cfd8ea",
+            color: "var(--soft-2)",
             backdropFilter: "blur(12px)",
           }}
         >
@@ -338,8 +345,8 @@ export default function Home({
               padding: "13px 15px",
               borderRadius: 18,
               background:
-                "linear-gradient(135deg,rgba(240,199,117,.1),rgba(240,199,117,.03))",
-              border: "1px solid rgba(240,199,117,.16)",
+                "linear-gradient(135deg,rgb(var(--accent-rgb) / .1),rgb(var(--accent-rgb) / .03))",
+              border: "1px solid rgb(var(--accent-rgb) / .16)",
               marginBottom: 14,
             }}
           >
@@ -352,12 +359,12 @@ export default function Home({
                     height: 7,
                     borderRadius: "50%",
                     background:
-                      i < streak ? GOLD : "rgba(240,199,117,.22)",
+                      i < streak ? GOLD : "rgb(var(--accent-rgb) / .22)",
                   }}
                 />
               ))}
             </div>
-            <div style={{ fontSize: 12.5, color: "#e8d8b4", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 12.5, color: "var(--accent-text)", lineHeight: 1.5 }}>
               {ar
                 ? `${streak} أيام متتالية من الصلاة`
                 : `${streak} days of prayer in a row`}
@@ -373,7 +380,7 @@ export default function Home({
               padding: 20,
               marginBottom: 26,
               background:
-                "linear-gradient(150deg,rgba(96,120,200,.22),rgba(20,28,54,.5))",
+                "linear-gradient(150deg,var(--resume-a),var(--resume-b))",
               border: "1px solid rgba(255,255,255,.09)",
             }}
           >
@@ -386,7 +393,7 @@ export default function Home({
                 height: 190,
                 borderRadius: "50%",
                 background:
-                  "radial-gradient(circle,rgba(240,199,117,.3),rgba(240,199,117,0) 70%)",
+                  "radial-gradient(circle,rgb(var(--accent-rgb) / .3),rgb(var(--accent-rgb) / 0) 70%)",
                 pointerEvents: "none",
               }}
             />
@@ -426,7 +433,7 @@ export default function Home({
                     style={{
                       height: "100%",
                       borderRadius: 999,
-                      background: `linear-gradient(90deg,${GOLD},#ffe6b0)`,
+                      background: `linear-gradient(90deg,${GOLD},var(--accent-soft))`,
                       transition: `width .6s ${EASE}`,
                       width: `${(progress * 100).toFixed(1)}%`,
                     }}
@@ -435,7 +442,7 @@ export default function Home({
                 <div
                   style={{
                     fontSize: 12,
-                    color: "#a9b7d4",
+                    color: "var(--soft)",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
@@ -489,7 +496,7 @@ export default function Home({
                   }}
                 >
                   <div style={{ fontSize: 15.5, fontWeight: 500 }}>{r.name}</div>
-                  <div style={{ fontSize: 12, color: "#8d9dbe" }}>{r.meta}</div>
+                  <div style={{ fontSize: 12, color: "var(--dim)" }}>{r.meta}</div>
                 </div>
               </Row>
             ))}
@@ -522,15 +529,15 @@ export default function Home({
                     width: 20,
                     height: 20,
                     borderRadius: 6,
-                    border: "1px solid rgba(240,199,117,.35)",
-                    background: "rgba(240,199,117,.07)",
+                    border: "1px solid rgb(var(--accent-rgb) / .35)",
+                    background: "rgb(var(--accent-rgb) / .07)",
                   }}
                 />
                 <div
                   style={{
                     fontSize: 13.5,
                     fontWeight: 500,
-                    color: "#b9c3d8",
+                    color: "var(--soft)",
                     lineHeight: 1.35,
                   }}
                 >
@@ -554,8 +561,8 @@ export default function Home({
               padding: "22px 20px",
               marginBottom: 18,
               background:
-                "linear-gradient(150deg,rgba(240,199,117,.16),rgba(20,28,54,.55))",
-              border: "1px solid rgba(240,199,117,.2)",
+                "linear-gradient(150deg,rgb(var(--accent-rgb) / .16),var(--resume-b))",
+              border: "1px solid rgb(var(--accent-rgb) / .2)",
             }}
           >
             <div
@@ -567,7 +574,7 @@ export default function Home({
                 height: 200,
                 borderRadius: "50%",
                 background:
-                  "radial-gradient(circle,rgba(255,236,190,.28),rgba(240,199,117,0) 70%)",
+                  "radial-gradient(circle,rgb(var(--accent-soft-rgb) / .28),rgb(var(--accent-rgb) / 0) 70%)",
                 pointerEvents: "none",
               }}
             />
@@ -593,7 +600,7 @@ export default function Home({
               <div style={{ fontSize: 22, fontWeight: 600, lineHeight: 1.3 }}>
                 {SET_LABEL[lang][todaySet]}
               </div>
-              <div style={{ fontSize: 13, color: "#c9d3e6", lineHeight: 1.7 }}>
+              <div style={{ fontSize: 13, color: "var(--soft-2)", lineHeight: 1.7 }}>
                 {t.todaySetHint}
               </div>
             </div>
@@ -625,7 +632,7 @@ export default function Home({
                   {value}
                 </div>
                 <div
-                  style={{ fontSize: 11.5, color: "#8d9dbe", lineHeight: 1.4 }}
+                  style={{ fontSize: 11.5, color: "var(--dim)", lineHeight: 1.4 }}
                 >
                   {t.statLabels[i]}
                 </div>
@@ -666,7 +673,7 @@ export default function Home({
                       flex: 1,
                     }}
                   >
-                    <div style={{ fontSize: 10.5, color: "#75839f" }}>
+                    <div style={{ fontSize: 10.5, color: "var(--dim-3)" }}>
                       {label}
                     </div>
                     <div
@@ -679,11 +686,11 @@ export default function Home({
                         justifyContent: "center",
                         background:
                           i === day
-                            ? "rgba(240,199,117,.16)"
+                            ? "rgb(var(--accent-rgb) / .16)"
                             : "rgba(255,255,255,.03)",
                         border: `1px solid ${
                           i === day
-                            ? "rgba(240,199,117,.45)"
+                            ? "rgb(var(--accent-rgb) / .45)"
                             : "rgba(255,255,255,.07)"
                         }`,
                       }}
@@ -722,11 +729,11 @@ export default function Home({
             </div>
             <div
               className="selectable"
-              style={{ fontSize: 16, lineHeight: 1.9, color: "#e6ebf6" }}
+              style={{ fontSize: 16, lineHeight: 1.9, color: "var(--body)" }}
             >
               {t.verse}
             </div>
-            <div style={{ fontSize: 12, color: "#8d9dbe" }}>{t.verseRef}</div>
+            <div style={{ fontSize: 12, color: "var(--dim)" }}>{t.verseRef}</div>
           </div>
         </div>
       )}
@@ -752,11 +759,11 @@ export default function Home({
                 width: 12,
                 height: 12,
                 borderRadius: "50%",
-                border: "1.5px solid #75839f",
+                border: "1.5px solid var(--dim-3)",
                 flex: "none",
               }}
             />
-            <div style={{ fontSize: 13.5, color: "#75839f" }}>{t.search}</div>
+            <div style={{ fontSize: 13.5, color: "var(--dim-3)" }}>{t.search}</div>
           </div>
 
           {[
@@ -811,12 +818,12 @@ export default function Home({
                         style={{
                           fontSize: 15,
                           fontWeight: 500,
-                          color: it.ready ? "#f4f1ea" : "#8d9dbe",
+                          color: it.ready ? "var(--ink)" : "var(--dim)",
                         }}
                       >
                         {it.name}
                       </div>
-                      <div style={{ fontSize: 11.5, color: "#75839f" }}>
+                      <div style={{ fontSize: 11.5, color: "var(--dim-3)" }}>
                         {it.meta}
                       </div>
                     </div>
@@ -827,7 +834,7 @@ export default function Home({
                           color: GOLD,
                           padding: "4px 9px",
                           borderRadius: 999,
-                          background: "rgba(240,199,117,.12)",
+                          background: "rgb(var(--accent-rgb) / .12)",
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -845,6 +852,66 @@ export default function Home({
       {/* ---------- SETTINGS ---------- */}
       {tab === 3 && (
         <div>
+          <div style={sectionLabel}>{PALETTE_LABEL[lang]}</div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 10,
+              marginBottom: 26,
+            }}
+          >
+            {PALETTES.map((p) => {
+              const on = p.id === palette;
+              return (
+                <Row
+                  key={p.id}
+                  onClick={() => onSetPalette(p.id)}
+                  style={{
+                    padding: "12px 8px 10px",
+                    borderRadius: 16,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 9,
+                    alignItems: "center",
+                    transition: "background .25s ease,border-color .25s ease",
+                    background: on
+                      ? "rgb(var(--accent-rgb) / .12)"
+                      : "rgba(255,255,255,.035)",
+                    border: `1px solid ${
+                      on ? "rgb(var(--accent-rgb) / .45)" : "rgba(255,255,255,.07)"
+                    }`,
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: "50%",
+                      /* The chip previews the palette itself: its ground with
+                         its accent glowing out of the centre. */
+                      background: `radial-gradient(circle at 50% 42%, ${p.swatch} 0%, ${p.swatch} 28%, ${p.ground} 72%)`,
+                      boxShadow: on
+                        ? `0 0 0 2px rgb(var(--accent-rgb) / .5), 0 2px 10px ${p.swatch}55`
+                        : "inset 0 0 0 1px rgba(255,255,255,.12)",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 11.5,
+                      fontWeight: 500,
+                      color: on ? "var(--accent)" : "var(--soft)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {p.label[lang]}
+                  </span>
+                </Row>
+              );
+            })}
+          </div>
+
           <div style={sectionLabel}>{t.beadStyleLabel}</div>
           <div
             style={{
@@ -869,22 +936,22 @@ export default function Home({
                     alignItems: "center",
                     transition: "background .25s ease,border-color .25s ease",
                     background: on
-                      ? "rgba(240,199,117,.12)"
+                      ? "rgb(var(--accent-rgb) / .12)"
                       : "rgba(255,255,255,.035)",
                     border: `1px solid ${
-                      on ? "rgba(240,199,117,.45)" : "rgba(255,255,255,.07)"
+                      on ? "rgb(var(--accent-rgb) / .45)" : "rgba(255,255,255,.07)"
                     }`,
                   }}
                 >
                   <StyleGlyph
                     kind={k}
-                    ink={on ? GOLD : "rgba(219,226,245,.55)"}
+                    ink={on ? GOLD : "rgb(var(--bead-rgb) / .55)"}
                   />
                   <div
                     style={{
                       fontSize: 12.5,
                       fontWeight: 500,
-                      color: on ? GOLD : "#b9c3d8",
+                      color: on ? GOLD : "var(--soft)",
                     }}
                   >
                     {STYLE_LABEL[lang][k]}
@@ -959,7 +1026,7 @@ export default function Home({
                 >
                   <div style={{ fontSize: 14.5 }}>{name}</div>
                   <div
-                    style={{ fontSize: 11.5, color: "#75839f", lineHeight: 1.4 }}
+                    style={{ fontSize: 11.5, color: "var(--dim-3)", lineHeight: 1.4 }}
                   >
                     {hint}
                   </div>
@@ -1011,8 +1078,8 @@ export default function Home({
               border: "1px solid rgba(255,255,255,.06)",
             }}
           >
-            <div style={{ fontSize: 13.5, color: "#b9c3d8" }}>{t.about}</div>
-            <div style={{ fontSize: 12, color: "#75839f" }}>{t.version}</div>
+            <div style={{ fontSize: 13.5, color: "var(--soft)" }}>{t.about}</div>
+            <div style={{ fontSize: 12, color: "var(--dim-3)" }}>{t.version}</div>
           </div>
         </div>
       )}

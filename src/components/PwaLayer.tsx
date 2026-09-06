@@ -178,7 +178,7 @@ export default function PwaLayer() {
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "center",
-          background: "rgba(3,5,12,.62)",
+          background: "var(--scrim)",
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)",
           transition: "opacity .35s ease",
@@ -198,7 +198,7 @@ export default function PwaLayer() {
             maxWidth: 460,
             margin: "0 10px calc(10px + var(--safe-b))",
             borderRadius: "28px 28px 22px 22px",
-            background: "#101a33",
+            background: "var(--surface)",
             border: "1px solid rgba(255,255,255,.1)",
             padding: "14px 20px 22px",
             boxShadow: "0 -20px 60px rgba(0,0,0,.5)",
@@ -243,7 +243,7 @@ export default function PwaLayer() {
               >
                 {C.title}
               </div>
-              <div style={{ fontSize: 12.5, color: "#8d9dbe", lineHeight: 1.5 }}>
+              <div style={{ fontSize: 12.5, color: "var(--dim)", lineHeight: 1.5 }}>
                 {C.blurb}
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function PwaLayer() {
                 style={{
                   fontSize: 13.5,
                   lineHeight: 1.9,
-                  color: "#dfe4f0",
+                  color: "var(--body)",
                   padding: "12px 14px",
                   borderRadius: 14,
                   background: "rgba(255,255,255,.04)",
@@ -264,7 +264,7 @@ export default function PwaLayer() {
                 }}
               >
                 Tap the Share button in Safari&apos;s bottom bar, then choose{" "}
-                <strong style={{ color: "#f0c775" }}>Add to Home Screen</strong>.
+                <strong style={{ color: "var(--accent)" }}>Add to Home Screen</strong>.
               </div>
               <button
                 type="button"
@@ -275,7 +275,7 @@ export default function PwaLayer() {
                   borderRadius: 16,
                   background: "rgba(255,255,255,.06)",
                   border: "1px solid rgba(255,255,255,.09)",
-                  color: "#cfd8ea",
+                  color: "var(--soft-2)",
                   fontSize: 14.5,
                   fontWeight: 500,
                 }}
@@ -292,8 +292,8 @@ export default function PwaLayer() {
                   flex: 1,
                   height: 50,
                   borderRadius: 16,
-                  background: "linear-gradient(135deg,#f0c775,#e0ac4d)",
-                  color: "#20180a",
+                  background: "linear-gradient(135deg,var(--accent),var(--accent-deep))",
+                  color: "var(--on-accent)",
                   fontSize: 15,
                   fontWeight: 600,
                 }}
@@ -309,7 +309,7 @@ export default function PwaLayer() {
                   borderRadius: 16,
                   background: "rgba(255,255,255,.06)",
                   border: "1px solid rgba(255,255,255,.09)",
-                  color: "#cfd8ea",
+                  color: "var(--soft-2)",
                   fontSize: 14.5,
                 }}
               >
@@ -338,7 +338,7 @@ export default function PwaLayer() {
             maxWidth: "92vw",
             padding: "10px 12px 10px 16px",
             borderRadius: 999,
-            background: "rgba(16,26,51,.96)",
+            background: "var(--surface)",
             border: "1px solid rgba(255,255,255,.12)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
@@ -357,8 +357,8 @@ export default function PwaLayer() {
               flex: "none",
               padding: "7px 14px",
               borderRadius: 999,
-              background: "#f0c775",
-              color: "#20180a",
+              background: "var(--accent)",
+              color: "var(--on-accent)",
               fontSize: 13,
               fontWeight: 600,
             }}

@@ -34,7 +34,7 @@ export default function MysterySheet({
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(3,5,12,.62)",
+          background: "var(--scrim)",
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)",
           transition: "opacity .35s ease",
@@ -51,7 +51,7 @@ export default function MysterySheet({
           insetInline: 0,
           bottom: 0,
           borderRadius: "28px 28px 0 0",
-          background: "#101a33",
+          background: "var(--surface)",
           borderTop: "1px solid rgba(255,255,255,.1)",
           padding: "14px 18px calc(22px + var(--safe-b))",
           boxShadow: "0 -20px 60px rgba(0,0,0,.5)",
@@ -75,7 +75,7 @@ export default function MysterySheet({
         <div
           style={{
             fontSize: 12.5,
-            color: "#8d9dbe",
+            color: "var(--dim)",
             marginBottom: 16,
             lineHeight: 1.6,
           }}
@@ -110,10 +110,10 @@ export default function MysterySheet({
                   textAlign: "start",
                   transition: "background .25s ease,border-color .25s ease",
                   background: on
-                    ? "rgba(240,199,117,.12)"
+                    ? "rgb(var(--accent-rgb) / .12)"
                     : "rgba(255,255,255,.035)",
                   border: `1px solid ${
-                    on ? "rgba(240,199,117,.45)" : "rgba(255,255,255,.07)"
+                    on ? "rgb(var(--accent-rgb) / .45)" : "rgba(255,255,255,.07)"
                   }`,
                 }}
               >
@@ -129,12 +129,12 @@ export default function MysterySheet({
                     style={{
                       fontSize: 15,
                       fontWeight: 500,
-                      color: on ? "#f0c775" : "#f4f1ea",
+                      color: on ? "var(--accent)" : "var(--ink)",
                     }}
                   >
                     {SET_LABEL[lang][k]}
                   </span>
-                  <span style={{ fontSize: 11.5, color: "#8d9dbe" }}>
+                  <span style={{ fontSize: 11.5, color: "var(--dim)" }}>
                     {SET_DAYS[lang][k]}
                   </span>
                 </span>
@@ -143,8 +143,8 @@ export default function MysterySheet({
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
-                    border: `1px solid ${on ? "#f0c775" : "rgba(255,255,255,.2)"}`,
-                    background: on ? "#f0c775" : "transparent",
+                    border: `1px solid ${on ? "var(--accent)" : "rgba(255,255,255,.2)"}`,
+                    background: on ? "var(--accent)" : "transparent",
                     flex: "none",
                   }}
                 />
@@ -164,8 +164,8 @@ export default function MysterySheet({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(135deg,#f0c775,#e0ac4d)",
-            color: "#20180a",
+            background: "linear-gradient(135deg,var(--accent),var(--accent-deep))",
+            color: "var(--on-accent)",
             fontSize: 15,
             fontWeight: 600,
           }}

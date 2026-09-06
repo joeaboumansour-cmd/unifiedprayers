@@ -33,7 +33,7 @@ export default function TabBar({
         display: "flex",
         gap: 4,
         background:
-          "linear-gradient(rgba(7,10,21,0),rgba(7,10,21,.86) 40%,rgba(7,10,21,.97))",
+          "linear-gradient(rgb(var(--bg-base-rgb) / 0),rgb(var(--bg-base-rgb) / .86) 40%,rgb(var(--bg-base-rgb) / .97))",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
         borderTop: "1px solid rgba(255,255,255,.06)",
@@ -45,7 +45,7 @@ export default function TabBar({
       aria-hidden={hidden}
     >
       {t.tabs.map((label, i) => {
-        const ink = i === tab ? "#f0c775" : "#6f7d9c";
+        const ink = i === tab ? "var(--accent)" : "var(--dim-3)";
         const [r1, r2] = RADII[i];
         return (
           <button
