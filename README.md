@@ -13,9 +13,10 @@ npm start        # serve the production build
 
 ## Deploying to Vercel
 
-Import the repository and point the project at this directory:
+Import the repository and deploy — the app sits at the repository root, so
+there is nothing to configure:
 
-- **Root Directory**: `web`
+- **Root Directory**: leave empty (the repo root)
 - Framework preset: Next.js (detected automatically)
 - No environment variables, no backend services
 

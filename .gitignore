@@ -13,9 +13,9 @@ next-env.d.ts
 # The design source itself is kept in design/.
 design-src/
 
+# the previous static app, superseded by this one (kept on disk only)
+unifiedprayers/
+
 # OS noise
 .DS_Store
 Thumbs.db
-
-# the previous static app, superseded by web/ (kept on disk only)
-unifiedprayers/
