@@ -1,10 +1,12 @@
 "use client";
 
-import { type CSSProperties, useState } from "react";
+import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import type { Lang } from "@/lib/content";
 import type { Auth } from "@/lib/useAuth";
 import type { SyncStatus } from "@/lib/useCloudSync";
+import { useProfile } from "@/lib/useProfile";
 
 /**
  * Account strings live here rather than in design.json for the same reason the
@@ -15,9 +17,8 @@ const S = {
   ar: {
     title: "الحساب",
     blurb: "سجّل الدخول لتنتقل إعداداتك وموضعك بين أجهزتك.",
-    email: "البريد الإلكتروني",
-    sendLink: "أرسل رابط الدخول",
-    sent: "تفقّد بريدك — أرسلنا لك رابط دخول.",
+    signIn: "تسجيل الدخول",
+    createAccount: "إنشاء حساب",
     signOut: "تسجيل الخروج",
     signedInAs: "مسجّل الدخول باسم",
     status: {
@@ -30,9 +31,8 @@ const S = {
   en: {
     title: "Account",
     blurb: "Sign in and your settings and place follow you between devices.",
-    email: "Email address",
-    sendLink: "Send sign-in link",
-    sent: "Check your email — we sent you a sign-in link.",
+    signIn: "Sign in",
+    createAccount: "Create an account",
     signOut: "Sign out",
     signedInAs: "Signed in as",
     status: {
@@ -71,6 +71,8 @@ const button: CSSProperties = {
   background: "rgb(var(--accent-rgb) / .1)",
   cursor: "pointer",
   fontFamily: "inherit",
+  textDecoration: "none",
+  display: "inline-block",
 };
 
 export default function AccountCard({
@@ -82,7 +84,7 @@ export default function AccountCard({
   auth: Auth;
   syncStatus: SyncStatus;
 }) {
-  const [email, setEmail] = useState("");
+  const { profile } = useProfile(auth.user?.id ?? null);
   const s = S[lang];
   const ar = lang === "ar";
 
@@ -110,7 +112,9 @@ export default function AccountCard({
               flexWrap: "wrap",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}
+            >
               <div style={{ fontSize: 11.5, color: "var(--dim-3)" }}>
                 {s.signedInAs}
               </div>
@@ -120,17 +124,23 @@ export default function AccountCard({
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
+                  // The profile has not loaded offline; the email is a fine
+                  // stand-in and is already on the device.
                   direction: "ltr",
                   textAlign: ar ? "right" : "left",
                 }}
               >
-                {auth.user?.email ?? auth.user?.id}
+                {profile ? `@${profile.username}` : (auth.user?.email ?? "")}
               </div>
               <div style={{ fontSize: 11.5, color: "var(--dim-3)" }}>
                 {s.status[syncStatus]}
               </div>
             </div>
-            <button type="button" style={button} onClick={() => void auth.signOut()}>
+            <button
+              type="button"
+              style={button}
+              onClick={() => void auth.signOut()}
+            >
               {s.signOut}
             </button>
           </div>
@@ -141,59 +151,28 @@ export default function AccountCard({
               flexDirection: "column",
               gap: 12,
               padding: "16px",
+              alignItems: ar ? "flex-end" : "flex-start",
             }}
           >
             <div style={{ fontSize: 12.5, color: "var(--dim-3)", lineHeight: 1.5 }}>
               {s.blurb}
             </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (email.trim()) void auth.signInWithEmail(email.trim());
-              }}
-              style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
-            >
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (auth.error || auth.linkSent) auth.reset();
-                }}
-                placeholder={s.email}
-                autoComplete="email"
-                // The address is Latin script whichever way the page reads.
-                dir="ltr"
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Link href="/login" style={button}>
+                {s.signIn}
+              </Link>
+              <Link
+                href="/login?mode=signup"
                 style={{
-                  flex: "1 1 190px",
-                  minWidth: 0,
-                  appearance: "none",
-                  borderRadius: 999,
-                  border: "1px solid rgba(255,255,255,.12)",
-                  background: "rgba(0,0,0,.28)",
-                  padding: "10px 16px",
-                  fontSize: 14,
-                  color: "var(--ink)",
-                  fontFamily: "inherit",
+                  ...button,
+                  color: "var(--soft)",
+                  background: "rgba(255,255,255,.04)",
+                  border: "1px solid rgba(255,255,255,.1)",
                 }}
-              />
-              <button type="submit" style={button}>
-                {s.sendLink}
-              </button>
-            </form>
-
-            {auth.linkSent && (
-              <div style={{ fontSize: 12.5, color: "var(--accent)", lineHeight: 1.5 }}>
-                {s.sent}
-              </div>
-            )}
-            {auth.error && (
-              <div style={{ fontSize: 12.5, color: "#f2a2b0", lineHeight: 1.5 }}>
-                {auth.error}
-              </div>
-            )}
+              >
+                {s.createAccount}
+              </Link>
+            </div>
           </div>
         )}
       </div>

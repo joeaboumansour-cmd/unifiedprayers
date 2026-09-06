@@ -1,7 +1,7 @@
 /* Service worker for Unified Prayers.
    Bump CACHE_VERSION whenever the shell needs to be re-fetched. */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE = `unified-prayers-${CACHE_VERSION}`;
 
 /* Enough to open the app and pray with no connection at all. Next's own
@@ -87,16 +87,25 @@ self.addEventListener('fetch', event => {
 
   // Navigations: network first so a deploy lands immediately, shell as fallback.
   if (req.mode === 'navigate') {
+    // Keyed by path, so the manifest shortcuts (/?set=mary) do not each store
+    // their own copy of the same page.
+    const key = url.origin + url.pathname;
     event.respondWith((async () => {
       try {
         const preloaded = await event.preloadResponse;
         const res = preloaded || await fetch(req);
         const cache = await caches.open(CACHE);
-        cache.put('/', res.clone());
+        // Each page under its own URL. Storing every navigation under '/'
+        // would mean one visit to /login leaves the sign-in form as the
+        // offline shell, and praying offline would open it instead of the app.
+        cache.put(key, res.clone());
         return res;
       } catch (err) {
         const cache = await caches.open(CACHE);
-        return (await cache.match('/')) ||
+        // This page if it has been seen before, otherwise the app shell:
+        // signing in needs the network anyway, and offline is for praying.
+        return (await cache.match(key)) ||
+               (await cache.match('/')) ||
                new Response('Offline', {
                  status: 503,
                  headers: { 'Content-Type': 'text/plain; charset=utf-8' },

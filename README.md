@@ -62,11 +62,24 @@ Optional. Skip all of this and the app still works.
    gitignored, and never anywhere the browser can reach.
 
 4. Enable the Email provider under Authentication → Providers. Sign-in is by
-   magic link only — no passwords, and no OAuth provider, which would mean
-   maintaining a client and secret with Google for a single button. Add your
-   deployed origin under Authentication → URL Configuration, since
-   `signInWithOtp` sends `window.location.origin` as the redirect and Supabase
-   rejects an origin that is not on that list.
+   email and password; there is no OAuth provider, which would mean
+   maintaining a client and secret with Google for a single button.
+
+5. Add every origin the app is served from under Authentication → URL
+   Configuration. Both the signup confirmation and the password reset send
+   `window.location.origin` as the redirect, and Supabase rejects an origin
+   that is not on that list — so a preview deployment needs its own entry.
+
+6. Turn these on under Authentication → Providers → Email, and Policies. They
+   are the settings that actually decide how hard this is to attack, and none
+   of them can be set from the code in this repo:
+
+   - **Confirm email** — on. Without it an account is usable before anyone
+     proves they own the address.
+   - **Minimum password length** — 10, to match `PASSWORD_MIN` in
+     `src/lib/username.ts`. The form's check is a courtesy; this is the rule.
+   - **Leaked password protection** — on. It checks new passwords against
+     Have I Been Pwned, which is worth more than any composition rule.
 
 **How it degrades.** Every piece of this is a no-op when it cannot reach the
 network, by design:
@@ -79,6 +92,47 @@ network, by design:
 - Content fetch fails → the app runs on the JSON in the bundle. A document that
   fails its shape check is ignored rather than adopted, so a half-written row
   cannot break the player mid-prayer.
+
+## Accounts
+
+Sign-in is optional and always has been: nothing in the prayer app is gated on
+it, and every screen works signed out and offline. The account pages live at
+`/login` (sign in, sign up and forgot-password in one page) and
+`/reset-password` (where the emailed link lands).
+
+`0002_profiles.sql` adds two tables, split along a permission boundary rather
+than by subject:
+
+- **`profiles`** — username, display name, avatar. Readable by *any* signed-in
+  user, because finding a friend or showing who sent a novena reminder needs
+  it. Anonymous visitors get nothing.
+- **`user_private`** — the optional phone number, readable only by its owner.
+
+The split is the point. Keeping the phone out of `profiles` means a future
+"search for a friend" query cannot leak it by accident: the boundary is the
+table, so it does not depend on whoever writes that query remembering to leave
+a column out of the SELECT.
+
+**Usernames** are stored lowercase and unique. Case-insensitive uniqueness is
+not cosmetic — allowing both `joseph` and `Joseph` is an impersonation vector
+as soon as profiles are visible to other people. Presentation casing goes in
+`display_name`, which has no uniqueness at all. The rules live in
+`username_is_valid()` and are mirrored for the form in `src/lib/username.ts`;
+if the two ever disagree, the database wins and the form is the bug.
+
+Both rows are created by a trigger on `auth.users` in the same transaction as
+the signup, so a taken username fails the whole signup instead of leaving an
+account with no profile. The `username_available()` RPC the form calls while
+you type is a courtesy; the unique index is the guarantee, and it is what
+settles two people submitting the same name at the same moment.
+
+**What the forms do about attacks.** A wrong password and an unknown address
+give the same message, and the forgot-password form reports success whatever
+happened — otherwise either one answers "does this address have an account?".
+Password fields carry the right `autocomplete` values so a manager does not
+save a new password over an old one. Repeated failed sign-ins lock the form
+locally, which is UX rather than a control — anyone can reload past it, and
+Supabase's endpoint rate limits are the real limit.
 
 **Sync model.** Prefs and progress each reconcile as a whole document on
 sign-in: the newer copy wins outright, compared on `prefs.updatedAt` and
@@ -98,9 +152,12 @@ public/
 src/
   app/                   layout (fonts, metadata, viewport) and the one page
     palettes.css         the six colour palettes, as CSS custom properties
+    login/               sign in, sign up, forgot password
+    reset-password/      where the emailed reset link lands
   components/
     Home.tsx             the four tabs: Prayers, Today, Library, Settings
-    AccountCard.tsx      sign-in / sync status, in Settings
+    AccountCard.tsx      account state and sync status, in Settings
+    auth/AuthShell.tsx   shared frame, fields and inputs for the auth pages
     Player.tsx           full-screen prayer player
     BeadVisual.tsx       arc / ring / chain / orb bead styles
     MysterySheet.tsx     mystery-set picker
@@ -110,7 +167,9 @@ src/
     content.ts           typed access to the prayer text and UI strings,
                          and the store the Supabase copy swaps into
     state.ts             prefs/progress types, storage, and row mapping
-    useAuth.ts           session, magic link, sign out
+    useAuth.ts           sign in/up, password reset, sign out
+    useProfile.ts        the signed-in account's own profile row
+    username.ts          username, phone and password rules for the form
     useCloudSync.ts      mirrors prefs and progress to Supabase
     useRemoteContent.ts  overlays DB prayer text onto the bundled JSON
     supabase/
@@ -156,6 +215,9 @@ scripts/
 - **Offline.** The shell — HTML, JS, CSS, self-hosted fonts, images, icons —
   is precached on install, so the app opens and every prayer is readable with
   no connection. Bump `CACHE_VERSION` in `public/sw.js` when the shell changes.
+  Navigations are cached under their own path: storing every one under `/`, as
+  an earlier version did, meant a single visit to `/login` replaced the offline
+  shell, and praying offline opened the sign-in form instead of the app.
 - **`teachings.json`** holds the eight teaching popups from the original app
   (Pope Francis on each of the seven gifts, plus *هلم أيها الروح القدس*). The
   new design has nowhere to show them yet, so nothing imports it — it is kept
