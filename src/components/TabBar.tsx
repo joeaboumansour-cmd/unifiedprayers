@@ -9,20 +9,31 @@ const RADII: [number, number][] = [
   [8.5, 0],
   [7, 3.4],
   [9, 1.6],
+  [6, 5],
 ];
+
+/** Named here rather than in design.json — see the note in Home.tsx. */
+const ADMIN_LABEL = { ar: "الإدارة", en: "Admin" } as const;
 
 export default function TabBar({
   tab,
   lang,
   hidden,
+  isAdmin,
   onSelect,
 }: {
   tab: number;
   lang: Lang;
   hidden: boolean;
+  /** Appends the admin tab. Nothing behind it trusts this flag. */
+  isAdmin: boolean;
   onSelect: (i: number) => void;
 }) {
   const t = ui(lang);
+  // The four names come from the content document, which an admin can edit; a
+  // fifth entry added there would appear here with no tab body behind it, so
+  // the list is cut to the panels that exist before the admin one is added.
+  const labels = [...t.tabs.slice(0, 4), ...(isAdmin ? [ADMIN_LABEL[lang]] : [])];
   return (
     <nav
       style={{
@@ -44,7 +55,7 @@ export default function TabBar({
       }}
       aria-hidden={hidden}
     >
-      {t.tabs.map((label, i) => {
+      {labels.map((label, i) => {
         const ink = i === tab ? "var(--accent)" : "var(--dim-3)";
         const [r1, r2] = RADII[i];
         return (

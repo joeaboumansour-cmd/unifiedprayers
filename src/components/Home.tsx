@@ -1,7 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
+import { AnnouncementBanner } from "@/components/Announcements";
+import NotificationsCard from "@/components/NotificationsCard";
 import {
   PALETTES,
   PALETTE_LABEL,
@@ -15,8 +18,28 @@ import {
   styles,
   ui,
 } from "@/lib/content";
+import type { AnnouncementRow } from "@/lib/supabase/types";
 import type { Auth } from "@/lib/useAuth";
 import type { SyncStatus } from "@/lib/useCloudSync";
+import type { Push } from "@/lib/usePush";
+import type { Verse } from "@/lib/useVerse";
+
+/** The admin tab's own name. Chrome, not prayer text — so not in design.json. */
+const ADMIN_LABEL = { ar: "الإدارة", en: "Admin" } as const;
+
+/**
+ * Four editor panels, their forms and their bilingual copy, fetched only by the
+ * one or two accounts that can open them. Everyone else is here to pray, and
+ * this is an offline-first app whose first load is the thing being protected —
+ * shipping an admin console inside it to every visitor would be paying for a
+ * screen almost nobody can see.
+ *
+ * `ssr: false` because the tab renders only after the admin check resolves,
+ * which needs the session, which the server render does not have.
+ */
+const AdminTab = dynamic(() => import("@/components/admin/AdminTab"), {
+  ssr: false,
+});
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
 const GOLD = "var(--accent)";
@@ -212,6 +235,13 @@ export type HomeProps = {
   toggles: boolean[];
   auth: Auth;
   syncStatus: SyncStatus;
+  /** Adds the fifth tab. Every button in it is checked again server-side. */
+  isAdmin: boolean;
+  push: Push;
+  /** Today's verse from the database, or null to use the bundled one. */
+  verse: Verse | null;
+  banner: AnnouncementRow | null;
+  onDismissBanner: () => void;
   onToggleLang: () => void;
   onSetLang: (l: Lang) => void;
   onResume: () => void;
@@ -237,6 +267,11 @@ export default function Home({
   toggles,
   auth,
   syncStatus,
+  isAdmin,
+  push,
+  verse,
+  banner,
+  onDismissBanner,
   onToggleLang,
   onSetLang,
   onResume,
@@ -316,7 +351,9 @@ export default function Home({
               letterSpacing: "-.01em",
             }}
           >
-            {tab === 0 ? t.greeting[greet] : t.pages[tab]}
+            {tab === 0
+              ? t.greeting[greet]
+              : (t.pages[tab] ?? ADMIN_LABEL[lang])}
           </div>
         </div>
         <button
@@ -344,6 +381,13 @@ export default function Home({
       {/* ---------- PRAYERS ---------- */}
       {tab === 0 && (
         <div>
+          {banner && (
+            <AnnouncementBanner
+              row={banner}
+              lang={lang}
+              onDismiss={onDismissBanner}
+            />
+          )}
           <div
             style={{
               display: "flex",
@@ -738,9 +782,14 @@ export default function Home({
               className="selectable"
               style={{ fontSize: 16, lineHeight: 1.9, color: "var(--body)" }}
             >
-              {t.verse}
+              {/* The bundled verse is the fallback, not the default: it is what
+                  shows before anyone has added one, and offline on a device
+                  that has never fetched the list. */}
+              {verse?.text ?? t.verse}
             </div>
-            <div style={{ fontSize: 12, color: "var(--dim)" }}>{t.verseRef}</div>
+            <div style={{ fontSize: 12, color: "var(--dim)" }}>
+              {verse ? verse.ref : t.verseRef}
+            </div>
           </div>
         </div>
       )}
@@ -1076,6 +1125,10 @@ export default function Home({
 
           <AccountCard lang={lang} auth={auth} syncStatus={syncStatus} />
 
+          <div style={{ marginTop: 26 }}>
+            <NotificationsCard lang={lang} push={push} />
+          </div>
+
           <div
             style={{
               display: "flex",
@@ -1093,6 +1146,11 @@ export default function Home({
           </div>
         </div>
       )}
+
+      {/* ---------- ADMIN ---------- */}
+      {/* Guarded twice over: the tab bar only offers this index to an admin,
+          and the panel is only mounted for one. */}
+      {tab === 4 && isAdmin && <AdminTab lang={lang} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnnouncementModal } from "@/components/Announcements";
 import Home from "@/components/Home";
 import MysterySheet from "@/components/MysterySheet";
 import Player from "@/components/Player";
@@ -25,10 +26,14 @@ import {
 } from "@/lib/state";
 import { playChime } from "@/lib/chime";
 import { buildSteps } from "@/lib/steps";
+import { useAdmin } from "@/lib/useAdmin";
 import { useAmbientDrone } from "@/lib/useAmbientDrone";
+import { useAnnouncements } from "@/lib/useAnnouncements";
 import { useAuth } from "@/lib/useAuth";
 import { useCloudSync } from "@/lib/useCloudSync";
+import { usePush } from "@/lib/usePush";
 import { useRemoteContent } from "@/lib/useRemoteContent";
+import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
 
 const DEFAULT_PROGRESS: Progress = {
@@ -61,6 +66,12 @@ export default function Page() {
   // through content.ts, so re-rendering on it is what makes the swap visible.
   const contentVersion = useRemoteContent();
   const auth = useAuth();
+  // Undefined until the check has run, so the tab bar does not flash a fifth
+  // tab in and out on every launch. Only true unlocks it.
+  const isAdmin = useAdmin(auth.user?.id ?? null) === true;
+  const push = usePush(prefs.lang);
+  const verse = useVerse(prefs.lang);
+  const { banner, modal, dismiss } = useAnnouncements(auth.status === "signed-in");
 
   // The snapshot the sync layer mirrors. Held as state rather than derived so
   // there is exactly one `at` per change, shared by localStorage and Supabase.
@@ -133,6 +144,10 @@ export default function Page() {
     }
     setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isAdmin && tab > 3) setTab(0);
+  }, [isAdmin, tab]);
 
   useEffect(() => {
     const { theme } = paletteInfo(prefs.palette);
@@ -302,6 +317,11 @@ export default function Page() {
         toggles={[prefs.dim, prefs.haptics, prefs.audio, prefs.awake]}
         auth={auth}
         syncStatus={syncStatus}
+        isAdmin={isAdmin}
+        push={push}
+        verse={verse}
+        banner={banner}
+        onDismissBanner={() => banner && dismiss(banner.id)}
         onToggleLang={() =>
           patch({ lang: prefs.lang === "ar" ? "en" : "ar" })
         }
@@ -342,6 +362,7 @@ export default function Page() {
         tab={tab}
         lang={prefs.lang}
         hidden={isPlayer}
+        isAdmin={isAdmin}
         onSelect={(i) => {
           haptic(5);
           setTab(i);
@@ -380,6 +401,17 @@ export default function Page() {
         onStart={startMary}
         onClose={() => setSheet(false)}
       />
+
+      {/* Held back until the app is on the home screen: a message over a prayer
+          in progress, or over the closing moment, would be an interruption
+          rather than an announcement. */}
+      {modal && !isPlayer && !done && (
+        <AnnouncementModal
+          row={modal}
+          lang={prefs.lang}
+          onDismiss={() => dismiss(modal.id)}
+        />
+      )}
     </main>
   );
 }
