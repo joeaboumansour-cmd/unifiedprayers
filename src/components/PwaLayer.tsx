@@ -329,7 +329,7 @@ export default function PwaLayer() {
             // Physical left, so centring holds in both text directions.
             left: "50%",
             transform: "translateX(-50%)",
-            bottom: "78px",
+            bottom: "71px",
             zIndex: 1200,
             display: "flex",
             alignItems: "center",
