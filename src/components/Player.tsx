@@ -325,16 +325,18 @@ export default function Player({
             transition: `background .3s ${EASE}`,
           }}
         >
+          {/* The short word, not the full setting name: the switch beside it
+              already says it is a setting, and the header has a title to fit. */}
           <span
             style={{
-              width: 13,
-              height: 13,
-              borderRadius: "50%",
-              background: dim ? "var(--accent)" : "var(--soft)",
-              boxShadow: "inset -4px 0 0 0 rgba(0,0,0,.55)",
-              transition: `background .3s ${EASE}`,
+              fontSize: 12,
+              fontWeight: 500,
+              color: dim ? "var(--accent)" : "var(--soft)",
+              transition: `color .3s ${EASE}`,
             }}
-          />
+          >
+            {ar ? "ليلي" : "Night"}
+          </span>
           <span
             style={{
               // Explicit, because a span defaults to inline and would ignore
