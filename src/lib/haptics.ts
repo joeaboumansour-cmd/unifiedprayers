@@ -59,7 +59,9 @@ function iosToggle(): HTMLInputElement | null {
     left: "0",
     width: "1px",
     height: "1px",
-    opacity: "0",
+    // Fully transparent, but not hidden: a switch with no rendering does not
+    // play the tick.
+    opacity: "0.01",
     pointerEvents: "none",
     zIndex: "-1",
   } satisfies Partial<CSSStyleDeclaration>);
@@ -73,13 +75,23 @@ function tick(): void {
   const input = iosToggle();
   if (!input) return;
   try {
-    input.checked = !input.checked;
-    // The tick follows the state change the switch renders, so it needs the
-    // event a real toggle would have fired.
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    // `click()` is what plays the tick: it runs the switch's own activation
+    // behaviour, which flips the state, animates it and fires the events.
+    // Setting `checked` by hand skips that behaviour, so it is silent.
+    input.click();
   } catch {
     /* the element was torn out from under us */
   }
+}
+
+/**
+ * Build the iOS switch ahead of time. It has to be in the document and laid out
+ * before the tap it should answer, so it is made on mount rather than inside
+ * the first gesture. No-op everywhere else.
+ */
+export function primeHaptics(): void {
+  if (typeof window === "undefined") return;
+  iosToggle();
 }
 
 /**
@@ -120,4 +132,32 @@ export function haptic(ms: number | number[] = 8): void {
     }
     at += segment;
   });
+}
+
+/**
+ * A small haptic on every touch anywhere in the app, so a tap that no handler
+ * answers still feels like it landed.
+ *
+ * It listens on the capture phase for the same reason the audio unlock does: a
+ * handler that stops propagation cannot swallow it. Where a control also asks
+ * for its own haptic, that call arrives a moment later and replaces this one —
+ * `navigator.vibrate` overrides whatever is playing rather than queueing — so
+ * the control's own pattern is what is felt.
+ *
+ * Returns a teardown, so it can be mounted from an effect.
+ */
+export function watchHapticTouch(enabled: boolean): () => void {
+  if (typeof window === "undefined" || !enabled) return () => {};
+  primeHaptics();
+
+  const onDown = (e: PointerEvent) => {
+    // Touch and pen only. A mouse has nothing to feel, and firing there just
+    // rattles a desktop with a phone plugged in.
+    if (e.pointerType === "mouse") return;
+    haptic(7);
+  };
+
+  const opts: AddEventListenerOptions = { capture: true, passive: true };
+  window.addEventListener("pointerdown", onDown, opts);
+  return () => window.removeEventListener("pointerdown", onDown, opts);
 }

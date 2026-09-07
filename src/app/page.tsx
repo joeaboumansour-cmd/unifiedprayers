@@ -28,10 +28,10 @@ import {
 import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
 import { playChime } from "@/lib/chime";
-import { haptic as fireHaptic } from "@/lib/haptics";
+import { haptic as fireHaptic, watchHapticTouch } from "@/lib/haptics";
 import { buildSteps } from "@/lib/steps";
 import { useAdmin } from "@/lib/useAdmin";
-import { useAmbientDrone } from "@/lib/useAmbientDrone";
+import { useAmbience } from "@/lib/useAmbience";
 import { useAnnouncements } from "@/lib/useAnnouncements";
 import { useAuth } from "@/lib/useAuth";
 import { useCloudSync } from "@/lib/useCloudSync";
@@ -136,13 +136,17 @@ export default function Page() {
   }, [screen, done]);
 
   useWakeLock(prefs.awake && screen === "player");
-  useAmbientDrone(prefs.audio && screen === "player");
+  useAmbience(prefs.audio && screen === "player");
 
   // Browsers only start audio a person asked for, and Safari only accepts the
   // request while the gesture is still being handled -- too early for the
-  // effect that opens the drone. So the first touch anywhere unlocks the shared
-  // context, before anything asks it for a sound.
+  // effect that opens the ambience. So the first touch anywhere unlocks the
+  // shared context, before anything asks it for a sound.
   useEffect(watchAudioUnlock, []);
+
+  // Every touch gets a small haptic, whether or not the thing under it has one
+  // of its own.
+  useEffect(() => watchHapticTouch(prefs.haptics), [prefs.haptics]);
 
   /* ---------------- restore ---------------- */
   useEffect(() => {

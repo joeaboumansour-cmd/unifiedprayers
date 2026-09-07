@@ -5,7 +5,7 @@ import { audioContext } from "@/lib/audio";
 /**
  * A soft bell rung once when a prayer is finished.
  *
- * Synthesised for the same reason as the ambient drone: no audio file, so the
+ * Synthesised for the same reason as the ambience: no audio file, so the
  * app keeps working offline and the download does not grow. Four rising
  * partials, each with its own long decay, read as one struck bell rather than
  * four notes.
