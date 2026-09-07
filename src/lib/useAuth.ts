@@ -261,6 +261,24 @@ export function useAuth(): Auth {
       if (!supabase) return { ok: false, message: T[lang].generic };
 
       const phone = input.phone ? normalisePhone(input.phone) : "";
+
+      // Profile rows are built when the address is confirmed, not here, so a
+      // taken username no longer fails the signup transaction the way it did
+      // when the trigger ran on insert. Without this check the form would
+      // accept a name somebody already holds and quietly hand back a suffixed
+      // one at confirmation time. The form's own debounced check runs while
+      // typing; this is the one that runs against the value being submitted.
+      //
+      // An RPC failure is not a refusal: offline, or an older database without
+      // the function, must not block a signup that is probably fine.
+      const { data: free, error: checkError } = await supabase.rpc(
+        "username_available",
+        { u: normaliseUsername(input.username) },
+      );
+      if (!checkError && free === false) {
+        return { ok: false, message: T[lang].usernameTaken };
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: input.email.trim().toLowerCase(),
         password: input.password,
