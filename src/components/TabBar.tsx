@@ -48,7 +48,7 @@ export default function TabBar({
           "linear-gradient(rgb(var(--bg-base-rgb) / 0),rgb(var(--bg-base-rgb) / .86) 40%,rgb(var(--bg-base-rgb) / .97))",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
-        borderTop: "1px solid rgba(255,255,255,.06)",
+        borderTop: "1px solid rgb(var(--veil-rgb) / .06)",
         transition: `transform .5s ${EASE}, opacity .35s ease`,
         transform: hidden ? "translateY(120%)" : "translateY(0)",
         opacity: hidden ? 0 : 1,

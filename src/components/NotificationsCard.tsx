@@ -55,8 +55,8 @@ const S = {
 
 const card: CSSProperties = {
   borderRadius: 18,
-  background: "rgba(255,255,255,.045)",
-  border: "1px solid rgba(255,255,255,.07)",
+  background: "rgb(var(--veil-rgb) / .045)",
+  border: "1px solid rgb(var(--veil-rgb) / .07)",
   padding: 16,
   display: "flex",
   flexDirection: "column",
@@ -65,13 +65,13 @@ const card: CSSProperties = {
 
 const button = (disabled: boolean): CSSProperties => ({
   appearance: "none",
-  border: `1px solid ${disabled ? "rgba(255,255,255,.08)" : "rgb(var(--accent-rgb) / .35)"}`,
+  border: `1px solid ${disabled ? "rgb(var(--veil-rgb) / .08)" : "rgb(var(--accent-rgb) / .35)"}`,
   borderRadius: 999,
   padding: "11px 18px",
   fontSize: 14,
   fontWeight: 500,
-  color: disabled ? "var(--dim-3)" : "var(--accent)",
-  background: disabled ? "rgba(255,255,255,.03)" : "rgb(var(--accent-rgb) / .12)",
+  color: disabled ? "var(--dim-3)" : "var(--accent-ink)",
+  background: disabled ? "rgb(var(--veil-rgb) / .03)" : "rgb(var(--accent-rgb) / .12)",
   cursor: disabled ? "default" : "pointer",
   fontFamily: "inherit",
 });
@@ -155,7 +155,7 @@ export default function NotificationsCard({
 
       {push.state === "on" && (
         <>
-          <div style={{ fontSize: 13.5, color: "var(--accent)" }}>{s.enabled}</div>
+          <div style={{ fontSize: 13.5, color: "var(--accent-ink)" }}>{s.enabled}</div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label
@@ -176,8 +176,8 @@ export default function NotificationsCard({
                 appearance: "none",
                 width: "100%",
                 boxSizing: "border-box",
-                background: "rgba(255,255,255,.05)",
-                border: "1px solid rgba(255,255,255,.1)",
+                background: "rgb(var(--veil-rgb) / .05)",
+                border: "1px solid rgb(var(--veil-rgb) / .1)",
                 borderRadius: 12,
                 padding: "11px 13px",
                 color: "var(--body)",
@@ -204,8 +204,8 @@ export default function NotificationsCard({
             style={{
               ...button(push.busy),
               color: push.busy ? "var(--dim-3)" : "var(--dim)",
-              border: "1px solid rgba(255,255,255,.12)",
-              background: "rgba(255,255,255,.04)",
+              border: "1px solid rgb(var(--veil-rgb) / .12)",
+              background: "rgb(var(--veil-rgb) / .04)",
             }}
           >
             {push.busy ? s.working : s.disable}

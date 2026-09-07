@@ -52,9 +52,9 @@ export default function MysterySheet({
           bottom: 0,
           borderRadius: "28px 28px 0 0",
           background: "var(--surface)",
-          borderTop: "1px solid rgba(255,255,255,.1)",
+          borderTop: "1px solid rgb(var(--veil-rgb) / .1)",
           padding: "14px 18px max(22px, var(--safe-b))",
-          boxShadow: "0 -20px 60px rgba(0,0,0,.5)",
+          boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
           transition: `transform .48s ${EASE}`,
           transform: open ? "translateY(0)" : "translateY(105%)",
           pointerEvents: open ? "auto" : "none",
@@ -65,7 +65,7 @@ export default function MysterySheet({
             width: 38,
             height: 4,
             borderRadius: 999,
-            background: "rgba(255,255,255,.22)",
+            background: "rgb(var(--veil-rgb) / .22)",
             margin: "0 auto 16px",
           }}
         />
@@ -111,9 +111,9 @@ export default function MysterySheet({
                   transition: "background .25s ease,border-color .25s ease",
                   background: on
                     ? "rgb(var(--accent-rgb) / .12)"
-                    : "rgba(255,255,255,.035)",
+                    : "rgb(var(--veil-rgb) / .035)",
                   border: `1px solid ${
-                    on ? "rgb(var(--accent-rgb) / .45)" : "rgba(255,255,255,.07)"
+                    on ? "rgb(var(--accent-rgb) / .45)" : "rgb(var(--veil-rgb) / .07)"
                   }`,
                 }}
               >
@@ -129,7 +129,7 @@ export default function MysterySheet({
                     style={{
                       fontSize: 15,
                       fontWeight: 500,
-                      color: on ? "var(--accent)" : "var(--ink)",
+                      color: on ? "var(--accent-ink)" : "var(--ink)",
                     }}
                   >
                     {setLabel(lang, k)}
@@ -143,7 +143,7 @@ export default function MysterySheet({
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
-                    border: `1px solid ${on ? "var(--accent)" : "rgba(255,255,255,.2)"}`,
+                    border: `1px solid ${on ? "var(--accent)" : "rgb(var(--veil-rgb) / .2)"}`,
                     background: on ? "var(--accent)" : "transparent",
                     flex: "none",
                   }}

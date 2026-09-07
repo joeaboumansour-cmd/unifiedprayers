@@ -73,7 +73,7 @@ export default function Player({
               ? "var(--accent)"
               : state === 2
                 ? "rgb(var(--accent-rgb) / .45)"
-                : "rgba(255,255,255,.14)",
+                : "rgb(var(--veil-rgb) / .14)",
         };
       }),
     [units, unit],
@@ -131,8 +131,8 @@ export default function Player({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: on ? "rgb(var(--accent-rgb) / .18)" : "rgba(255,255,255,.07)",
-    border: "1px solid rgba(255,255,255,.09)",
+    background: on ? "rgb(var(--accent-rgb) / .18)" : "rgb(var(--veil-rgb) / .07)",
+    border: "1px solid rgb(var(--veil-rgb) / .09)",
     flex: "none",
   });
 
@@ -290,7 +290,7 @@ export default function Player({
           >
             {prayer === "mary" ? t.maryName : t.spiritName}
           </div>
-          <div style={{ fontSize: 10.5, color: "var(--accent)" }}>
+          <div style={{ fontSize: 10.5, color: "var(--accent-ink)" }}>
             {prayer === "mary"
               ? setLabel(lang, mysterySet)
               : ar
@@ -320,8 +320,8 @@ export default function Player({
             borderRadius: 999,
             background: dim
               ? "rgb(var(--accent-rgb) / .16)"
-              : "rgba(255,255,255,.07)",
-            border: "1px solid rgba(255,255,255,.09)",
+              : "rgb(var(--veil-rgb) / .07)",
+            border: "1px solid rgb(var(--veil-rgb) / .09)",
             transition: `background .3s ${EASE}`,
           }}
         >
@@ -331,7 +331,7 @@ export default function Player({
             style={{
               fontSize: 12,
               fontWeight: 500,
-              color: dim ? "var(--accent)" : "var(--soft)",
+              color: dim ? "var(--accent-ink)" : "var(--soft)",
               transition: `color .3s ${EASE}`,
             }}
           >
@@ -349,7 +349,7 @@ export default function Player({
               boxSizing: "border-box",
               background: dim
                 ? "rgb(var(--accent-rgb) / .85)"
-                : "rgba(255,255,255,.14)",
+                : "rgb(var(--veil-rgb) / .14)",
               transition: `background .3s ${EASE}`,
             }}
           >
@@ -359,7 +359,7 @@ export default function Player({
                 width: 14,
                 height: 14,
                 borderRadius: "50%",
-                background: "#fff",
+                background: "var(--switch-knob)",
                 transition: `transform .3s ${EASE}`,
                 // Forward is whichever way the script runs, so the knob leaves
                 // its off position towards the end of the line, not to a fixed
@@ -424,7 +424,7 @@ export default function Player({
             fontWeight: 500,
             letterSpacing: ".14em",
             textTransform: "uppercase",
-            color: "var(--accent)",
+            color: "var(--accent-ink)",
             flex: "none",
             transition: "opacity .3s ease",
             opacity: fading ? 0 : 1,
@@ -542,7 +542,7 @@ export default function Player({
           transition: "opacity .6s ease",
           opacity: dim ? 1 : 0,
           background:
-            "linear-gradient(rgba(60,26,0,.42),rgba(40,16,0,.5)),rgba(0,0,0,.28)",
+            "var(--dim-veil)",
         }}
       />
 

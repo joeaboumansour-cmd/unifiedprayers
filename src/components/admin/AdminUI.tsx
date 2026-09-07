@@ -21,8 +21,8 @@ import { getSupabase } from "@/lib/supabase/client";
 
 export const card: CSSProperties = {
   borderRadius: 18,
-  background: "rgba(255,255,255,.045)",
-  border: "1px solid rgba(255,255,255,.07)",
+  background: "rgb(var(--veil-rgb) / .045)",
+  border: "1px solid rgb(var(--veil-rgb) / .07)",
   padding: 16,
 };
 
@@ -39,8 +39,8 @@ export const inputStyle = (invalid = false): CSSProperties => ({
   appearance: "none",
   width: "100%",
   boxSizing: "border-box",
-  background: "rgba(255,255,255,.05)",
-  border: `1px solid ${invalid ? "rgba(242,162,176,.5)" : "rgba(255,255,255,.1)"}`,
+  background: "rgb(var(--veil-rgb) / .05)",
+  border: `1px solid ${invalid ? "rgb(var(--danger-rgb) / .5)" : "rgb(var(--veil-rgb) / .1)"}`,
   borderRadius: 12,
   padding: "11px 13px",
   color: "var(--body)",
@@ -67,8 +67,8 @@ export function Button({
 }) {
   const colours = {
     accent: { fg: "var(--accent)", bg: "rgb(var(--accent-rgb) / .12)", br: "rgb(var(--accent-rgb) / .35)" },
-    quiet: { fg: "var(--soft)", bg: "rgba(255,255,255,.05)", br: "rgba(255,255,255,.12)" },
-    danger: { fg: "#f2a2b0", bg: "rgba(242,162,176,.1)", br: "rgba(242,162,176,.35)" },
+    quiet: { fg: "var(--soft)", bg: "rgb(var(--veil-rgb) / .05)", br: "rgb(var(--veil-rgb) / .12)" },
+    danger: { fg: "var(--danger)", bg: "rgb(var(--danger-rgb) / .1)", br: "rgb(var(--danger-rgb) / .35)" },
   }[tone];
 
   return (
@@ -79,13 +79,13 @@ export function Button({
       style={{
         appearance: "none",
         width: wide ? "100%" : undefined,
-        border: `1px solid ${disabled ? "rgba(255,255,255,.08)" : colours.br}`,
+        border: `1px solid ${disabled ? "rgb(var(--veil-rgb) / .08)" : colours.br}`,
         borderRadius: 999,
         padding: wide ? "13px 18px" : "9px 16px",
         fontSize: wide ? 15 : 13.5,
         fontWeight: 500,
         color: disabled ? "var(--dim-3)" : colours.fg,
-        background: disabled ? "rgba(255,255,255,.03)" : colours.bg,
+        background: disabled ? "rgb(var(--veil-rgb) / .03)" : colours.bg,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit",
         transition: "background .2s ease, color .2s ease",
@@ -226,8 +226,8 @@ export function Choice<T extends string>({
               cursor: "pointer",
               transition: "background .2s ease, color .2s ease",
               color: on ? "var(--on-accent)" : "var(--soft)",
-              background: on ? "rgb(var(--accent-rgb) / .9)" : "rgba(255,255,255,.05)",
-              border: `1px solid ${on ? "transparent" : "rgba(255,255,255,.1)"}`,
+              background: on ? "rgb(var(--accent-rgb) / .9)" : "rgb(var(--veil-rgb) / .05)",
+              border: `1px solid ${on ? "transparent" : "rgb(var(--veil-rgb) / .1)"}`,
             }}
           >
             {o.label}
@@ -262,8 +262,8 @@ export function Switch({
         width: "100%",
         padding: "11px 13px",
         borderRadius: 12,
-        background: "rgba(255,255,255,.04)",
-        border: "1px solid rgba(255,255,255,.08)",
+        background: "rgb(var(--veil-rgb) / .04)",
+        border: "1px solid rgb(var(--veil-rgb) / .08)",
         color: "var(--soft)",
         fontSize: 13.5,
         fontFamily: "inherit",
@@ -280,7 +280,7 @@ export function Switch({
           borderRadius: 999,
           padding: 2,
           display: "flex",
-          background: on ? "rgb(var(--accent-rgb) / .85)" : "rgba(255,255,255,.12)",
+          background: on ? "rgb(var(--accent-rgb) / .85)" : "rgb(var(--veil-rgb) / .12)",
           transition: "background .25s ease",
         }}
       >
@@ -321,15 +321,15 @@ export function ToastLine({ toast }: { toast: Toast }) {
         borderRadius: 12,
         fontSize: 13,
         lineHeight: 1.6,
-        color: toast.tone === "ok" ? "var(--accent)" : "#f2a2b0",
+        color: toast.tone === "ok" ? "var(--accent-ink)" : "var(--danger)",
         background:
           toast.tone === "ok"
             ? "rgb(var(--accent-rgb) / .1)"
-            : "rgba(242,162,176,.1)",
+            : "rgb(var(--danger-rgb) / .1)",
         border: `1px solid ${
           toast.tone === "ok"
             ? "rgb(var(--accent-rgb) / .25)"
-            : "rgba(242,162,176,.3)"
+            : "rgb(var(--danger-rgb) / .3)"
         }`,
       }}
     >

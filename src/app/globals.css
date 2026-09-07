@@ -24,8 +24,6 @@
   --tab-label-lh: normal;
   --tab-clear: calc(86px + max(10px, var(--safe-b)));
   --toast-b: calc(74px + max(10px, var(--safe-b)));
-
-  color-scheme: dark;
 }
 
 /* iOS only. The home indicator is a thin overlay rather than reserved
@@ -224,8 +222,8 @@ button {
   .app-shell {
     width: 440px;
     height: min(940px, 100dvh);
-    border-inline: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+    border-inline: 1px solid rgb(var(--veil-rgb) / 0.08);
+    box-shadow: 0 40px 120px rgb(var(--shadow-rgb) / var(--shadow-a));
   }
 }
 
@@ -233,7 +231,7 @@ button {
 @media (min-width: 680px) and (min-height: 700px) {
   .app-shell {
     height: min(940px, calc(100dvh - 48px));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(var(--veil-rgb) / 0.08);
     border-radius: 30px;
   }
 }
@@ -249,10 +247,10 @@ button {
   }
   .tap:hover {
     transform: translateY(-2px);
-    filter: brightness(1.18);
+    filter: brightness(var(--tap-bright));
   }
   .tap:active {
     transform: translateY(0);
-    filter: brightness(1.05);
+    filter: brightness(calc(1 + (var(--tap-bright) - 1) * 0.28));
   }
 }

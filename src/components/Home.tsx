@@ -74,8 +74,8 @@ const sectionLabel: CSSProperties = {
 
 const card: CSSProperties = {
   borderRadius: 18,
-  background: "rgba(255,255,255,.045)",
-  border: "1px solid rgba(255,255,255,.07)",
+  background: "rgb(var(--veil-rgb) / .045)",
+  border: "1px solid rgb(var(--veil-rgb) / .07)",
 };
 
 function Row({
@@ -144,7 +144,7 @@ function MaryGlyph() {
 
 /** Miniature previews for the bead-style picker. */
 function StyleGlyph({ kind, ink }: { kind: BeadStyle; ink: string }) {
-  const track = "rgba(255,255,255,.14)";
+  const track = "rgb(var(--veil-rgb) / .14)";
   const body = {
     arc: (
       <g>
@@ -223,7 +223,7 @@ function Toggle({ on }: { on: boolean }) {
         padding: 3,
         boxSizing: "border-box",
         transition: "background .3s ease",
-        background: on ? "rgb(var(--accent-rgb) / .85)" : "rgba(255,255,255,.14)",
+        background: on ? "rgb(var(--accent-rgb) / .85)" : "rgb(var(--veil-rgb) / .14)",
       }}
     >
       <div
@@ -231,7 +231,7 @@ function Toggle({ on }: { on: boolean }) {
           width: 22,
           height: 22,
           borderRadius: "50%",
-          background: "#fff",
+          background: "var(--switch-knob)",
           transition: `transform .3s ${EASE}`,
           transform: on ? "translateX(var(--knob))" : "translateX(0)",
         }}
@@ -398,8 +398,8 @@ export default function Home({
             height: 34,
             padding: "0 13px",
             borderRadius: 999,
-            background: "rgba(255,255,255,.06)",
-            border: "1px solid rgba(255,255,255,.09)",
+            background: "rgb(var(--veil-rgb) / .06)",
+            border: "1px solid rgb(var(--veil-rgb) / .09)",
             fontSize: 12.5,
             fontWeight: 500,
             color: "var(--soft-2)",
@@ -465,7 +465,7 @@ export default function Home({
               marginBottom: 26,
               background:
                 "linear-gradient(150deg,var(--resume-a),var(--resume-b))",
-              border: "1px solid rgba(255,255,255,.09)",
+              border: "1px solid rgb(var(--veil-rgb) / .09)",
             }}
           >
             <div
@@ -495,7 +495,7 @@ export default function Home({
                   fontWeight: 500,
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: GOLD,
+                  color: "var(--accent-ink)",
                 }}
               >
                 {t.resumeKicker}
@@ -509,7 +509,7 @@ export default function Home({
                     flex: 1,
                     height: 3,
                     borderRadius: 999,
-                    background: "rgba(255,255,255,.12)",
+                    background: "rgb(var(--veil-rgb) / .12)",
                     overflow: "hidden",
                   }}
                 >
@@ -600,8 +600,8 @@ export default function Home({
                 style={{
                   padding: "15px 14px",
                   borderRadius: 16,
-                  background: "rgba(255,255,255,.028)",
-                  border: "1px solid rgba(255,255,255,.05)",
+                  background: "rgb(var(--veil-rgb) / .028)",
+                  border: "1px solid rgb(var(--veil-rgb) / .05)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 8,
@@ -676,7 +676,7 @@ export default function Home({
                   fontWeight: 500,
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: GOLD,
+                  color: "var(--accent-ink)",
                 }}
               >
                 {t.todayKicker}
@@ -698,8 +698,8 @@ export default function Home({
                   flex: 1,
                   padding: "15px 12px",
                   borderRadius: 18,
-                  background: "rgba(255,255,255,.04)",
-                  border: "1px solid rgba(255,255,255,.07)",
+                  background: "rgb(var(--veil-rgb) / .04)",
+                  border: "1px solid rgb(var(--veil-rgb) / .07)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 6,
@@ -709,7 +709,7 @@ export default function Home({
                   style={{
                     fontSize: 22,
                     fontWeight: 600,
-                    color: GOLD,
+                    color: "var(--accent-ink)",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
@@ -728,8 +728,8 @@ export default function Home({
             style={{
               padding: 18,
               borderRadius: 20,
-              background: "rgba(255,255,255,.035)",
-              border: "1px solid rgba(255,255,255,.06)",
+              background: "rgb(var(--veil-rgb) / .035)",
+              border: "1px solid rgb(var(--veil-rgb) / .06)",
               marginBottom: 18,
             }}
           >
@@ -771,11 +771,11 @@ export default function Home({
                         background:
                           i === day
                             ? "rgb(var(--accent-rgb) / .16)"
-                            : "rgba(255,255,255,.03)",
+                            : "rgb(var(--veil-rgb) / .03)",
                         border: `1px solid ${
                           i === day
                             ? "rgb(var(--accent-rgb) / .45)"
-                            : "rgba(255,255,255,.07)"
+                            : "rgb(var(--veil-rgb) / .07)"
                         }`,
                       }}
                     >
@@ -787,7 +787,7 @@ export default function Home({
                           background:
                             done || i === day
                               ? GOLD
-                              : "rgba(255,255,255,.12)",
+                              : "rgb(var(--veil-rgb) / .12)",
                         }}
                       />
                     </div>
@@ -801,8 +801,8 @@ export default function Home({
             style={{
               padding: 18,
               borderRadius: 20,
-              background: "rgba(255,255,255,.035)",
-              border: "1px solid rgba(255,255,255,.06)",
+              background: "rgb(var(--veil-rgb) / .035)",
+              border: "1px solid rgb(var(--veil-rgb) / .06)",
               display: "flex",
               flexDirection: "column",
               gap: 10,
@@ -838,8 +838,8 @@ export default function Home({
               height: 42,
               padding: "0 14px",
               borderRadius: 14,
-              background: "rgba(255,255,255,.05)",
-              border: "1px solid rgba(255,255,255,.08)",
+              background: "rgb(var(--veil-rgb) / .05)",
+              border: "1px solid rgb(var(--veil-rgb) / .08)",
               marginBottom: 20,
             }}
           >
@@ -890,9 +890,9 @@ export default function Home({
                       padding: "15px 16px",
                       borderRadius: 16,
                       background: it.ready
-                        ? "rgba(255,255,255,.045)"
-                        : "rgba(255,255,255,.022)",
-                      border: "1px solid rgba(255,255,255,.06)",
+                        ? "rgb(var(--veil-rgb) / .045)"
+                        : "rgb(var(--veil-rgb) / .022)",
+                      border: "1px solid rgb(var(--veil-rgb) / .06)",
                     }}
                   >
                     <div
@@ -920,7 +920,7 @@ export default function Home({
                       <div
                         style={{
                           fontSize: 11,
-                          color: GOLD,
+                          color: "var(--accent-ink)",
                           padding: "4px 9px",
                           borderRadius: 999,
                           background: "rgb(var(--accent-rgb) / .12)",
@@ -942,11 +942,24 @@ export default function Home({
       {tab === 3 && (
         <div dir="ltr" style={{ ["--knob" as string]: "18px" }}>
           <div style={sectionLabel}>{PALETTE_LABEL.en}</div>
+          {/* One control split down the middle, dark on one side and light on
+              the other. Each half is painted in its OWN palette rather than
+              the running one, so the control shows what the tap will do
+              instead of describing it. */}
           <div
+            role="group"
+            aria-label={PALETTE_LABEL.en}
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: 10,
+              gridTemplateColumns: "1fr 1fr",
+              borderRadius: 18,
+              overflow: "hidden",
+              /* The frame is drawn in the live accent, not in the neutral
+                 hairline the other cards use, so the box belongs to the
+                 selection inside it rather than sitting around it. */
+              border: "1px solid rgb(var(--accent-rgb) / .3)",
+              boxShadow: "0 0 0 3px rgb(var(--accent-rgb) / .06)",
+              transition: "border-color .25s ease, box-shadow .25s ease",
               marginBottom: 26,
             }}
           >
@@ -957,45 +970,56 @@ export default function Home({
                   key={p.id}
                   onClick={() => onSetPalette(p.id)}
                   style={{
-                    padding: "12px 8px 10px",
-                    borderRadius: 16,
+                    padding: "19px 12px 15px",
                     display: "flex",
                     flexDirection: "column",
                     gap: 9,
                     alignItems: "center",
-                    transition: "background .25s ease,border-color .25s ease",
-                    background: on
-                      ? "rgb(var(--accent-rgb) / .12)"
-                      : "rgba(255,255,255,.035)",
-                    border: `1px solid ${
-                      on ? "rgb(var(--accent-rgb) / .45)" : "rgba(255,255,255,.07)"
-                    }`,
+                    // The accent glows out of the top of its own ground.
+                    background: `radial-gradient(130% 100% at 50% -15%, ${p.swatch}33 0%, ${p.ground} 62%)`,
+                    /* Neither half is faded: fading one would wash it toward
+                       the page it is NOT, and then it previews nothing. The
+                       chosen side is marked by the rule under its name, and
+                       by its accent and label coming up to full strength. */
+                    transition: "background .25s ease",
                   }}
                 >
                   <span
                     aria-hidden="true"
                     style={{
-                      width: 34,
-                      height: 34,
+                      width: 26,
+                      height: 26,
                       borderRadius: "50%",
-                      /* The chip previews the palette itself: its ground with
-                         its accent glowing out of the centre. */
-                      background: `radial-gradient(circle at 50% 42%, ${p.swatch} 0%, ${p.swatch} 28%, ${p.ground} 72%)`,
-                      boxShadow: on
-                        ? `0 0 0 2px rgb(var(--accent-rgb) / .5), 0 2px 10px ${p.swatch}55`
-                        : "inset 0 0 0 1px rgba(255,255,255,.12)",
+                      background: on ? p.swatch : `${p.swatch}88`,
+                      boxShadow: on ? `0 2px 12px ${p.swatch}66` : "none",
+                      transition: "background .25s ease",
                     }}
                   />
                   <span
                     style={{
-                      fontSize: 11.5,
-                      fontWeight: 500,
-                      color: on ? "var(--accent)" : "var(--soft)",
+                      fontSize: 12.5,
+                      fontWeight: on ? 600 : 500,
+                      // Readable on this half's ground, not on the app's.
+                      color: on ? p.ink : `${p.ink}b0`,
                       whiteSpace: "nowrap",
                     }}
                   >
                     {p.label.en}
                   </span>
+                  {/* The mark of the choice: a short rule in this half's own
+                      accent. It holds its width either way so the two names
+                      stay on the same line. */}
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 22,
+                      height: 2,
+                      borderRadius: 999,
+                      background: p.swatch,
+                      opacity: on ? 1 : 0,
+                      transition: "opacity .25s ease",
+                    }}
+                  />
                 </Row>
               );
             })}
@@ -1026,9 +1050,9 @@ export default function Home({
                     transition: "background .25s ease,border-color .25s ease",
                     background: on
                       ? "rgb(var(--accent-rgb) / .12)"
-                      : "rgba(255,255,255,.035)",
+                      : "rgb(var(--veil-rgb) / .035)",
                     border: `1px solid ${
-                      on ? "rgb(var(--accent-rgb) / .45)" : "rgba(255,255,255,.07)"
+                      on ? "rgb(var(--accent-rgb) / .45)" : "rgb(var(--veil-rgb) / .07)"
                     }`,
                   }}
                 >
@@ -1040,7 +1064,7 @@ export default function Home({
                     style={{
                       fontSize: 12.5,
                       fontWeight: 500,
-                      color: on ? GOLD : "var(--soft)",
+                      color: on ? "var(--accent-ink)" : "var(--soft)",
                     }}
                   >
                     {styleLabel("en", k)}
@@ -1054,8 +1078,8 @@ export default function Home({
           <div
             style={{
               borderRadius: 18,
-              background: "rgba(255,255,255,.04)",
-              border: "1px solid rgba(255,255,255,.07)",
+              background: "rgb(var(--veil-rgb) / .04)",
+              border: "1px solid rgb(var(--veil-rgb) / .07)",
               overflow: "hidden",
               marginBottom: 26,
             }}
@@ -1067,7 +1091,7 @@ export default function Home({
                 justifyContent: "space-between",
                 gap: 12,
                 padding: "15px 16px",
-                borderBottom: "1px solid rgba(255,255,255,.05)",
+                borderBottom: "1px solid rgb(var(--veil-rgb) / .05)",
               }}
             >
               <div style={{ fontSize: 14.5 }}>{tEn.textSize}</div>
@@ -1077,7 +1101,7 @@ export default function Home({
                   gap: 4,
                   padding: 3,
                   borderRadius: 999,
-                  background: "rgba(0,0,0,.28)",
+                  background: "var(--well)",
                 }}
               >
                 {tEn.sizes.map((label, i) => (
@@ -1102,7 +1126,7 @@ export default function Home({
                   justifyContent: "space-between",
                   gap: 12,
                   padding: "15px 16px",
-                  borderBottom: "1px solid rgba(255,255,255,.05)",
+                  borderBottom: "1px solid rgb(var(--veil-rgb) / .05)",
                 }}
               >
                 <div
@@ -1140,7 +1164,7 @@ export default function Home({
                   gap: 4,
                   padding: 3,
                   borderRadius: 999,
-                  background: "rgba(0,0,0,.28)",
+                  background: "var(--well)",
                 }}
               >
                 {(["ar", "en"] as Lang[]).map((l) => (
@@ -1169,8 +1193,8 @@ export default function Home({
               justifyContent: "space-between",
               padding: "15px 16px",
               borderRadius: 18,
-              background: "rgba(255,255,255,.03)",
-              border: "1px solid rgba(255,255,255,.06)",
+              background: "rgb(var(--veil-rgb) / .03)",
+              border: "1px solid rgb(var(--veil-rgb) / .06)",
               marginTop: 26,
             }}
           >

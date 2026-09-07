@@ -608,7 +608,7 @@ export default function LoginPage() {
                           background:
                             i < strength
                               ? "rgb(var(--accent-rgb) / .8)"
-                              : "rgba(255,255,255,.09)",
+                              : "rgb(var(--veil-rgb) / .09)",
                         }}
                       />
                     ))}
@@ -679,7 +679,7 @@ export default function LoginPage() {
           alignItems: "center",
           marginTop: 18,
           paddingTop: 16,
-          borderTop: "1px solid rgba(255,255,255,.06)",
+          borderTop: "1px solid rgb(var(--veil-rgb) / .06)",
         }}
       >
         {mode === "signin" && (

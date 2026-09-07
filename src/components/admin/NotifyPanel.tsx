@@ -316,7 +316,7 @@ export default function NotifyPanel({ lang }: { lang: Lang }) {
             { n: stats.signedIn, label: s.signedIn },
           ].map((x) => (
             <div key={x.label} style={{ ...card, flex: 1, padding: 14 }}>
-              <div style={{ fontSize: 24, fontWeight: 600, color: "var(--accent)" }}>
+              <div style={{ fontSize: 24, fontWeight: 600, color: "var(--accent-ink)" }}>
                 {x.n}
               </div>
               <div style={{ fontSize: 11.5, color: "var(--dim-2)", lineHeight: 1.5 }}>

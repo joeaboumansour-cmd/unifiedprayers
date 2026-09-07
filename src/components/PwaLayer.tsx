@@ -254,9 +254,9 @@ export default function PwaLayer() {
             margin: "0 10px max(10px, var(--safe-b))",
             borderRadius: "28px 28px 22px 22px",
             background: "var(--surface)",
-            border: "1px solid rgba(255,255,255,.1)",
+            border: "1px solid rgb(var(--veil-rgb) / .1)",
             padding: "14px 20px 22px",
-            boxShadow: "0 -20px 60px rgba(0,0,0,.5)",
+            boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
             transition: `transform .48s ${EASE}`,
             transform: open ? "translateY(0)" : "translateY(110%)",
           }}
@@ -266,7 +266,7 @@ export default function PwaLayer() {
               width: 38,
               height: 4,
               borderRadius: 999,
-              background: "rgba(255,255,255,.22)",
+              background: "rgb(var(--veil-rgb) / .22)",
               margin: "0 auto 18px",
             }}
           />
@@ -288,7 +288,7 @@ export default function PwaLayer() {
               style={{
                 borderRadius: 13,
                 flex: "none",
-                border: "1px solid rgba(255,255,255,.08)",
+                border: "1px solid rgb(var(--veil-rgb) / .08)",
               }}
             />
             <div style={{ minWidth: 0 }}>
@@ -313,13 +313,13 @@ export default function PwaLayer() {
                   color: "var(--body)",
                   padding: "12px 14px",
                   borderRadius: 14,
-                  background: "rgba(255,255,255,.04)",
-                  border: "1px solid rgba(255,255,255,.07)",
+                  background: "rgb(var(--veil-rgb) / .04)",
+                  border: "1px solid rgb(var(--veil-rgb) / .07)",
                   marginBottom: 12,
                 }}
               >
                 Tap the Share button in Safari&apos;s bottom bar, then choose{" "}
-                <strong style={{ color: "var(--accent)" }}>Add to Home Screen</strong>.
+                <strong style={{ color: "var(--accent-ink)" }}>Add to Home Screen</strong>.
               </div>
               <button
                 type="button"
@@ -328,8 +328,8 @@ export default function PwaLayer() {
                   width: "100%",
                   height: 48,
                   borderRadius: 16,
-                  background: "rgba(255,255,255,.06)",
-                  border: "1px solid rgba(255,255,255,.09)",
+                  background: "rgb(var(--veil-rgb) / .06)",
+                  border: "1px solid rgb(var(--veil-rgb) / .09)",
                   color: "var(--soft-2)",
                   fontSize: 14.5,
                   fontWeight: 500,
@@ -362,8 +362,8 @@ export default function PwaLayer() {
                   height: 50,
                   padding: "0 20px",
                   borderRadius: 16,
-                  background: "rgba(255,255,255,.06)",
-                  border: "1px solid rgba(255,255,255,.09)",
+                  background: "rgb(var(--veil-rgb) / .06)",
+                  border: "1px solid rgb(var(--veil-rgb) / .09)",
                   color: "var(--soft-2)",
                   fontSize: 14.5,
                 }}

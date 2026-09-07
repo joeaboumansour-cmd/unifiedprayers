@@ -181,7 +181,7 @@ export default function ResetPasswordPage() {
                         background:
                           i < strength
                             ? "rgb(var(--accent-rgb) / .8)"
-                            : "rgba(255,255,255,.09)",
+                            : "rgb(var(--veil-rgb) / .09)",
                       }}
                     />
                   ))}

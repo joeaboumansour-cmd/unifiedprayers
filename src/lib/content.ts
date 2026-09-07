@@ -5,13 +5,7 @@ export type Lang = "ar" | "en";
 export type PrayerId = "spirit" | "mary";
 export type MysteryKey = "joyful" | "sorrowful" | "glorious" | "luminous";
 export type BeadStyle = "arc" | "ring" | "chain" | "orb";
-export type Palette =
-  | "midnight"
-  | "rose"
-  | "lavender"
-  | "salmon"
-  | "sand"
-  | "sage";
+export type Palette = "midnight" | "linen";
 
 export type NamedPrayer = { name: string; sections: string[] };
 export type Gift = { name: string; super: string };
@@ -237,10 +231,14 @@ export const setForDay = (day: number): MysteryKey => D.DAY_SET[day] ?? "joyful"
 /* -------------------------------- palettes ------------------------------- */
 
 /**
- * The palettes offered in Settings. Each pairs a deep ground with an accent
- * from the opposite side of the colour wheel; `swatch` is the accent and
- * `ground` the mid background stop, which is all a picker chip needs to show
- * the pairing.
+ * The two palettes offered in Settings — one dark, one light. Each is a whole
+ * scheme, ground and surface and ink and accent, rather than an accent
+ * swapped onto one design.
+ *
+ * The picker paints each half in its OWN colours rather than the running
+ * theme's, so it previews what the tap does. That needs three of these:
+ * `ground` is the mid background stop, `swatch` the accent, and `ink` the
+ * text colour that is readable on that ground.
  * `theme` is what goes in the theme-color meta so the browser and task
  * switcher tint to match. Keep these in step with src/app/palettes.css.
  *
@@ -253,22 +251,15 @@ export type PaletteInfo = {
   label: { ar: string; en: string };
   swatch: string;
   ground: string;
+  ink: string;
   theme: string;
 };
 
 export const PALETTES: PaletteInfo[] = [
   { id: "midnight", label: { ar: "ليلي", en: "Midnight" },
-    swatch: "#f0c775", ground: "#0b1226", theme: "#070a15" },
-  { id: "rose", label: { ar: "وردي", en: "Rose" },
-    swatch: "#f2a2b0", ground: "#0a1f1b", theme: "#05110f" },
-  { id: "lavender", label: { ar: "بنفسجي", en: "Lavender" },
-    swatch: "#c3aef5", ground: "#181a12", theme: "#0d0f09" },
-  { id: "salmon", label: { ar: "سلموني", en: "Salmon" },
-    swatch: "#f6a184", ground: "#08202a", theme: "#041116" },
-  { id: "sand", label: { ar: "رملي", en: "Sand" },
-    swatch: "#ecdcb8", ground: "#14182b", theme: "#0b0d19" },
-  { id: "sage", label: { ar: "زيتي", en: "Sage" },
-    swatch: "#a9d6ba", ground: "#240f20", theme: "#120610" },
+    swatch: "#e8c77e", ground: "#0b1226", ink: "#eceff7", theme: "#070c18" },
+  { id: "linen", label: { ar: "نهاري", en: "Linen" },
+    swatch: "#b08445", ground: "#f6f3ec", ink: "#23262e", theme: "#f1ece1" },
 ];
 
 export const paletteInfo = (id: Palette): PaletteInfo =>

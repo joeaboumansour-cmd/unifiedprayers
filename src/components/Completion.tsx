@@ -91,7 +91,7 @@ export default function Completion({ open, lang, onDismiss }: CompletionProps) {
             cx="60"
             cy="60"
             r="50"
-            stroke="rgba(255,255,255,.10)"
+            stroke="rgb(var(--veil-rgb) / .10)"
             strokeWidth="2"
           />
           <circle

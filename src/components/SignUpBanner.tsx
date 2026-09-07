@@ -92,8 +92,8 @@ export default function SignUpBanner({ auth }: { auth: Auth }) {
         padding: "13px 15px",
         borderRadius: 18,
         marginBottom: 14,
-        background: "rgba(255,255,255,.045)",
-        border: "1px solid rgba(255,255,255,.07)",
+        background: "rgb(var(--veil-rgb) / .045)",
+        border: "1px solid rgb(var(--veil-rgb) / .07)",
       }}
     >
       <div
@@ -117,8 +117,8 @@ export default function SignUpBanner({ auth }: { auth: Auth }) {
             href="/login"
             style={{
               ...button,
-              background: "rgba(255,255,255,.05)",
-              border: "1px solid rgba(255,255,255,.1)",
+              background: "rgb(var(--veil-rgb) / .05)",
+              border: "1px solid rgb(var(--veil-rgb) / .1)",
               color: "var(--soft)",
             }}
           >

@@ -102,9 +102,9 @@ export default function NotificationsPrompt({
           margin: "0 10px max(10px, var(--safe-b))",
           borderRadius: "28px 28px 22px 22px",
           background: "var(--surface)",
-          border: "1px solid rgba(255,255,255,.1)",
+          border: "1px solid rgb(var(--veil-rgb) / .1)",
           padding: "14px 20px 22px",
-          boxShadow: "0 -20px 60px rgba(0,0,0,.5)",
+          boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
           transition: `transform .48s ${EASE}`,
           transform: open ? "translateY(0)" : "translateY(110%)",
         }}
@@ -114,7 +114,7 @@ export default function NotificationsPrompt({
             width: 38,
             height: 4,
             borderRadius: 999,
-            background: "rgba(255,255,255,.22)",
+            background: "rgb(var(--veil-rgb) / .22)",
             margin: "0 auto 18px",
           }}
         />
@@ -129,7 +129,7 @@ export default function NotificationsPrompt({
             style={{
               borderRadius: 13,
               flex: "none",
-              border: "1px solid rgba(255,255,255,.08)",
+              border: "1px solid rgb(var(--veil-rgb) / .08)",
             }}
           />
           <div style={{ minWidth: 0 }}>
@@ -177,8 +177,8 @@ export default function NotificationsPrompt({
               minWidth: 108,
               height: 48,
               borderRadius: 16,
-              background: "rgba(255,255,255,.06)",
-              border: "1px solid rgba(255,255,255,.09)",
+              background: "rgb(var(--veil-rgb) / .06)",
+              border: "1px solid rgb(var(--veil-rgb) / .09)",
               color: "var(--soft-2)",
               fontSize: 14.5,
               fontWeight: 500,

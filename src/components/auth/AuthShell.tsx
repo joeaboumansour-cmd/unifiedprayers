@@ -35,8 +35,8 @@ export const AUTH_COPY = {
 
 const card: CSSProperties = {
   borderRadius: 22,
-  background: "rgba(255,255,255,.045)",
-  border: "1px solid rgba(255,255,255,.07)",
+  background: "rgb(var(--veil-rgb) / .045)",
+  border: "1px solid rgb(var(--veil-rgb) / .07)",
   padding: "22px 20px",
 };
 
@@ -48,8 +48,8 @@ export const primaryButton = (disabled: boolean): CSSProperties => ({
   padding: "13px 18px",
   fontSize: 15,
   fontWeight: 600,
-  color: disabled ? "var(--dim-3)" : "var(--accent)",
-  background: disabled ? "rgba(255,255,255,.03)" : "rgb(var(--accent-rgb) / .12)",
+  color: disabled ? "var(--dim-3)" : "var(--accent-ink)",
+  background: disabled ? "rgb(var(--veil-rgb) / .03)" : "rgb(var(--accent-rgb) / .12)",
   cursor: disabled ? "default" : "pointer",
   fontFamily: "inherit",
   transition: "background .2s ease, color .2s ease",
@@ -64,7 +64,7 @@ export const linkButton: CSSProperties = {
   border: "none",
   padding: 0,
   fontSize: 13,
-  color: "var(--accent)",
+  color: "var(--accent-ink)",
   cursor: "pointer",
   fontFamily: "inherit",
   textDecoration: "none",
@@ -79,7 +79,7 @@ export function Notice({
   children: ReactNode;
 }) {
   const colour =
-    tone === "error" ? "#f2a2b0" : tone === "ok" ? "var(--accent)" : "var(--dim-3)";
+    tone === "error" ? "var(--danger)" : tone === "ok" ? "var(--accent)" : "var(--dim-3)";
   return (
     <div
       // Announced to screen readers when it appears, which is the whole point
@@ -90,9 +90,9 @@ export function Notice({
         fontSize: 12.5,
         lineHeight: 1.55,
         color: colour,
-        background: tone === "error" ? "rgba(242,162,176,.07)" : "transparent",
+        background: tone === "error" ? "rgb(var(--danger-rgb) / .07)" : "transparent",
         border:
-          tone === "error" ? "1px solid rgba(242,162,176,.2)" : "1px solid transparent",
+          tone === "error" ? "1px solid rgb(var(--danger-rgb) / .2)" : "1px solid transparent",
         borderRadius: 12,
         padding: tone === "error" ? "10px 12px" : "0 2px",
       }}
@@ -139,7 +139,7 @@ export function Field({ label, hint, error, badge, children }: FieldProps) {
       {error && (
         <div
           id={errorId}
-          style={{ fontSize: 11.5, color: "#f2a2b0", lineHeight: 1.5 }}
+          style={{ fontSize: 11.5, color: "var(--danger)", lineHeight: 1.5 }}
         >
           {error}
         </div>
@@ -152,8 +152,8 @@ const inputStyle = (invalid: boolean): CSSProperties => ({
   appearance: "none",
   width: "100%",
   borderRadius: 14,
-  border: `1px solid ${invalid ? "rgba(242,162,176,.45)" : "rgba(255,255,255,.12)"}`,
-  background: "rgba(0,0,0,.28)",
+  border: `1px solid ${invalid ? "rgb(var(--danger-rgb) / .45)" : "rgb(var(--veil-rgb) / .12)"}`,
+  background: "var(--well)",
   padding: "12px 14px",
   fontSize: 15,
   color: "var(--ink)",

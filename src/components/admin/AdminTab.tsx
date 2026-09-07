@@ -55,8 +55,8 @@ export default function AdminTab({ lang }: { lang: Lang }) {
           padding: 4,
           marginBottom: 20,
           borderRadius: 999,
-          background: "rgba(255,255,255,.04)",
-          border: "1px solid rgba(255,255,255,.07)",
+          background: "rgb(var(--veil-rgb) / .04)",
+          border: "1px solid rgb(var(--veil-rgb) / .07)",
           // Four labels do not fit on a narrow phone in either language;
           // scrolling beats truncating them into initials.
           overflowX: "auto",

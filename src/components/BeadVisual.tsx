@@ -59,6 +59,10 @@ function Centre({
           animation: "upBreathe 6.5s ease-in-out infinite",
         }}
       >
+        {/* The art is screen-blended, which needs a dark ground under it to
+            show at all. On the dark palettes the app's own ground is that;
+            on the light one this plate supplies it. */}
+        <div style={{ ...imgStyle, mixBlendMode: "normal", background: "var(--art-plate)" }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/dove.webp"
@@ -135,7 +139,7 @@ export default function BeadVisual({
   const dash = `${(progress * DASH_LENGTH[style]).toFixed(1)} 9999`;
   // The arc and ring read right-to-left in Arabic, so mirror the whole group.
   const flip = lang === "ar" ? "translate(400,0) scale(-1,1)" : undefined;
-  const track = "rgba(255,255,255,.09)";
+  const track = "rgb(var(--veil-rgb) / .09)";
   const lit = "rgb(var(--accent-rgb) / .5)";
   const strokeAnim = { transition: `stroke-dasharray .55s ${EASE}` };
 

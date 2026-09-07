@@ -73,8 +73,8 @@ const S = {
 
 const card: CSSProperties = {
   borderRadius: 18,
-  background: "rgba(255,255,255,.045)",
-  border: "1px solid rgba(255,255,255,.07)",
+  background: "rgb(var(--veil-rgb) / .045)",
+  border: "1px solid rgb(var(--veil-rgb) / .07)",
   overflow: "hidden",
 };
 
@@ -94,7 +94,7 @@ const button: CSSProperties = {
   padding: "10px 18px",
   fontSize: 14,
   fontWeight: 500,
-  color: "var(--accent)",
+  color: "var(--accent-ink)",
   background: "rgb(var(--accent-rgb) / .1)",
   cursor: "pointer",
   fontFamily: "inherit",
@@ -155,7 +155,7 @@ function ChangePassword({ lang, auth }: { lang: Lang; auth: Auth }) {
           flexDirection: "column",
           gap: 10,
           padding: "14px 16px",
-          borderTop: "1px solid rgba(255,255,255,.06)",
+          borderTop: "1px solid rgb(var(--veil-rgb) / .06)",
           alignItems: ar ? "flex-end" : "flex-start",
         }}
       >
@@ -164,8 +164,8 @@ function ChangePassword({ lang, auth }: { lang: Lang; auth: Auth }) {
           style={{
             ...button,
             color: "var(--soft)",
-            background: "rgba(255,255,255,.04)",
-            border: "1px solid rgba(255,255,255,.1)",
+            background: "rgb(var(--veil-rgb) / .04)",
+            border: "1px solid rgb(var(--veil-rgb) / .1)",
           }}
           onClick={() => {
             setDone(false);
@@ -188,7 +188,7 @@ function ChangePassword({ lang, auth }: { lang: Lang; auth: Auth }) {
         flexDirection: "column",
         gap: 14,
         padding: "16px",
-        borderTop: "1px solid rgba(255,255,255,.06)",
+        borderTop: "1px solid rgb(var(--veil-rgb) / .06)",
       }}
     >
       {error && <Notice tone="error">{error}</Notice>}
@@ -255,8 +255,8 @@ function ChangePassword({ lang, auth }: { lang: Lang; auth: Auth }) {
             ...button,
             flex: "none",
             color: "var(--dim-2)",
-            background: "rgba(255,255,255,.04)",
-            border: "1px solid rgba(255,255,255,.1)",
+            background: "rgb(var(--veil-rgb) / .04)",
+            border: "1px solid rgb(var(--veil-rgb) / .1)",
           }}
         >
           {s.cancel}
@@ -367,8 +367,8 @@ export default function AccountCard({
                 style={{
                   ...button,
                   color: "var(--soft)",
-                  background: "rgba(255,255,255,.04)",
-                  border: "1px solid rgba(255,255,255,.1)",
+                  background: "rgb(var(--veil-rgb) / .04)",
+                  border: "1px solid rgb(var(--veil-rgb) / .1)",
                 }}
               >
                 {s.createAccount}

@@ -1,3 +1,4 @@
+import { PALETTES } from "@/lib/content";
 import type { BeadStyle, Lang, MysteryKey, Palette, PrayerId } from "@/lib/content";
 import type { PrefsRow, ProgressRow } from "@/lib/supabase/types";
 
@@ -46,13 +47,23 @@ export const DEFAULT_PREFS: Prefs = {
 
 /* ------------------------------- local disk ------------------------------ */
 
+/**
+ * A palette the build still ships, or the default. A device that last ran an
+ * older build holds a name that has since been dropped; leaving it in place
+ * would paint as midnight anyway, because the CSS is gone, and would then be
+ * pushed to a database that rejects it.
+ */
+const knownPalette = (p: Palette): Palette =>
+  PALETTES.some((x) => x.id === p) ? p : DEFAULT_PREFS.palette;
+
 export function readPrefs(): Prefs | null {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
     if (!raw) return null;
     // Spread over the defaults: a blob written by an older build is missing
     // whatever has been added since, and must still load.
-    return { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) };
+    const p = { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) };
+    return { ...p, palette: knownPalette(p.palette) };
   } catch {
     return null; // private mode, or a corrupt blob — defaults are fine
   }
@@ -97,7 +108,7 @@ export const prefsToRow = (p: Prefs, userId: string): PrefsRow => ({
 export const rowToPrefs = (r: PrefsRow): Prefs => ({
   lang: r.lang,
   beadStyle: r.bead_style,
-  palette: r.palette,
+  palette: knownPalette(r.palette),
   size: r.size,
   dim: r.dim,
   haptics: r.haptics,

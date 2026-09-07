@@ -67,7 +67,7 @@ export function AnnouncementBanner({
               marginTop: 4,
               fontSize: 12.5,
               fontWeight: 500,
-              color: "var(--accent)",
+              color: "var(--accent-ink)",
               textDecoration: "none",
             }}
           >
@@ -162,8 +162,8 @@ export function AnnouncementModal({
           zIndex: 41,
           borderRadius: 24,
           background: "var(--surface)",
-          border: "1px solid rgba(255,255,255,.1)",
-          boxShadow: "0 24px 70px rgba(0,0,0,.55)",
+          border: "1px solid rgb(var(--veil-rgb) / .1)",
+          boxShadow: "0 24px 70px rgb(var(--shadow-rgb) / var(--shadow-a))",
           padding: 22,
           display: "flex",
           flexDirection: "column",
@@ -215,7 +215,7 @@ export function AnnouncementModal({
                 padding: "13px 18px",
                 fontSize: 15,
                 fontWeight: 600,
-                color: "var(--accent)",
+                color: "var(--accent-ink)",
                 background: "rgb(var(--accent-rgb) / .12)",
                 textDecoration: "none",
               }}

@@ -51,7 +51,7 @@ export const viewport: Viewport = {
   userScalable: false,
   // Lets the layout paint under the notch and the home bar.
   viewportFit: "cover",
-  themeColor: "#070a15",
+  themeColor: "#070c18",
 };
 
 export default function RootLayout({
