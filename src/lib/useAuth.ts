@@ -70,6 +70,20 @@ export type Auth = {
   /** Sends the confirmation email again, for one that never arrived. */
   resendConfirmation: (email: string, lang: Lang) => Promise<AuthResult>;
   /**
+   * Confirms an address with the code from the email, rather than the link.
+   *
+   * This is the path that works on a phone. A link is opened by whichever
+   * browser the mail app owns, and the session it creates lives in that
+   * browser's storage, not in the installed app -- so confirming by link ends
+   * with somebody still signed out on their home screen. A code is typed into
+   * the app itself, so the session is created where it is wanted.
+   */
+  confirmWithCode: (
+    email: string,
+    code: string,
+    lang: Lang,
+  ) => Promise<AuthResult>;
+  /**
    * Sets the password on the session a recovery link just opened. Asks for no
    * current password because the link was the proof. Only /reset-password
    * calls this, and only once lib/authRecovery confirms this tab redeemed it.
@@ -107,6 +121,7 @@ const T = {
     locked: "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
     offline: "تعذّر الاتصال. تحقق من الشبكة وحاول مجددًا.",
     weakPassword: "كلمة السر ضعيفة أو مكشوفة في تسريب معروف. اختر واحدة أخرى.",
+    badCode: "الرمز غير صحيح أو انتهت صلاحيته. تحقّق منه أو اطلب رمزًا جديدًا.",
     generic: "تعذّر إتمام الطلب. حاول مجددًا.",
   },
   en: {
@@ -119,6 +134,7 @@ const T = {
     locked: "Too many attempts. Wait a moment and try again.",
     offline: "Could not reach the server. Check your connection and try again.",
     weakPassword: "That password is too weak, or appears in a known breach. Choose another.",
+    badCode: "That code is wrong or has expired. Check it, or ask for a new one.",
     generic: "Something went wrong. Please try again.",
   },
 } as const;
@@ -139,6 +155,14 @@ function explain(error: { message?: string; code?: string } | null, lang: Lang):
   }
   if (code === "weak_password" || raw.includes("pwned") || raw.includes("weak")) {
     return t.weakPassword;
+  }
+  if (
+    code === "otp_expired" ||
+    raw.includes("token has expired") ||
+    raw.includes("invalid token") ||
+    raw.includes("otp")
+  ) {
+    return t.badCode;
   }
   if (code === "over_request_rate_limit" || raw.includes("rate limit")) return t.locked;
   // The signup trigger raises these when a username or phone is already held.
@@ -369,6 +393,27 @@ export function useAuth(): Auth {
     [],
   );
 
+  const confirmWithCode = useCallback(
+    async (email: string, code: string, lang: Lang): Promise<AuthResult> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, message: T[lang].generic };
+
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        // Whitespace because people paste, and a code read off a lock screen
+        // often arrives with a space in the middle.
+        token: code.replace(/s+/g, ""),
+        type: "signup",
+      });
+
+      if (error) return { ok: false, message: explain(error, lang) };
+      // verifyOtp signs them in as a side effect, and onAuthStateChange will
+      // have taken care of the session before this returns.
+      return { ok: true };
+    },
+    [],
+  );
+
   const setNewPassword = useCallback(
     async (next: string, lang: Lang): Promise<AuthResult> => {
       const supabase = getSupabase();
@@ -402,6 +447,7 @@ export function useAuth(): Auth {
     changePassword,
     requestPasswordReset,
     resendConfirmation,
+    confirmWithCode,
     setNewPassword,
     signOut,
   };

@@ -58,12 +58,17 @@ const COPY = {
     checkMailTitle: "تفقّد بريدك",
     confirmFirstTitle: "أكّد بريدك أولًا",
     confirmSent: (email: string) =>
-      `أنشأنا الحساب وأرسلنا رابط تأكيد إلى ${email}. افتحه لتفعيل الحساب.`,
+      `أنشأنا الحساب وأرسلنا رمزًا إلى ${email}. أدخله هنا لتفعيل الحساب.`,
     resetSent: (email: string) =>
       `إن كان لـ ${email} حساب عندنا، فرابط إعادة التعيين في طريقه إليه الآن.`,
     confirmPending: (email: string) =>
-      `${email} لم يُؤكَّد بعد. افتح رابط التأكيد المرسل إليه، أو اطلب رابطًا جديدًا.`,
+      `${email} لم يُؤكَّد بعد. أدخل الرمز المرسل إليه، أو اطلب رمزًا جديدًا.`,
     spamHint: "لم تصل خلال دقيقة؟ تفقّد مجلد الرسائل غير المرغوب فيها.",
+    codeLabel: "رمز التأكيد",
+    codeHint: "ستة أرقام، في الرسالة نفسها. صالح لساعة.",
+    verifyCta: "تأكيد وتسجيل الدخول",
+    codeTooShort: "الرمز ستة أرقام.",
+    orLink: "أو افتح الرابط في الرسالة نفسها — لكنه يفتح في متصفّح بريدك، فقد يلزمك تسجيل الدخول هنا بعده.",
     resend: "إعادة الإرسال",
     resendWait: (s: number) => `يمكن إعادة الإرسال بعد ${s} ثانية`,
     resendDone: "أُرسلت رسالة أخرى.",
@@ -103,12 +108,17 @@ const COPY = {
     checkMailTitle: "Check your email",
     confirmFirstTitle: "Confirm your email first",
     confirmSent: (email: string) =>
-      `Your account is created. Open the confirmation link we sent to ${email} to activate it.`,
+      `Your account is created. Enter the code we sent to ${email} to activate it.`,
     resetSent: (email: string) =>
       `If ${email} has an account with us, a reset link is on its way to it now.`,
     confirmPending: (email: string) =>
-      `${email} has not been confirmed yet. Open the link we already sent to it, or ask for a new one.`,
+      `${email} has not been confirmed yet. Enter the code from that email, or ask for a new one.`,
     spamHint: "Not there within a minute? Have a look in your spam folder.",
+    codeLabel: "Confirmation code",
+    codeHint: "Six digits, in the email itself. Good for an hour.",
+    verifyCta: "Confirm and sign in",
+    codeTooShort: "The code is six digits.",
+    orLink: "Or open the link in the same email — but that opens in your mail app's browser, so you may have to sign in here afterwards.",
     resend: "Send it again",
     resendWait: (s: number) => `You can send again in ${s}s`,
     resendDone: "Another email is on its way.",
@@ -148,6 +158,7 @@ export default function LoginPage() {
     email: string;
   } | null>(null);
   const [resendIn, setResendIn] = useState(0);
+  const [code, setCode] = useState("");
 
   const t = COPY[lang];
 
@@ -229,12 +240,32 @@ export default function LoginPage() {
     setResendIn(60);
   };
 
+  /* Confirming by code rather than by link. The whole point is that the
+     session lands in this browser -- the one the app is actually used in --
+     instead of whichever browser the mail app happens to own. */
+  const submitCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sent || pending) return;
+    setError(null);
+    setDone(null);
+
+    const digits = code.replace(/[^0-9]/g, "");
+    if (digits.length !== 6) return setError(t.codeTooShort);
+
+    setPending(true);
+    const res = await auth.confirmWithCode(sent.email, digits, lang);
+    setPending(false);
+    if (!res.ok) return setError(res.message);
+    router.replace("/");
+  };
+
   const switchMode = useCallback((next: Mode) => {
     setMode(next);
     setError(null);
     setDone(null);
     setSent(null);
     setPassword("");
+    setCode("");
   }, []);
 
   /* ------------------------------- submit ------------------------------- */
@@ -327,6 +358,60 @@ export default function LoginPage() {
                 : t.resetSent(sent.email)}
           </Notice>
           {done && <Notice tone="info">{done}</Notice>}
+
+          {sent.kind !== "reset" && (
+            <form
+              onSubmit={submitCode}
+              noValidate
+              style={{ display: "flex", flexDirection: "column", gap: 14 }}
+            >
+              {/* Named for the password manager, which otherwise offers to save
+                  the code against the account as if it were a password. */}
+              <input
+                type="email"
+                value={sent.email}
+                autoComplete="username"
+                readOnly
+                hidden
+              />
+              <Field label={t.codeLabel} hint={t.codeHint}>
+                {(id, describedBy) => (
+                  <TextInput
+                    id={id}
+                    aria-describedby={describedBy}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    // one-time-code is what lets iOS and Android offer the
+                    // digits straight from the notification, which is the
+                    // entire reason for preferring a code to a link.
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={7}
+                    autoFocus
+                    required
+                    placeholder="000000"
+                    style={{
+                      textAlign: "center",
+                      fontSize: 24,
+                      letterSpacing: ".3em",
+                      // The placeholder is centred; the letter-spacing would
+                      // otherwise push the digits off to one side.
+                      paddingInlineStart: 14 + 7,
+                    }}
+                  />
+                )}
+              </Field>
+              <button
+                type="submit"
+                disabled={pending}
+                style={primaryButton(pending)}
+              >
+                {pending ? t.working : t.verifyCta}
+              </button>
+            </form>
+          )}
+
           <div
             style={{
               fontSize: 11.5,
@@ -335,7 +420,7 @@ export default function LoginPage() {
               textAlign: "center",
             }}
           >
-            {t.spamHint}
+            {sent.kind === "reset" ? t.spamHint : `${t.spamHint} ${t.orLink}`}
           </div>
           <button
             type="button"

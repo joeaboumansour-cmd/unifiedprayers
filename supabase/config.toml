@@ -228,7 +228,7 @@ double_confirm_changes = true
 # confirmation step and no reset link, and a password is changed from Settings
 # with the current one as proof. Turning this back on without an SMTP sender
 # would lock every new account out, because the mail would never arrive.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -247,6 +247,18 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# The same templates the hosted project uses, so what is tested locally is
+# what people actually receive. The subject carries the code as well as the
+# body: mail apps show the subject in the notification, and the whole point of
+# a code over a link is being able to read it without opening anything.
+[auth.email.template.confirmation]
+subject = "{{ .Token }} is your Unified Prayers code"
+content_path = "./supabase/email-templates/confirm-signup.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Unified Prayers password"
+content_path = "./supabase/email-templates/reset-password.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
