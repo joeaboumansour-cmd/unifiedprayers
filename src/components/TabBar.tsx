@@ -1,6 +1,6 @@
 "use client";
 
-import { type Lang, ui } from "@/lib/content";
+import { ui } from "@/lib/content";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
 /** Each tab's glyph is the same circle pair at different radii. */
@@ -13,27 +13,28 @@ const RADII: [number, number][] = [
 ];
 
 /** Named here rather than in design.json — see the note in Home.tsx. */
-const ADMIN_LABEL = { ar: "الإدارة", en: "Admin" } as const;
+const ADMIN_LABEL = "Admin";
 
 export default function TabBar({
   tab,
-  lang,
   hidden,
   isAdmin,
   onSelect,
 }: {
   tab: number;
-  lang: Lang;
   hidden: boolean;
   /** Appends the admin tab. Nothing behind it trusts this flag. */
   isAdmin: boolean;
   onSelect: (i: number) => void;
 }) {
-  const t = ui(lang);
+  // English whatever the app language is, like the Settings and Admin tabs it
+  // leads to. Only the labels: the bar itself still mirrors with the shell, so
+  // the tabs stay where an Arabic reader's thumb already expects them.
+  const t = ui("en");
   // The four names come from the content document, which an admin can edit; a
   // fifth entry added there would appear here with no tab body behind it, so
   // the list is cut to the panels that exist before the admin one is added.
-  const labels = [...t.tabs.slice(0, 4), ...(isAdmin ? [ADMIN_LABEL[lang]] : [])];
+  const labels = [...t.tabs.slice(0, 4), ...(isAdmin ? [ADMIN_LABEL] : [])];
   return (
     <nav
       style={{

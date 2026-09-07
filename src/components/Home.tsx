@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
 import { AnnouncementBanner } from "@/components/Announcements";
 import NotificationsCard from "@/components/NotificationsCard";
+import SignUpBanner from "@/components/SignUpBanner";
 import {
   PALETTES,
   PALETTE_LABEL,
@@ -304,6 +305,13 @@ export default function Home({
 }: HomeProps) {
   const t = ui(lang);
   const ar = lang === "ar";
+  // Settings and Admin are English whatever the app language is: they are
+  // account and operator surfaces rather than prayer text, and one fixed
+  // wording keeps them unambiguous. Their subtrees also carry dir="ltr", since
+  // the shell around them mirrors in Arabic, and re-pin --knob, which the root
+  // sets to travel the mirrored way.
+  const tEn = ui("en");
+  const enOnly = tab === 3 || tab === 4;
   const today = new Date();
   const hour = today.getHours();
   const greet = hour < 5 ? 0 : hour < 12 ? 1 : hour < 17 ? 2 : 3;
@@ -375,7 +383,9 @@ export default function Home({
           >
             {tab === 0
               ? t.greeting[greet]
-              : (t.pages[tab] ?? ADMIN_LABEL[lang])}
+              : enOnly
+                ? (tEn.pages[tab] ?? ADMIN_LABEL.en)
+                : (t.pages[tab] ?? ADMIN_LABEL[lang])}
           </div>
         </div>
         <button
@@ -442,6 +452,8 @@ export default function Home({
               {streakLine(stats.streak, ar)}
             </div>
           </div>
+
+          <SignUpBanner auth={auth} />
 
           <Row
             onClick={onResume}
@@ -928,8 +940,8 @@ export default function Home({
 
       {/* ---------- SETTINGS ---------- */}
       {tab === 3 && (
-        <div>
-          <div style={sectionLabel}>{PALETTE_LABEL[lang]}</div>
+        <div dir="ltr" style={{ ["--knob" as string]: "18px" }}>
+          <div style={sectionLabel}>{PALETTE_LABEL.en}</div>
           <div
             style={{
               display: "grid",
@@ -982,14 +994,14 @@ export default function Home({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {p.label[lang]}
+                    {p.label.en}
                   </span>
                 </Row>
               );
             })}
           </div>
 
-          <div style={sectionLabel}>{t.beadStyleLabel}</div>
+          <div style={sectionLabel}>{tEn.beadStyleLabel}</div>
           <div
             style={{
               display: "grid",
@@ -1031,14 +1043,14 @@ export default function Home({
                       color: on ? GOLD : "var(--soft)",
                     }}
                   >
-                    {styleLabel(lang, k)}
+                    {styleLabel("en", k)}
                   </div>
                 </Row>
               );
             })}
           </div>
 
-          <div style={sectionLabel}>{t.readingLabel}</div>
+          <div style={sectionLabel}>{tEn.readingLabel}</div>
           <div
             style={{
               borderRadius: 18,
@@ -1058,7 +1070,7 @@ export default function Home({
                 borderBottom: "1px solid rgba(255,255,255,.05)",
               }}
             >
-              <div style={{ fontSize: 14.5 }}>{t.textSize}</div>
+              <div style={{ fontSize: 14.5 }}>{tEn.textSize}</div>
               <div
                 style={{
                   display: "flex",
@@ -1068,7 +1080,7 @@ export default function Home({
                   background: "rgba(0,0,0,.28)",
                 }}
               >
-                {t.sizes.map((label, i) => (
+                {tEn.sizes.map((label, i) => (
                   <Row
                     key={label}
                     onClick={() => onSetSize(i)}
@@ -1080,7 +1092,7 @@ export default function Home({
               </div>
             </div>
 
-            {t.toggles.map(([name, hint], i) => (
+            {tEn.toggles.map(([name, hint], i) => (
               <Row
                 key={name}
                 onClick={() => onToggle(i)}
@@ -1121,7 +1133,7 @@ export default function Home({
                 padding: "15px 16px",
               }}
             >
-              <div style={{ fontSize: 14.5 }}>{t.language}</div>
+              <div style={{ fontSize: 14.5 }}>{tEn.language}</div>
               <div
                 style={{
                   display: "flex",
@@ -1144,10 +1156,10 @@ export default function Home({
             </div>
           </div>
 
-          <AccountCard lang={lang} auth={auth} syncStatus={syncStatus} />
+          <AccountCard lang="en" auth={auth} syncStatus={syncStatus} />
 
           <div style={{ marginTop: 26 }}>
-            <NotificationsCard lang={lang} push={push} />
+            <NotificationsCard lang="en" push={push} />
           </div>
 
           <div
@@ -1162,8 +1174,8 @@ export default function Home({
               marginTop: 26,
             }}
           >
-            <div style={{ fontSize: 13.5, color: "var(--soft)" }}>{t.about}</div>
-            <div style={{ fontSize: 12, color: "var(--dim-3)" }}>{t.version}</div>
+            <div style={{ fontSize: 13.5, color: "var(--soft)" }}>{tEn.about}</div>
+            <div style={{ fontSize: 12, color: "var(--dim-3)" }}>{tEn.version}</div>
           </div>
         </div>
       )}
@@ -1171,7 +1183,11 @@ export default function Home({
       {/* ---------- ADMIN ---------- */}
       {/* Guarded twice over: the tab bar only offers this index to an admin,
           and the panel is only mounted for one. */}
-      {tab === 4 && isAdmin && <AdminTab lang={lang} />}
+      {tab === 4 && isAdmin && (
+        <div dir="ltr" style={{ ["--knob" as string]: "17px" }}>
+          <AdminTab lang="en" />
+        </div>
+      )}
     </div>
   );
 }

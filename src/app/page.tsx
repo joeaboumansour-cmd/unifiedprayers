@@ -411,7 +411,6 @@ export default function Page() {
 
       <TabBar
         tab={tab}
-        lang={prefs.lang}
         hidden={isPlayer}
         isAdmin={isAdmin}
         onSelect={(i) => {
