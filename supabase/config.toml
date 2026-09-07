@@ -257,7 +257,7 @@ subject = "{{ .Token }} is your Unified Prayers code"
 content_path = "./supabase/email-templates/confirm-signup.html"
 
 [auth.email.template.recovery]
-subject = "Reset your Unified Prayers password"
+subject = "{{ .Token }} is your Unified Prayers reset code"
 content_path = "./supabase/email-templates/reset-password.html"
 
 # Uncomment to customize email template

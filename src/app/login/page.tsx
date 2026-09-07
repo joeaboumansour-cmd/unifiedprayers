@@ -11,6 +11,7 @@ import AuthShell, {
   linkButton,
   primaryButton,
 } from "@/components/auth/AuthShell";
+import { markRecovery, recoveryIsLive } from "@/lib/authRecovery";
 import { type Lang, paletteInfo } from "@/lib/content";
 import { readPrefs } from "@/lib/state";
 import { getSupabase } from "@/lib/supabase/client";
@@ -45,8 +46,8 @@ const COPY = {
     signIn: "دخول",
     signUp: "إنشاء الحساب",
     forgotTitle: "إعادة تعيين كلمة السر",
-    forgotSub: "أدخل بريدك، ونرسل لك رابطًا لاختيار كلمة سر جديدة.",
-    forgotCta: "إرسال الرابط",
+    forgotSub: "أدخل بريدك، ونرسل لك رمزًا لاختيار كلمة سر جديدة.",
+    forgotCta: "إرسال الرمز",
     forgotLink: "نسيت كلمة السر؟",
     backToSignIn: "العودة إلى الدخول",
     noAccount: "ليس لديك حساب؟ أنشئ واحدًا",
@@ -60,11 +61,15 @@ const COPY = {
     confirmSent: (email: string) =>
       `أنشأنا الحساب وأرسلنا رمزًا إلى ${email}. أدخله هنا لتفعيل الحساب.`,
     resetSent: (email: string) =>
-      `إن كان لـ ${email} حساب عندنا، فرابط إعادة التعيين في طريقه إليه الآن.`,
+      `إن كان لـ ${email} حساب عندنا، فرمز إعادة التعيين في طريقه إليه الآن.`,
     confirmPending: (email: string) =>
       `${email} لم يُؤكَّد بعد. أدخل الرمز المرسل إليه، أو اطلب رمزًا جديدًا.`,
     spamHint: "لم تصل خلال دقيقة؟ تفقّد مجلد الرسائل غير المرغوب فيها.",
     codeLabel: "رمز التأكيد",
+    codeLabelReset: "رمز إعادة التعيين",
+    verifyCtaReset: "متابعة",
+    orLinkReset:
+      "أو افتح الرابط في الرسالة نفسها — لكنه يفتح في متصفّح بريدك، وقد لا تنتقل الجلسة إلى التطبيق.",
     codeHint: "ستة أرقام، في الرسالة نفسها. صالح لساعة.",
     verifyCta: "تأكيد وتسجيل الدخول",
     codeTooShort: "الرمز ستة أرقام.",
@@ -95,8 +100,8 @@ const COPY = {
     signIn: "Sign in",
     signUp: "Create account",
     forgotTitle: "Reset your password",
-    forgotSub: "Give us your email and we will send a link to choose a new one.",
-    forgotCta: "Send reset link",
+    forgotSub: "Give us your email and we will send a code to choose a new one.",
+    forgotCta: "Send reset code",
     forgotLink: "Forgotten your password?",
     backToSignIn: "Back to sign in",
     noAccount: "No account? Create one",
@@ -110,11 +115,15 @@ const COPY = {
     confirmSent: (email: string) =>
       `Your account is created. Enter the code we sent to ${email} to activate it.`,
     resetSent: (email: string) =>
-      `If ${email} has an account with us, a reset link is on its way to it now.`,
+      `If ${email} has an account with us, a reset code is on its way to it now.`,
     confirmPending: (email: string) =>
       `${email} has not been confirmed yet. Enter the code from that email, or ask for a new one.`,
     spamHint: "Not there within a minute? Have a look in your spam folder.",
     codeLabel: "Confirmation code",
+    codeLabelReset: "Reset code",
+    verifyCtaReset: "Continue",
+    orLinkReset:
+      "Or open the link in the same email — but that opens in your mail app's browser, and the session may not carry into the app.",
     codeHint: "Six digits, in the email itself. Good for an hour.",
     verifyCta: "Confirm and sign in",
     codeTooShort: "The code is six digits.",
@@ -180,9 +189,16 @@ export default function LoginPage() {
     setReady(true);
   }, []);
 
-  /* Already signed in: there is nothing to do on this page. */
+  /* Already signed in: there is nothing to do on this page.
+
+     Except mid-reset. Verifying a recovery code signs the person in, which
+     trips this effect, and it would race the handoff to /reset-password and
+     win -- landing somebody who asked to change their password on the home
+     screen instead, with no way back to the form and a spent code. The marker
+     is set immediately before that handoff, so it is the one thing here that
+     can tell the two apart. */
   useEffect(() => {
-    if (auth.status === "signed-in") router.replace("/");
+    if (auth.status === "signed-in" && !recoveryIsLive()) router.replace("/");
   }, [auth.status, router]);
 
   /* Username availability, debounced. Only asked once the name is well formed,
@@ -253,9 +269,21 @@ export default function LoginPage() {
     if (digits.length !== 6) return setError(t.codeTooShort);
 
     setPending(true);
-    const res = await auth.confirmWithCode(sent.email, digits, lang);
+    const res =
+      sent.kind === "reset"
+        ? await auth.verifyResetCode(sent.email, digits, lang)
+        : await auth.confirmWithCode(sent.email, digits, lang);
     setPending(false);
     if (!res.ok) return setError(res.message);
+
+    if (sent.kind === "reset") {
+      // The code proved the mailbox, and verifyOtp opened a session on the
+      // strength of it. /reset-password will not take a password from a
+      // session that cannot show this.
+      markRecovery();
+      router.replace("/reset-password");
+      return;
+    }
     router.replace("/");
   };
 
@@ -359,7 +387,7 @@ export default function LoginPage() {
           </Notice>
           {done && <Notice tone="info">{done}</Notice>}
 
-          {sent.kind !== "reset" && (
+          {(
             <form
               onSubmit={submitCode}
               noValidate
@@ -374,7 +402,10 @@ export default function LoginPage() {
                 readOnly
                 hidden
               />
-              <Field label={t.codeLabel} hint={t.codeHint}>
+              <Field
+                label={sent.kind === "reset" ? t.codeLabelReset : t.codeLabel}
+                hint={t.codeHint}
+              >
                 {(id, describedBy) => (
                   <TextInput
                     id={id}
@@ -407,7 +438,11 @@ export default function LoginPage() {
                 disabled={pending}
                 style={primaryButton(pending)}
               >
-                {pending ? t.working : t.verifyCta}
+                {pending
+                  ? t.working
+                  : sent.kind === "reset"
+                    ? t.verifyCtaReset
+                    : t.verifyCta}
               </button>
             </form>
           )}
@@ -420,7 +455,9 @@ export default function LoginPage() {
               textAlign: "center",
             }}
           >
-            {sent.kind === "reset" ? t.spamHint : `${t.spamHint} ${t.orLink}`}
+            {sent.kind === "reset"
+              ? `${t.spamHint} ${t.orLinkReset}`
+              : `${t.spamHint} ${t.orLink}`}
           </div>
           <button
             type="button"

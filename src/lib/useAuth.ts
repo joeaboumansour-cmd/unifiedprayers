@@ -84,6 +84,18 @@ export type Auth = {
     lang: Lang,
   ) => Promise<AuthResult>;
   /**
+   * Opens a recovery session with the code from the reset email, rather than
+   * the link, for the same reason confirmWithCode exists: the session has to
+   * be created in the browser the app is used in, and a link is opened by
+   * whichever browser the mail app owns. On success the caller may show
+   * /reset-password.
+   */
+  verifyResetCode: (
+    email: string,
+    code: string,
+    lang: Lang,
+  ) => Promise<AuthResult>;
+  /**
    * Sets the password on the session a recovery link just opened. Asks for no
    * current password because the link was the proof. Only /reset-password
    * calls this, and only once lib/authRecovery confirms this tab redeemed it.
@@ -414,6 +426,23 @@ export function useAuth(): Auth {
     [],
   );
 
+  const verifyResetCode = useCallback(
+    async (email: string, code: string, lang: Lang): Promise<AuthResult> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, message: T[lang].generic };
+
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: code.replace(/s+/g, ""),
+        type: "recovery",
+      });
+
+      if (error) return { ok: false, message: explain(error, lang) };
+      return { ok: true };
+    },
+    [],
+  );
+
   const setNewPassword = useCallback(
     async (next: string, lang: Lang): Promise<AuthResult> => {
       const supabase = getSupabase();
@@ -448,6 +477,7 @@ export function useAuth(): Auth {
     requestPasswordReset,
     resendConfirmation,
     confirmWithCode,
+    verifyResetCode,
     setNewPassword,
     signOut,
   };
