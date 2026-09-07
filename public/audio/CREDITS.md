@@ -1,6 +1,6 @@
 # Audio credits
 
-All five files come from Pixabay under the [Pixabay Content License](https://pixabay.com/service/license-summary/):
+All four files come from Pixabay under the [Pixabay Content License](https://pixabay.com/service/license-summary/):
 free for commercial and non-commercial use, no attribution required. The credits
 are recorded here anyway, so the origin of each file is traceable.
 
@@ -8,7 +8,6 @@ are recorded here anyway, so the origin of each file is traceable.
 | --- | --- | --- |
 | `night-ambience.mp3` | [Night Ambience with Cricket Sound](https://pixabay.com/sound-effects/nature-night-ambience-with-cricket-sound-271304/) | TanwerAman |
 | `birds-day.mp3` | [Morning Birdsong](https://pixabay.com/sound-effects/nature-morning-birdsong-246402/) | Creative_Spark |
-| `page-turn.mp3` | [Turn a Page](https://pixabay.com/sound-effects/film-special-effects-turn-a-page-336933/) | CreatorsHome |
 | `piano-loop.mp3` | [Soft-piano-loop](https://pixabay.com/sound-effects/musical-soft-piano-loop-192098/) | Ncone |
 | `chime.mp3` | [Dream Chime](https://pixabay.com/sound-effects/musical-dream-chime-452820/) | humordome |
 

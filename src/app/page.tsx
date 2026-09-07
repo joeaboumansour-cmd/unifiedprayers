@@ -287,14 +287,19 @@ export default function Page() {
 
   const advance = useCallback(() => {
     if (step >= total - 1) return complete();
-    haptic(8);
+    // Stronger than the small haptic every touch already gets, so a bead that
+    // moves feels different from a tap that does nothing. The two arrive back
+    // to back and vibrate overrides rather than queues, so this is what is
+    // felt.
+    haptic(16);
     if (prefs.audio) playPageTurn();
     crossfade(step + 1);
   }, [step, total, haptic, crossfade, complete]);
 
   const back = useCallback(() => {
     if (step === 0 || done) return;
-    haptic(6);
+    // A shorter one going back, the same way the sound is softer that way.
+    haptic(12);
     if (prefs.audio) playPageTurn(true);
     crossfade(step - 1);
   }, [step, done, haptic, crossfade]);

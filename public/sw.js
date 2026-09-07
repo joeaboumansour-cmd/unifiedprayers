@@ -8,7 +8,7 @@
    state is how a message somebody switched off an hour ago is still sitting on
    a stranger's screen. Those go to the network, every time. */
 
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v10';
 const CACHE = `unified-prayers-${CACHE_VERSION}`;
 
 /* Enough to open the app and pray with no connection at all. Next's own
@@ -27,7 +27,6 @@ const PRECACHE = [
   '/icons/apple-touch-icon.png',
   '/audio/night-ambience.mp3',
   '/audio/birds-day.mp3',
-  '/audio/page-turn.mp3',
   '/audio/piano-loop.mp3',
   '/audio/chime.mp3',
 ];

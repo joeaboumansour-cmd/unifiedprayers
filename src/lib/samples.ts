@@ -8,7 +8,7 @@ import { audioContext } from "@/lib/audio";
  * Every file lives in /public/audio and is precached by the service worker, so
  * the app still has its sound with no connection. Each one is fetched and
  * decoded a single time and then kept — decoding is the expensive half, and a
- * page turn cannot wait for it.
+ * sound that has to wait for it arrives after the moment it was for.
  *
  * All of it runs on the shared AudioContext that the first tap unlocks, for the
  * same reasons the chime does: a context made outside a gesture stays suspended
@@ -18,7 +18,6 @@ import { audioContext } from "@/lib/audio";
 export const AUDIO = {
   night: "/audio/night-ambience.mp3",
   birds: "/audio/birds-day.mp3",
-  pageTurn: "/audio/page-turn.mp3",
   piano: "/audio/piano-loop.mp3",
   chime: "/audio/chime.mp3",
 } as const;
