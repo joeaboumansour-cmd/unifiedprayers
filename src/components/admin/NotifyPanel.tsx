@@ -15,7 +15,11 @@ import {
 } from "@/components/admin/AdminUI";
 import type { Lang } from "@/lib/content";
 import { getSupabase } from "@/lib/supabase/client";
-import type { DailyReminderSetting, NotificationRow } from "@/lib/supabase/types";
+import type {
+  DailyReminderSetting,
+  MorningSetting,
+  NotificationRow,
+} from "@/lib/supabase/types";
 
 const S = {
   ar: {
@@ -56,6 +60,11 @@ const S = {
       "النص الذي يصل كل مساء لمن فعّل التذكير. التوقيت يختاره كل شخص من إعداداته.",
     saveReminder: "حفظ النص",
     saved: "تم الحفظ.",
+    morning: "رسالة الصباح",
+    morningHint:
+      "رسالة تشجيع تُختار تلقائيًا لكل شخص حسب سلسلة أيامه، وتصل كل صباح بتوقيت جهازه. النصوص في التطبيق نفسه؛ هنا يمكن إيقافها للجميع.",
+    morningOn: "مفعّلة",
+    morningOff: "موقوفة",
     status: {
       draft: "مسودة",
       scheduled: "مجدولة",
@@ -103,6 +112,11 @@ const S = {
       "What goes out each evening to everyone who switched reminders on. Each person picks their own hour in Settings.",
     saveReminder: "Save text",
     saved: "Saved.",
+    morning: "Morning message",
+    morningHint:
+      "An encouragement chosen automatically for each person from their streak, sent each morning in their device's own time. The wording lives in the app; this turns it off for everyone.",
+    morningOn: "On",
+    morningOff: "Off",
     status: {
       draft: "Draft",
       scheduled: "Scheduled",
@@ -150,6 +164,10 @@ export default function NotifyPanel({ lang }: { lang: Lang }) {
   const [reminder, setReminder] = useState<DailyReminderSetting>(FALLBACK);
   const [savingReminder, setSavingReminder] = useState(false);
 
+  /* -------------------------------- morning ------------------------------ */
+  // Optimistic: the cron reads a missing row as on, so the panel should too.
+  const [morningOn, setMorningOn] = useState(true);
+
   const loadHistory = useCallback(async () => {
     const supabase = getSupabase();
     if (!supabase) return;
@@ -186,6 +204,16 @@ export default function NotifyPanel({ lang }: { lang: Lang }) {
         if (data?.value) {
           setReminder({ ...FALLBACK, ...(data.value as Partial<DailyReminderSetting>) });
         }
+      });
+
+    supabase
+      ?.from("app_settings")
+      .select("value")
+      .eq("key", "morning_message")
+      .maybeSingle()
+      .then(({ data }) => {
+        const v = data?.value as Partial<MorningSetting> | null;
+        if (v) setMorningOn(v.enabled !== false);
       });
   }, [loadHistory]);
 
@@ -297,6 +325,28 @@ export default function NotifyPanel({ lang }: { lang: Lang }) {
     setToast(
       error ? { tone: "bad", text: s.failed } : { tone: "ok", text: s.saved },
     );
+  };
+
+  /* Written straight through rather than staged behind a Save button: this is
+     one boolean, and the reason to reach for it is usually that a daily push to
+     every subscriber needs to stop now. */
+  const setMorning = async (on: boolean) => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    const before = morningOn;
+    setMorningOn(on);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert(
+        { key: "morning_message", value: { enabled: on, url: "/" } },
+        { onConflict: "key" },
+      );
+    if (error) {
+      setMorningOn(before);
+      setToast({ tone: "bad", text: s.failed });
+      return;
+    }
+    setToast({ tone: "ok", text: s.saved });
   };
 
   return (
@@ -437,6 +487,22 @@ export default function NotifyPanel({ lang }: { lang: Lang }) {
         <Button onClick={saveReminder} disabled={savingReminder}>
           {s.saveReminder}
         </Button>
+      </div>
+
+      {/* ------------------------ the morning message ----------------------- */}
+      <div style={{ ...card, display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ fontSize: 15, fontWeight: 600 }}>{s.morning}</div>
+        <div style={{ fontSize: 12, color: "var(--dim-2)", lineHeight: 1.7 }}>
+          {s.morningHint}
+        </div>
+        <Choice
+          value={morningOn ? "on" : "off"}
+          options={[
+            { id: "on", label: s.morningOn },
+            { id: "off", label: s.morningOff },
+          ]}
+          onChange={(v) => void setMorning(v === "on")}
+        />
       </div>
 
       {/* -------------------------------- log ------------------------------- */}

@@ -182,11 +182,40 @@ export type PushSubscriptionRow = {
   tz: string;
   reminder_hour: number | null;
   last_remind: string | null;
+  /** Local hour for the morning message. 8 by default; null turns it off. */
+  morning_hour: number | null;
+  /** The device's own date on the morning it was last greeted. */
+  last_morning: string | null;
   enabled: boolean;
   failures: number;
   last_seen_at: string;
   created_at: string;
   updated_at: string;
+};
+
+/**
+ * A device due its morning message, with the streak the copy should speak to.
+ *
+ * Not a `PushSubscriptionRow`: `due_morning_messages` returns only what the
+ * sender needs plus two computed columns, rather than every column of the
+ * table. `streak` is 0 and `last_prayed` null for a device that never signed
+ * in — there is no account to count sessions against.
+ */
+export type MorningDueRow = {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  tz: string;
+  user_id: string | null;
+  streak: number;
+  last_prayed: string | null;
+};
+
+/** The morning message's switch and destination, under key `morning_message`. */
+export type MorningSetting = {
+  enabled: boolean;
+  url: string;
 };
 
 /** postgrest-js resolves a table to `never` unless Relationships is present. */
@@ -270,6 +299,16 @@ export type Database = {
       due_daily_reminders: {
         Args: Record<string, never>;
         Returns: PushSubscriptionRow[];
+      };
+      /** Secret key only — endpoints, and the prayer history beside them. */
+      due_morning_messages: {
+        Args: Record<string, never>;
+        Returns: MorningDueRow[];
+      };
+      /** Consecutive days ending at `today` or the day before. Secret key only. */
+      streak_for: {
+        Args: { uid: string; today: string };
+        Returns: number;
       };
     };
     Enums: Record<never, never>;

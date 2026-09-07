@@ -85,9 +85,22 @@ export type SendReport = {
   error?: string;
 };
 
+/** One device and the message written for it. */
+export type PersonalisedSend = {
+  sub: Pick<PushSubscriptionRow, "id" | "endpoint" | "p256dh" | "auth">;
+  payload: BilingualPayload;
+};
+
 /**
- * Sends one payload to many subscriptions and reconciles the table with what
- * the push services said.
+ * Sends a different payload to each subscription and reconciles the table with
+ * what the push services said.
+ *
+ * The per-device shape exists for the morning message, where the text depends
+ * on the streak the account actually has — so grouping devices by a shared
+ * payload would mean one group per distinct streak number, and a serial await
+ * for each. Encrypting per recipient is what Web Push does regardless: the body
+ * is encrypted to that device's own keys either way, so nothing is lost by
+ * letting the plaintext differ too.
  *
  * 404 and 410 are the important answers: they mean the subscription is
  * permanently gone — the app was uninstalled, notifications were revoked, the
@@ -95,15 +108,13 @@ export type SendReport = {
  * is treated as transient and only counted, because a push service having a bad
  * minute should not cost someone their subscription.
  */
-export async function sendToSubscriptions(
-  subs: Pick<PushSubscriptionRow, "id" | "endpoint" | "p256dh" | "auth">[],
-  payload: BilingualPayload,
+export async function sendPersonalised(
+  items: PersonalisedSend[],
 ): Promise<SendReport> {
   if (!ensureConfigured()) {
-    return { sent: 0, failed: subs.length, expired: 0, error: "vapid-not-configured" };
+    return { sent: 0, failed: items.length, expired: 0, error: "vapid-not-configured" };
   }
 
-  const body = JSON.stringify(payload);
   const dead: string[] = [];
   let sent = 0;
   let failed = 0;
@@ -113,16 +124,16 @@ export async function sendToSubscriptions(
      simultaneous TLS connections is how a serverless function runs out of
      sockets and reports every send as a failure. */
   const CHUNK = 100;
-  for (let i = 0; i < subs.length; i += CHUNK) {
-    const slice = subs.slice(i, i + CHUNK);
+  for (let i = 0; i < items.length; i += CHUNK) {
+    const slice = items.slice(i, i + CHUNK);
     const results = await Promise.allSettled(
-      slice.map((s) =>
+      slice.map(({ sub: s, payload }) =>
         webpush.sendNotification(
           {
             endpoint: s.endpoint,
             keys: { p256dh: s.p256dh, auth: s.auth },
           },
-          body,
+          JSON.stringify(payload),
           {
             // How long the push service holds it for a device that is offline.
             // A day: a prayer reminder that lands three days late is noise.
@@ -142,7 +153,7 @@ export async function sendToSubscriptions(
       const err = r.reason as WebPushError | Error;
       const status = (err as WebPushError).statusCode;
       if (status === 404 || status === 410) {
-        dead.push(slice[n].id);
+        dead.push(slice[n].sub.id);
       } else if (!firstError) {
         firstError = `${status ?? "?"}: ${err.message ?? "unknown"}`.slice(0, 300);
       }
@@ -157,6 +168,14 @@ export async function sendToSubscriptions(
   }
 
   return { sent, failed, expired: dead.length, error: firstError };
+}
+
+/** One payload to many devices — an admin message, or the nightly reminder. */
+export async function sendToSubscriptions(
+  subs: Pick<PushSubscriptionRow, "id" | "endpoint" | "p256dh" | "auth">[],
+  payload: BilingualPayload,
+): Promise<SendReport> {
+  return sendPersonalised(subs.map((sub) => ({ sub, payload })));
 }
 
 /**

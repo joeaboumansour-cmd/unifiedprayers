@@ -1,8 +1,19 @@
 import { timingSafeEqual } from "node:crypto";
 
 import { denied, json, serviceClient, unconfigured } from "@/lib/server/supabase";
-import { isPushConfigured, sendToSubscriptions, subscriptionsFor } from "@/lib/server/push";
-import type { DailyReminderSetting, PushSubscriptionRow } from "@/lib/supabase/types";
+import {
+  isPushConfigured,
+  sendPersonalised,
+  sendToSubscriptions,
+  subscriptionsFor,
+} from "@/lib/server/push";
+import { morningMessage } from "@/lib/server/morningCopy";
+import type {
+  DailyReminderSetting,
+  MorningDueRow,
+  MorningSetting,
+  PushSubscriptionRow,
+} from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,17 +21,20 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * The clock. Two jobs, one endpoint, run every hour:
+ * The clock. Three jobs, one endpoint, run every hour:
  *
  *   1. scheduled messages — an admin picked a time, it has passed, send it.
  *   2. the nightly reminder — each device asked for an hour in its own
  *      timezone, and somewhere in the world it is now that hour.
+ *   3. the morning message — the same idea, at a separate hour, with the copy
+ *      chosen against the streak the account actually has.
  *
- * Both are idempotent, which matters more than it sounds: cron delivery is
+ * All three are idempotent, which matters more than it sounds: cron delivery is
  * at-least-once, and a retry after a timeout must not send everything twice.
  * Scheduled messages are claimed by moving them to 'sending' before anything
- * goes out; reminders are guarded by last_remind holding the device's own local
- * date. Running this twice in the same hour sends nothing the second time.
+ * goes out; the two daily sweeps are guarded by last_remind and last_morning
+ * holding the device's own local date. Running this twice in the same hour
+ * sends nothing the second time.
  */
 
 /**
@@ -180,6 +194,86 @@ async function runReminders(): Promise<{ due: number; sent: number }> {
   return { due: subs.length, sent: report.sent };
 }
 
+/**
+ * The morning message.
+ *
+ * Shaped like the reminder sweep above and different in one way that changes
+ * the plumbing: every device gets its own text. The streak comes back with the
+ * row, the copy is picked from the pool against it, and the send is per-device
+ * rather than one payload fanned out.
+ *
+ * The switch in app_settings is a real one. This pushes to every subscriber
+ * every day, which is the kind of thing that should be stoppable without a
+ * deploy; a missing row means on, so a fresh database behaves like the seed.
+ */
+async function runMorning(): Promise<{ due: number; sent: number }> {
+  const supabase = serviceClient();
+  if (!supabase) return { due: 0, sent: 0 };
+
+  const { data: setting } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", "morning_message")
+    .maybeSingle();
+
+  const config = (setting?.value as Partial<MorningSetting> | null) ?? {};
+  if (config.enabled === false) return { due: 0, sent: 0 };
+  const url = typeof config.url === "string" && config.url ? config.url : "/";
+
+  const { data: due, error } = await supabase.rpc("due_morning_messages");
+  if (error || !due?.length) return { due: 0, sent: 0 };
+
+  const rows = due as MorningDueRow[];
+  const now = new Date();
+
+  const items = rows.map((row) => {
+    const date = localDate(row.tz, now);
+    const copy = morningMessage({
+      seed: row.id,
+      date,
+      streak: row.streak,
+      // The row is read at the top of the morning hour, so this is usually
+      // false — but a device in a timezone the sweep reaches late, or someone
+      // who prays before eight, should not be told to go and pray.
+      prayedToday: row.last_prayed === date,
+      everPrayed: row.last_prayed !== null,
+    });
+
+    return {
+      sub: row,
+      payload: {
+        ...copy,
+        url,
+        // One tag for the morning message, as the reminder has one: a phone
+        // left untouched for three days shows today's greeting, not three.
+        tag: "up-morning",
+      },
+    };
+  });
+
+  const report = await sendPersonalised(items);
+
+  /* Marked for every device tried, not only the successes, and for the same
+     reason the reminder is: the sender does not say which endpoint failed, and
+     a missed morning is a much smaller problem than being greeted every hour
+     until a transient failure clears. */
+  const byDate = new Map<string, string[]>();
+  for (const row of rows) {
+    const date = localDate(row.tz, now);
+    const list = byDate.get(date);
+    if (list) list.push(row.id);
+    else byDate.set(date, [row.id]);
+  }
+  for (const [date, ids] of byDate) {
+    await supabase
+      .from("push_subscriptions")
+      .update({ last_morning: date })
+      .in("id", ids);
+  }
+
+  return { due: rows.length, sent: report.sent };
+}
+
 export async function GET(req: Request): Promise<Response> {
   if (!authorised(req)) return denied();
 
@@ -189,8 +283,9 @@ export async function GET(req: Request): Promise<Response> {
 
   const scheduled = await runScheduled();
   const reminders = await runReminders();
+  const morning = await runMorning();
 
-  return json({ ok: true, scheduled, reminders });
+  return json({ ok: true, scheduled, reminders, morning });
 }
 
 /** pg_net sends POST more naturally than GET; same job either way. */

@@ -36,6 +36,14 @@ export type Push = {
   state: PushState;
   /** Local hour 0–23 for the nightly reminder, or null when it is off. */
   reminderHour: number | null;
+  /**
+   * Local hour 0–23 for the morning message, or null when it is off.
+   *
+   * Starts at MORNING_DEFAULT rather than null, because the column does too:
+   * this one is on unless someone turns it off, and showing "off" for the
+   * second it takes to ask the server would be a lie in the other direction.
+   */
+  morningHour: number | null;
   busy: boolean;
   /**
    * Why the last attempt to turn them on failed, in the reader's language.
@@ -50,7 +58,11 @@ export type Push = {
   enable: () => Promise<boolean>;
   disable: () => Promise<void>;
   setReminderHour: (hour: number | null) => Promise<void>;
+  setMorningHour: (hour: number | null) => Promise<void>;
 };
+
+/** Matches the column default in 0006. Changing one means changing both. */
+export const MORNING_DEFAULT = 8;
 
 const VAPID = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -133,6 +145,7 @@ const FAIL = {
 export function usePush(lang: "ar" | "en"): Push {
   const [state, setState] = useState<PushState>("checking");
   const [reminderHour, setHour] = useState<number | null>(null);
+  const [morningHour, setMorning] = useState<number | null>(MORNING_DEFAULT);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endpoint = useRef<string | null>(null);
@@ -189,8 +202,17 @@ export function usePush(lang: "ar" | "en"): Push {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ endpoint: sub.endpoint }),
         });
-        const data = (await res.json()) as { found?: boolean; reminderHour?: number | null };
-        if (live && data.found) setHour(data.reminderHour ?? null);
+        const data = (await res.json()) as {
+          found?: boolean;
+          reminderHour?: number | null;
+          morningHour?: number | null;
+        };
+        if (live && data.found) {
+          setHour(data.reminderHour ?? null);
+          // `?? MORNING_DEFAULT` would be wrong here: null is a real answer
+          // meaning someone turned it off, not a missing one.
+          setMorning(data.morningHour === undefined ? MORNING_DEFAULT : data.morningHour);
+        }
       } catch {
         /* offline — the toggle still shows as on, the hour just reads null */
       }
@@ -212,14 +234,15 @@ export function usePush(lang: "ar" | "en"): Push {
       vapid: VAPID,
       tz: timezone(),
       reminderHour,
+      morningHour,
       platform: platform(),
     });
-  }, [lang, reminderHour, state]);
+  }, [lang, reminderHour, morningHour, state]);
 
   /* ------------------------------- register ------------------------------ */
 
   const register = useCallback(
-    async (hour: number | null): Promise<boolean> => {
+    async (hour: number | null, morning: number | null): Promise<boolean> => {
       const reg = await navigator.serviceWorker.ready;
       let sub = await reg.pushManager.getSubscription();
 
@@ -241,6 +264,7 @@ export function usePush(lang: "ar" | "en"): Push {
           subscription: sub.toJSON(),
           tz: timezone(),
           reminderHour: hour,
+          morningHour: morning,
           platform: platform(),
         }),
       });
@@ -266,7 +290,7 @@ export function usePush(lang: "ar" | "en"): Push {
         return false;
       }
 
-      const ok = await register(reminderHour);
+      const ok = await register(reminderHour, morningHour);
       setState(ok ? "on" : "off");
       // Permission granted but the server would not take the subscription --
       // offline, or the deployment has no VAPID private key. Distinguished
@@ -280,7 +304,7 @@ export function usePush(lang: "ar" | "en"): Push {
     } finally {
       setBusy(false);
     }
-  }, [busy, register, reminderHour, lang]);
+  }, [busy, register, reminderHour, morningHour, lang]);
 
   const disable = useCallback(async (): Promise<void> => {
     if (busy) return;
@@ -303,6 +327,9 @@ export function usePush(lang: "ar" | "en"): Push {
       }
       endpoint.current = null;
       setHour(null);
+      // Back to the default, not to null: the row is gone, and turning
+      // notifications on again creates a fresh one with the morning message on.
+      setMorning(MORNING_DEFAULT);
       setState("off");
     } finally {
       setBusy(false);
@@ -315,12 +342,33 @@ export function usePush(lang: "ar" | "en"): Push {
       // Setting an hour is also how someone turns reminders on for the first
       // time, so this registers rather than assuming a subscription exists.
       if (state === "on" || Notification.permission === "granted") {
-        await register(hour).catch(() => {});
+        await register(hour, morningHour).catch(() => {});
         setState("on");
       }
     },
-    [register, state],
+    [register, state, morningHour],
   );
 
-  return { state, reminderHour, busy, error, enable, disable, setReminderHour };
+  const setMorningHour = useCallback(
+    async (hour: number | null): Promise<void> => {
+      setMorning(hour);
+      if (state === "on" || Notification.permission === "granted") {
+        await register(reminderHour, hour).catch(() => {});
+        setState("on");
+      }
+    },
+    [register, state, reminderHour],
+  );
+
+  return {
+    state,
+    reminderHour,
+    morningHour,
+    busy,
+    error,
+    enable,
+    disable,
+    setReminderHour,
+    setMorningHour,
+  };
 }

@@ -8,7 +8,7 @@
    state is how a message somebody switched off an hour ago is still sitting on
    a stranger's screen. Those go to the network, every time. */
 
-const CACHE_VERSION = 'v8';
+const CACHE_VERSION = 'v9';
 const CACHE = `unified-prayers-${CACHE_VERSION}`;
 
 /* Enough to open the app and pray with no connection at all. Next's own
@@ -223,6 +223,15 @@ self.addEventListener('pushsubscriptionchange', event => {
           tz: config.tz || 'UTC',
           reminderHour:
             typeof config.reminderHour === 'number' ? config.reminderHour : null,
+          /* Undefined rather than null when the config predates this field --
+             the route reads a missing key as "leave it alone", and a worker
+             cached before the morning message existed must not switch it off. */
+          morningHour:
+            typeof config.morningHour === 'number'
+              ? config.morningHour
+              : config.morningHour === null
+                ? null
+                : undefined,
           platform: config.platform || null,
         }),
       });

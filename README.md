@@ -60,6 +60,8 @@ Optional. Skip all of this and the app still works.
    - `0003` — `app_admins`, `verses`, `announcements`, `app_settings`, and the
      admin write policies for `content_documents`. See **Admin** below.
    - `0004` — `push_subscriptions` and `notifications`. See **Notifications**.
+   - `0005` — `prayer_sessions`, the log the home-screen stats are counted from.
+   - `0006` — the morning message: its schedule columns, and `streak_for()`.
 
 3. Optionally seed the prayer text from what is in the bundle today. This also
    gives the admin tab's Content section its three rows to edit:
@@ -249,7 +251,9 @@ is involved. What differs is on the device:
    refuses every caller and nothing scheduled is ever delivered — it fails
    closed, because an open version of that URL would be a public spam button.
 
-4. Schedule the hourly tick. Fill in your URL and secret in
+4. Schedule the hourly tick. **Nothing is delivered until this is done** — the
+   file is a template with placeholders and is deliberately never committed
+   filled in. Fill in your URL and secret in
    `supabase/schedule.sql` and run it once in the SQL editor. It is Supabase
    pg_cron rather than Vercel Cron because Vercel's Hobby plan runs a cron job
    once a day, and once a day cannot serve "9pm where you are" — every timezone
@@ -264,11 +268,32 @@ travel in the same payload and the service worker picks one when it arrives,
 using the language set on the device at that moment rather than whenever it
 subscribed.
 
-The nightly reminder is separate. Each person chooses their own hour in
-Settings, stored against their device with its timezone; the admin tab edits
-only the text. The hourly sweep sends to devices whose local clock has just
-reached their hour and marks them against their own local date, so running it
-twice in an hour sends once, and a retry after a timeout does not double up.
+Two daily messages run on their own, both per-device and both in the device's
+own timezone. Each is turned on and off separately in Settings, and someone who
+keeps both gets both.
+
+**The nightly reminder** is off until a person picks an hour. The admin tab edits
+its text, which is one stored string for everybody.
+
+**The morning message** is on by default at 8am local and knows about streaks.
+It has no stored text: the copy is chosen at send time from a pool in
+`src/lib/server/morningCopy.ts`, per device, per day, against the streak the
+account actually has — a streak of twelve is told so, a broken one is invited
+back without being scolded, and someone who has never prayed is invited to
+start. Milestones at 7, 30, 50, 100, 200 and 365 days get their own words. The
+admin tab has only a switch for it, because a daily push to every subscriber
+should be stoppable without a deploy.
+
+The streak is computed in Postgres by `streak_for()`, not read from the device —
+at 8am the device is asleep. It has to agree exactly with `computeStats()` in
+`src/lib/sessions.ts`: days are the device's own `local_date`, an unprayed today
+does not end a run because the day is not over, and two prayers in one day count
+as one. A device that never signed in has no account to count against, so it is
+greeted as someone starting out.
+
+Both sweeps mark the devices they touched against their own local date —
+`last_remind` and `last_morning` — so running the tick twice in an hour sends
+once, and a retry after a timeout does not double up.
 
 Subscriptions clean themselves up: a push service answering 404 or 410 means
 that device is gone for good, and the row is deleted on the spot.
@@ -305,7 +330,7 @@ src/
   components/
     Home.tsx             the tabs: Prayers, Today, Library, Settings, Admin
     AccountCard.tsx      account state and sync status, in Settings
-    NotificationsCard.tsx  the push switch and reminder hour, in Settings
+    NotificationsCard.tsx  the push switch and both daily hours, in Settings
     Announcements.tsx    the banner and the modal an admin publishes
     auth/AuthShell.tsx   shared frame, fields and inputs for the auth pages
     admin/
@@ -313,7 +338,7 @@ src/
       AdminUI.tsx        shared fields, buttons and the bilingual pair
       VersesPanel.tsx    the verse of the day
       AnnouncementsPanel.tsx  banners and modals
-      NotifyPanel.tsx    compose, schedule, history, reminder text
+      NotifyPanel.tsx    compose, schedule, history, reminder text, morning switch
       ContentPanel.tsx   the prayer documents as raw JSON
     Player.tsx           full-screen prayer player
     BeadVisual.tsx       arc / ring / chain / orb bead styles
@@ -336,7 +361,7 @@ src/
     usePush.ts           permission, subscription, and the iOS install case
     useWakeLock.ts       keeps the screen on while praying
     useAmbientDrone.ts   the optional ambient tone (Web Audio, no asset)
-    server/              server-only: the secret key and the push sender
+    server/              server-only: the secret key, the push sender, morning copy
     supabase/
       client.ts          the browser client, or null when unconfigured
       types.ts           hand-written Database types

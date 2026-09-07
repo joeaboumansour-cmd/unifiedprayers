@@ -71,8 +71,26 @@ type Body = {
   tz?: unknown;
   /** 0–23 local, or null to leave the nightly reminder off. */
   reminderHour?: unknown;
+  /**
+   * 0–23 local for the morning message, or null to turn it off.
+   *
+   * Absent is not the same as null and must not be read as one. The service
+   * worker re-subscribes from a config written before this field existed, and
+   * an older cached worker will keep doing so — treating a missing key as "off"
+   * would quietly cancel the morning message on exactly the devices that never
+   * asked for anything to change. Absent means leave whatever is stored.
+   */
+  morningHour?: unknown;
   platform?: unknown;
 };
+
+/** 0–23, or null. `undefined` means the key was not sent at all. */
+function readHour(v: unknown): number | null | undefined | "bad" {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  if (typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 23) return v;
+  return "bad";
+}
 
 export async function POST(req: Request): Promise<Response> {
   const supabase = serviceClient();
@@ -95,14 +113,14 @@ export async function POST(req: Request): Promise<Response> {
   }
   if (p256dh.length > 200 || auth.length > 100) return badRequest("bad-keys");
 
-  const hour = body.reminderHour;
-  const reminderHour =
-    hour === null || hour === undefined
-      ? null
-      : typeof hour === "number" && Number.isInteger(hour) && hour >= 0 && hour <= 23
-        ? hour
-        : undefined;
-  if (reminderHour === undefined) return badRequest("bad-hour");
+  // The nightly reminder keeps its original contract: absent means off, because
+  // that is what every caller has always meant by leaving it out.
+  const reminderRaw = readHour(body.reminderHour);
+  if (reminderRaw === "bad") return badRequest("bad-hour");
+  const reminderHour = reminderRaw ?? null;
+
+  const morningHour = readHour(body.morningHour);
+  if (morningHour === "bad") return badRequest("bad-morning-hour");
 
   // Unverified is fine here: the token is proof of who this is, and its absence
   // just means the device is anonymous. It is never proof of anything else.
@@ -121,6 +139,10 @@ export async function POST(req: Request): Promise<Response> {
         typeof body.platform === "string" ? body.platform.slice(0, 40) : null,
       tz: isTimezone(body.tz) ? body.tz : "UTC",
       reminder_hour: reminderHour,
+      // Omitted rather than nulled when the caller did not send it: postgrest
+      // only writes the columns present here, so a new row takes the column
+      // default (8, on) and an existing one keeps what it had.
+      ...(morningHour !== undefined ? { morning_hour: morningHour } : {}),
       enabled: true,
       // A device coming back after failures gets a clean slate: whatever was
       // failing has clearly stopped, since it just talked to us.

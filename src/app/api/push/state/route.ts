@@ -28,7 +28,7 @@ export async function POST(req: Request): Promise<Response> {
 
   const { data, error } = await supabase
     .from("push_subscriptions")
-    .select("reminder_hour, tz, enabled")
+    .select("reminder_hour, morning_hour, tz, enabled")
     .eq("endpoint", endpoint)
     .maybeSingle();
 
@@ -39,6 +39,7 @@ export async function POST(req: Request): Promise<Response> {
   return json({
     found: true,
     reminderHour: data.reminder_hour,
+    morningHour: data.morning_hour,
     tz: data.tz,
     enabled: data.enabled,
   });

@@ -17,7 +17,7 @@ import type { Push } from "@/lib/usePush";
 const S = {
   ar: {
     title: "الإشعارات",
-    blurb: "تذكير يومي، ورسائل نادرة من التطبيق.",
+    blurb: "رسالة في الصباح، تذكير يومي، ورسائل نادرة من التطبيق.",
     enable: "تفعيل الإشعارات",
     enabled: "الإشعارات مفعّلة",
     disable: "إيقاف",
@@ -32,10 +32,13 @@ const S = {
     reminder: "تذكير يومي",
     reminderOff: "بدون تذكير",
     reminderHint: "بتوقيت جهازك.",
+    morning: "رسالة الصباح",
+    morningOff: "بدون رسالة",
+    morningHint: "كلمة تشجيع كل صباح، وذكرٌ لسلسلة أيامك إن كانت لديك.",
   },
   en: {
     title: "Notifications",
-    blurb: "A daily reminder, and the occasional message from the app.",
+    blurb: "A morning message, a daily reminder, and the occasional word from the app.",
     enable: "Turn on notifications",
     enabled: "Notifications are on",
     disable: "Turn off",
@@ -50,6 +53,9 @@ const S = {
     reminder: "Daily reminder",
     reminderOff: "No reminder",
     reminderHint: "In your device's own time.",
+    morning: "Morning message",
+    morningOff: "No message",
+    morningHint: "A word of encouragement each morning, and your streak when you have one.",
   },
 } as const;
 
@@ -84,6 +90,67 @@ const formatHour = (h: number, lang: Lang): string =>
     hour: "numeric",
     hour12: lang !== "ar",
   }).format(new Date(2024, 0, 1, h));
+
+/**
+ * One labelled hour, or off.
+ *
+ * Two of these now sit in the card — the morning message and the nightly
+ * reminder — and they differ only in their words. Written once so they cannot
+ * drift apart visually, which on a settings screen reads as two unrelated
+ * controls rather than two of the same thing.
+ */
+function HourPicker({
+  id,
+  lang,
+  label,
+  off,
+  hint,
+  value,
+  onChange,
+}: {
+  id: string;
+  lang: Lang;
+  label: string;
+  off: string;
+  hint: string;
+  value: number | null;
+  onChange: (hour: number | null) => void | Promise<void>;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <label htmlFor={id} style={{ fontSize: 13, color: "var(--soft)" }}>
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value ?? ""}
+        onChange={(e) =>
+          onChange(e.target.value === "" ? null : Number(e.target.value))
+        }
+        style={{
+          appearance: "none",
+          width: "100%",
+          boxSizing: "border-box",
+          background: "rgb(var(--veil-rgb) / .05)",
+          border: "1px solid rgb(var(--veil-rgb) / .1)",
+          borderRadius: 12,
+          padding: "11px 13px",
+          color: "var(--body)",
+          fontSize: 15,
+          fontFamily: "inherit",
+        }}
+      >
+        <option value="">{off}</option>
+        {HOURS.map((h) => (
+          <option key={h} value={h}>
+            {formatHour(h, lang)}
+          </option>
+        ))}
+      </select>
+      <span style={{ fontSize: 11.5, color: "var(--dim-3)" }}>{hint}</span>
+    </div>
+  );
+}
 
 export default function NotificationsCard({
   lang,
@@ -157,45 +224,25 @@ export default function NotificationsCard({
         <>
           <div style={{ fontSize: 13.5, color: "var(--accent-ink)" }}>{s.enabled}</div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label
-              htmlFor="reminder-hour"
-              style={{ fontSize: 13, color: "var(--soft)" }}
-            >
-              {s.reminder}
-            </label>
-            <select
-              id="reminder-hour"
-              value={push.reminderHour ?? ""}
-              onChange={(e) =>
-                push.setReminderHour(
-                  e.target.value === "" ? null : Number(e.target.value),
-                )
-              }
-              style={{
-                appearance: "none",
-                width: "100%",
-                boxSizing: "border-box",
-                background: "rgb(var(--veil-rgb) / .05)",
-                border: "1px solid rgb(var(--veil-rgb) / .1)",
-                borderRadius: 12,
-                padding: "11px 13px",
-                color: "var(--body)",
-                fontSize: 15,
-                fontFamily: "inherit",
-              }}
-            >
-              <option value="">{s.reminderOff}</option>
-              {HOURS.map((h) => (
-                <option key={h} value={h}>
-                  {formatHour(h, lang)}
-                </option>
-              ))}
-            </select>
-            <span style={{ fontSize: 11.5, color: "var(--dim-3)" }}>
-              {s.reminderHint}
-            </span>
-          </div>
+          <HourPicker
+            id="morning-hour"
+            lang={lang}
+            label={s.morning}
+            off={s.morningOff}
+            hint={s.morningHint}
+            value={push.morningHour}
+            onChange={push.setMorningHour}
+          />
+
+          <HourPicker
+            id="reminder-hour"
+            lang={lang}
+            label={s.reminder}
+            off={s.reminderOff}
+            hint={s.reminderHint}
+            value={push.reminderHour}
+            onChange={push.setReminderHour}
+          />
 
           <button
             type="button"
