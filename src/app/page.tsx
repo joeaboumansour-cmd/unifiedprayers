@@ -28,6 +28,7 @@ import {
 import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
 import { playChime } from "@/lib/chime";
+import { playPageTurn, preloadSfx } from "@/lib/sfx";
 import { haptic as fireHaptic, watchHapticTouch } from "@/lib/haptics";
 import { buildSteps } from "@/lib/steps";
 import { useAdmin } from "@/lib/useAdmin";
@@ -143,6 +144,10 @@ export default function Page() {
   // effect that opens the ambience. So the first touch anywhere unlocks the
   // shared context, before anything asks it for a sound.
   useEffect(watchAudioUnlock, []);
+
+  // Fetch and decode the short sounds up front. A page turn that has to wait
+  // for a download is not a page turn.
+  useEffect(() => preloadSfx(), []);
 
   // Every touch gets a small haptic, whether or not the thing under it has one
   // of its own.
@@ -283,12 +288,14 @@ export default function Page() {
   const advance = useCallback(() => {
     if (step >= total - 1) return complete();
     haptic(8);
+    if (prefs.audio) playPageTurn();
     crossfade(step + 1);
   }, [step, total, haptic, crossfade, complete]);
 
   const back = useCallback(() => {
     if (step === 0 || done) return;
     haptic(6);
+    if (prefs.audio) playPageTurn(true);
     crossfade(step - 1);
   }, [step, done, haptic, crossfade]);
 
@@ -442,7 +449,12 @@ export default function Page() {
         onAdvance={advance}
         onBack={back}
         onClose={closePlayer}
+        audio={prefs.audio}
         onToggleDim={() => patch({ dim: !prefs.dim })}
+        onToggleAudio={() => {
+          haptic(6);
+          patch({ audio: !prefs.audio });
+        }}
         onFinish={finish}
       />
 

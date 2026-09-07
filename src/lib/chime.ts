@@ -1,14 +1,15 @@
 "use client";
 
 import { audioContext } from "@/lib/audio";
+import { playChimeSample } from "@/lib/sfx";
 
 /**
  * A soft bell rung once when a prayer is finished.
  *
- * Synthesised for the same reason as the ambience: no audio file, so the
- * app keeps working offline and the download does not grow. Four rising
- * partials, each with its own long decay, read as one struck bell rather than
- * four notes.
+ * The bell is a recording. What follows it here is a synthesised stand-in, used
+ * only when that file has not finished loading or could not be decoded: four
+ * rising partials, each with its own long decay, which read as one struck bell
+ * rather than four notes.
  *
  * The context is the app's shared one. A bell built on its own context is
  * silent on iOS, where a context made outside a gesture stays suspended, and
@@ -16,6 +17,8 @@ import { audioContext } from "@/lib/audio";
  * one page may hold.
  */
 export function playChime(): void {
+  if (playChimeSample()) return;
+
   const ctx = audioContext();
   if (!ctx) return;
 

@@ -28,10 +28,12 @@ export type PlayerProps = {
   dim: boolean;
   fading: boolean;
   done: boolean;
+  audio: boolean;
   onAdvance: () => void;
   onBack: () => void;
   onClose: () => void;
   onToggleDim: () => void;
+  onToggleAudio: () => void;
   onFinish: () => void;
 };
 
@@ -47,10 +49,12 @@ export default function Player({
   dim,
   fading,
   done,
+  audio,
   onAdvance,
   onBack,
   onClose,
   onToggleDim,
+  onToggleAudio,
   onFinish,
 }: PlayerProps) {
   const t = ui(lang);
@@ -249,25 +253,74 @@ export default function Player({
           padding: "calc(18px + var(--safe-t)) 16px 0",
         }}
       >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          aria-label={t.back}
-          style={round(false)}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderTop: "1.5px solid var(--ink)",
-              borderInlineStart: "1.5px solid var(--ink)",
-              transform: ar ? "rotate(135deg)" : "rotate(-45deg)",
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "none" }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
             }}
-          />
-        </button>
+            aria-label={t.back}
+            style={round(false)}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderTop: "1.5px solid var(--ink)",
+                borderInlineStart: "1.5px solid var(--ink)",
+                transform: ar ? "rotate(135deg)" : "rotate(-45deg)",
+              }}
+            />
+          </button>
+
+          {/* Sound off without leaving the prayer. It is the same setting the
+              home screen holds, so silencing it here is remembered rather than
+              lasting only until the screen closes. */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleAudio();
+            }}
+            aria-label={
+              audio
+                ? ar
+                  ? "كتم الصوت"
+                  : "Mute sound"
+                : ar
+                  ? "تشغيل الصوت"
+                  : "Unmute sound"
+            }
+            aria-pressed={!audio}
+            style={round(audio)}
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ink)"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M11 5 6 9H3v6h3l5 4z" />
+              {audio ? (
+                <>
+                  <path d="M15.5 8.5a4.5 4.5 0 0 1 0 7" />
+                  <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13" opacity=".55" />
+                </>
+              ) : (
+                <>
+                  <path d="m16 9 5 6" />
+                  <path d="m21 9-5 6" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
 
         <div
           style={{
