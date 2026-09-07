@@ -28,7 +28,16 @@ export type AuthResult =
        */
       pendingConfirmation?: boolean;
     }
-  | { ok: false; message: string };
+  | {
+      ok: false;
+      message: string;
+      /**
+       * The account exists and the password was right, but the address has
+       * never been confirmed. The caller should offer to send the link again
+       * rather than leaving the person to guess at a password that was fine.
+       */
+      reason?: "unconfirmed";
+    };
 
 export type SignUpInput = {
   email: string;
@@ -90,6 +99,7 @@ const T = {
     // One message for "no such account" and "wrong password" alike. Telling
     // them apart is how an attacker learns which addresses are registered.
     badCredentials: "البريد الإلكتروني أو كلمة السر غير صحيحة.",
+    notConfirmed: "لم يُؤكَّد هذا البريد بعد. افتح رابط التأكيد المرسل إليه.",
     wrongCurrent: "كلمة السر الحالية غير صحيحة.",
     samePassword: "كلمة السر الجديدة هي نفسها الحالية.",
     usernameTaken: "اسم المستخدم محجوز، جرّب غيره.",
@@ -101,6 +111,7 @@ const T = {
   },
   en: {
     badCredentials: "That email or password is incorrect.",
+    notConfirmed: "That email has not been confirmed yet. Open the link we sent to it.",
     wrongCurrent: "That is not your current password.",
     samePassword: "The new password is the same as the current one.",
     usernameTaken: "That username is taken, try another.",
@@ -119,6 +130,9 @@ function explain(error: { message?: string; code?: string } | null, lang: Lang):
   const code = error?.code || "";
 
   if (raw.includes("failed to fetch") || raw.includes("network")) return t.offline;
+  if (code === "email_not_confirmed" || raw.includes("not confirmed")) {
+    return t.notConfirmed;
+  }
   if (code === "invalid_credentials" || raw.includes("invalid login")) return t.badCredentials;
   if (code === "same_password" || raw.includes("should be different")) {
     return t.samePassword;
@@ -223,8 +237,17 @@ export function useAuth(): Auth {
       });
 
       if (error) {
-        noteFailure();
-        return { ok: false, message: explain(error, lang) };
+        const unconfirmed =
+          error.code === "email_not_confirmed" ||
+          error.message.toLowerCase().includes("not confirmed");
+        // An unconfirmed account is not a failed guess, and counting it toward
+        // the lockout would punish the one person who did nothing wrong.
+        if (!unconfirmed) noteFailure();
+        return {
+          ok: false,
+          message: explain(error, lang),
+          ...(unconfirmed ? { reason: "unconfirmed" as const } : {}),
+        };
       }
       failures.current = 0;
       return { ok: true };

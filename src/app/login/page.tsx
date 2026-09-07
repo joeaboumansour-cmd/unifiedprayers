@@ -56,10 +56,13 @@ const COPY = {
     taken: "محجوز",
     working: "لحظة…",
     checkMailTitle: "تفقّد بريدك",
+    confirmFirstTitle: "أكّد بريدك أولًا",
     confirmSent: (email: string) =>
       `أنشأنا الحساب وأرسلنا رابط تأكيد إلى ${email}. افتحه لتفعيل الحساب.`,
     resetSent: (email: string) =>
       `إن كان لـ ${email} حساب عندنا، فرابط إعادة التعيين في طريقه إليه الآن.`,
+    confirmPending: (email: string) =>
+      `${email} لم يُؤكَّد بعد. افتح رابط التأكيد المرسل إليه، أو اطلب رابطًا جديدًا.`,
     spamHint: "لم تصل خلال دقيقة؟ تفقّد مجلد الرسائل غير المرغوب فيها.",
     resend: "إعادة الإرسال",
     resendWait: (s: number) => `يمكن إعادة الإرسال بعد ${s} ثانية`,
@@ -98,10 +101,13 @@ const COPY = {
     taken: "Taken",
     working: "One moment…",
     checkMailTitle: "Check your email",
+    confirmFirstTitle: "Confirm your email first",
     confirmSent: (email: string) =>
       `Your account is created. Open the confirmation link we sent to ${email} to activate it.`,
     resetSent: (email: string) =>
       `If ${email} has an account with us, a reset link is on its way to it now.`,
+    confirmPending: (email: string) =>
+      `${email} has not been confirmed yet. Open the link we already sent to it, or ask for a new one.`,
     spamHint: "Not there within a minute? Have a look in your spam folder.",
     resend: "Send it again",
     resendWait: (s: number) => `You can send again in ${s}s`,
@@ -137,7 +143,8 @@ export default function LoginPage() {
   /* Set once an email has gone out. It replaces the form entirely: leaving the
      fields up invites a second submit that only rate-limits the first. */
   const [sent, setSent] = useState<{
-    kind: "confirm" | "reset";
+    /** "confirm" is a link just sent; "pending" is one sent some time ago. */
+    kind: "confirm" | "reset" | "pending";
     email: string;
   } | null>(null);
   const [resendIn, setResendIn] = useState(0);
@@ -213,9 +220,9 @@ export default function LoginPage() {
     setDone(null);
     setPending(true);
     const res =
-      sent.kind === "confirm"
-        ? await auth.resendConfirmation(sent.email, lang)
-        : await auth.requestPasswordReset(sent.email, lang);
+      sent.kind === "reset"
+        ? await auth.requestPasswordReset(sent.email, lang)
+        : await auth.resendConfirmation(sent.email, lang);
     setPending(false);
     if (!res.ok) return setError(res.message);
     setDone(t.resendDone);
@@ -257,7 +264,17 @@ export default function LoginPage() {
       setPending(true);
       const res = await auth.signIn(email, password, lang);
       setPending(false);
-      if (!res.ok) return setError(res.message);
+      if (!res.ok) {
+        // The password was right and the address was not confirmed. Put them
+        // on the panel that can do something about it, with no cooldown: no
+        // mail went out just now, so there is nothing to wait for.
+        if (res.reason === "unconfirmed") {
+          setSent({ kind: "pending", email: email.trim().toLowerCase() });
+          setResendIn(0);
+          return;
+        }
+        return setError(res.message);
+      }
       return router.replace("/");
     }
 
@@ -296,13 +313,18 @@ export default function LoginPage() {
      again, or go back. */
   if (sent) {
     return (
-      <AuthShell lang={lang} title={t.checkMailTitle}>
+      <AuthShell
+        lang={lang}
+        title={sent.kind === "pending" ? t.confirmFirstTitle : t.checkMailTitle}
+      >
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {error && <Notice tone="error">{error}</Notice>}
           <Notice tone="ok">
             {sent.kind === "confirm"
               ? t.confirmSent(sent.email)
-              : t.resetSent(sent.email)}
+              : sent.kind === "pending"
+                ? t.confirmPending(sent.email)
+                : t.resetSent(sent.email)}
           </Notice>
           {done && <Notice tone="info">{done}</Notice>}
           <div
