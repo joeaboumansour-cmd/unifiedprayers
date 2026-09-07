@@ -1,27 +1,23 @@
 "use client";
 
-type Ctor = typeof AudioContext;
+import { audioContext } from "@/lib/audio";
 
 /**
  * A soft bell rung once when a prayer is finished.
  *
  * Synthesised for the same reason as the ambient drone: no audio file, so the
- * app keeps working offline and the download does not grow. Three rising
+ * app keeps working offline and the download does not grow. Four rising
  * partials, each with its own long decay, read as one struck bell rather than
- * three notes.
+ * four notes.
+ *
+ * The context is the app's shared one. A bell built on its own context is
+ * silent on iOS, where a context made outside a gesture stays suspended, and
+ * silent everywhere after a few prayers, because Safari caps how many contexts
+ * one page may hold.
  */
 export function playChime(): void {
-  const Ctx: Ctor | undefined =
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: Ctor }).webkitAudioContext;
-  if (!Ctx) return;
-
-  let ctx: AudioContext;
-  try {
-    ctx = new Ctx();
-  } catch {
-    return;
-  }
+  const ctx = audioContext();
+  if (!ctx) return;
 
   const filter = ctx.createBiquadFilter();
   filter.type = "lowpass";
@@ -40,6 +36,7 @@ export function playChime(): void {
     [1174.66, 0.28, 0.06, 1.8],
   ];
 
+  let last = 0;
   const oscillators = voices.map(([freq, at, peak, decay]) => {
     const osc = ctx.createOscillator();
     osc.type = "sine";
@@ -57,20 +54,26 @@ export function playChime(): void {
     g.connect(filter);
     osc.start(t0);
     osc.stop(t0 + decay + 0.1);
-    return osc;
+    last = Math.max(last, at + decay + 0.1);
+    return { osc, g };
   });
 
-  // A gesture started this, but Safari can still hand back a suspended context.
-  ctx.resume?.().catch(() => {});
-
-  window.setTimeout(() => {
-    oscillators.forEach((o) => {
-      try {
-        o.stop();
-      } catch {
-        /* already stopped */
-      }
-    });
-    ctx.close().catch(() => {});
-  }, 3200);
+  // The context outlives the bell, so its nodes are unhooked by hand once the
+  // tail has run. Left connected, every prayer would add another dead chain.
+  window.setTimeout(
+    () => {
+      oscillators.forEach(({ osc, g }) => {
+        try {
+          osc.stop();
+        } catch {
+          /* already stopped */
+        }
+        osc.disconnect();
+        g.disconnect();
+      });
+      filter.disconnect();
+      master.disconnect();
+    },
+    (last + 0.3) * 1000,
+  );
 }

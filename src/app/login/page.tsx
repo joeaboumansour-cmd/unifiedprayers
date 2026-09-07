@@ -70,9 +70,9 @@ const COPY = {
     verifyCtaReset: "متابعة",
     orLinkReset:
       "أو افتح الرابط في الرسالة نفسها — لكنه يفتح في متصفّح بريدك، وقد لا تنتقل الجلسة إلى التطبيق.",
-    codeHint: "ستة أرقام، في الرسالة نفسها. صالح لساعة.",
+    codeHint: "الرمز في الرسالة نفسها. أدخله كاملاً. صالح لساعة.",
     verifyCta: "تأكيد وتسجيل الدخول",
-    codeTooShort: "الرمز ستة أرقام.",
+    codeTooShort: "أدخل الرمز كاملاً كما ورد في الرسالة.",
     orLink: "أو افتح الرابط في الرسالة نفسها — لكنه يفتح في متصفّح بريدك، فقد يلزمك تسجيل الدخول هنا بعده.",
     resend: "إعادة الإرسال",
     resendWait: (s: number) => `يمكن إعادة الإرسال بعد ${s} ثانية`,
@@ -124,9 +124,9 @@ const COPY = {
     verifyCtaReset: "Continue",
     orLinkReset:
       "Or open the link in the same email — but that opens in your mail app's browser, and the session may not carry into the app.",
-    codeHint: "Six digits, in the email itself. Good for an hour.",
+    codeHint: "The code is in the email itself. Good for an hour.",
     verifyCta: "Confirm and sign in",
-    codeTooShort: "The code is six digits.",
+    codeTooShort: "Enter the whole code, exactly as the email spells it.",
     orLink: "Or open the link in the same email — but that opens in your mail app's browser, so you may have to sign in here afterwards.",
     resend: "Send it again",
     resendWait: (s: number) => `You can send again in ${s}s`,
@@ -267,7 +267,11 @@ export default function LoginPage() {
     setDone(null);
 
     const digits = code.replace(/[^0-9]/g, "");
-    if (digits.length !== 6) return setError(t.codeTooShort);
+    // Supabase mints the code, and its length is a project setting that can
+    // be anything from 6 to 10 digits. Pinning this to 6 here is what locked
+    // people out when the hosted project was set to 8, so accept the range.
+    if (digits.length < 6 || digits.length > 10)
+      return setError(t.codeTooShort);
 
     setPending(true);
     const res =
@@ -419,7 +423,7 @@ export default function LoginPage() {
                     autoComplete="one-time-code"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    maxLength={7}
+                    maxLength={12}
                     autoFocus
                     required
                     placeholder="000000"

@@ -414,7 +414,7 @@ export function useAuth(): Auth {
         email: email.trim().toLowerCase(),
         // Whitespace because people paste, and a code read off a lock screen
         // often arrives with a space in the middle.
-        token: code.replace(/s+/g, ""),
+        token: code.replace(/\s+/g, ""),
         type: "signup",
       });
 
@@ -433,7 +433,7 @@ export function useAuth(): Auth {
 
       const { error } = await supabase.auth.verifyOtp({
         email: email.trim().toLowerCase(),
-        token: code.replace(/s+/g, ""),
+        token: code.replace(/\s+/g, ""),
         type: "recovery",
       });
 
