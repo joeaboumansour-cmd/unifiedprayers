@@ -36,6 +36,7 @@ import { useCloudSync } from "@/lib/useCloudSync";
 import { usePush } from "@/lib/usePush";
 import { useRemoteContent } from "@/lib/useRemoteContent";
 import { useStats } from "@/lib/useStats";
+import { useStrayAuthToken } from "@/lib/useStrayAuthToken";
 import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
 
@@ -68,6 +69,9 @@ export default function Page() {
   // Bumps when Supabase hands us newer prayer text; every string below is read
   // through content.ts, so re-rendering on it is what makes the swap visible.
   const contentVersion = useRemoteContent();
+  // A confirmation or recovery token that was aimed at "/" instead of
+  // /auth/confirm. Redeeming it is that page's job, so this only forwards.
+  const strayToken = useStrayAuthToken();
   const auth = useAuth();
   // Undefined until the check has run, so the tab bar does not flash a fifth
   // tab in and out on every launch. Only true unlocks it.
@@ -343,6 +347,10 @@ export default function Page() {
   const t = ui(prefs.lang);
   const activeName = prayer === "mary" ? t.maryName : t.spiritName;
   const isPlayer = screen === "player";
+
+  // Mid-redirect to /auth/confirm. Painting the app here would show somebody
+  // who is about to be signed in a home screen that says they are not.
+  if (strayToken) return null;
 
   return (
     <main className="app-shell" dir={prefs.lang === "ar" ? "rtl" : "ltr"}>
