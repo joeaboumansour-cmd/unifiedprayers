@@ -73,11 +73,7 @@ export default function ConfirmPage() {
     const params = new URLSearchParams(window.location.search);
     const tokenHash = params.get("token_hash");
     const type = params.get("type") || "";
-
-    if (!tokenHash || !HANDLED.includes(type)) {
-      setPhase({ kind: "bad", reason: "missing" });
-      return;
-    }
+    const recovery = type === "recovery";
 
     const supabase = getSupabase();
     if (!supabase) {
@@ -85,7 +81,48 @@ export default function ConfirmPage() {
       return;
     }
 
-    const recovery = type === "recovery";
+    // A link built by Supabase's default template rather than ours. It has
+    // already been through /auth/v1/verify -- the address is confirmed by the
+    // time we see it -- and arrives with a PKCE code instead of a token hash.
+    // The client redeems that itself through detectSessionInUrl, so there is
+    // nothing to redeem here, only a session to wait for. It only works in the
+    // browser that started the request, which is exactly why our templates do
+    // not use that flow, but reporting a broken link at somebody whose account
+    // was just confirmed would be a lie.
+    if (!tokenHash) {
+      if (!params.get("code")) {
+        setPhase({ kind: "bad", reason: "missing" });
+        return;
+      }
+
+      let tries = 0;
+      const poll = window.setInterval(async () => {
+        tries += 1;
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          window.clearInterval(poll);
+          if (recovery) {
+            markRecovery();
+            router.replace("/reset-password");
+          } else {
+            router.replace("/");
+          }
+          return;
+        }
+        // ~4s. The exchange is local and fast when it can work at all; waiting
+        // longer only delays telling somebody on the wrong device the truth.
+        if (tries >= 8) {
+          window.clearInterval(poll);
+          setPhase({ kind: "bad", reason: recovery ? "recovery" : "signup" });
+        }
+      }, 500);
+      return;
+    }
+
+    if (!HANDLED.includes(type)) {
+      setPhase({ kind: "bad", reason: "missing" });
+      return;
+    }
 
     supabase.auth
       .verifyOtp({ token_hash: tokenHash, type: type as EmailOtpType })

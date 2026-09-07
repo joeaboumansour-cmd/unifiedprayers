@@ -36,7 +36,22 @@ export function getSupabase(): SupabaseClient<Database> | null {
       // The magic-link / OAuth callback comes back as a URL fragment; let the
       // client consume it so we never hand-parse tokens.
       detectSessionInUrl: true,
-      flowType: "pkce",
+      // Implicit, not PKCE, and the reason is the confirmation email.
+      //
+      // Under PKCE the token hash Supabase puts in an auth email is prefixed
+      // "pkce_", and redeeming it yields an authorisation code that still has
+      // to be exchanged using a verifier held in the localStorage of the
+      // browser that started the request. Mail is not read in that browser.
+      // Phones open links in the mail app's own in-app browser, and desktop
+      // webmail is frequently a different browser than the app was used in.
+      // The verify call still lands server-side -- the address does get
+      // confirmed -- but no session comes back, so the person is told the link
+      // failed while their account is quietly activated behind them.
+      //
+      // Implicit issues a plain token hash that /auth/confirm can redeem
+      // anywhere. Nothing here uses OAuth or magic links, which are the flows
+      // PKCE exists to protect, so this costs us nothing we were using.
+      flowType: "implicit",
     },
   });
   return cached;
