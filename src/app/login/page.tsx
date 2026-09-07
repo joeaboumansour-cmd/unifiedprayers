@@ -24,7 +24,7 @@ import {
   passwordStrength,
 } from "@/lib/username";
 
-type Mode = "signin" | "signup";
+type Mode = "signin" | "signup" | "forgot";
 
 const COPY = {
   ar: {
@@ -44,16 +44,28 @@ const COPY = {
     passwordHint: `${PASSWORD_MIN} أحرف على الأقل. الأطول أفضل من الأعقد.`,
     signIn: "دخول",
     signUp: "إنشاء الحساب",
-    forgotHint:
-      "نسيت كلمة السر؟ التطبيق لا يرسل رسائل بريد، فغيّرها من الإعدادات وأنت مسجّل الدخول.",
+    forgotTitle: "إعادة تعيين كلمة السر",
+    forgotSub: "أدخل بريدك، ونرسل لك رابطًا لاختيار كلمة سر جديدة.",
+    forgotCta: "إرسال الرابط",
+    forgotLink: "نسيت كلمة السر؟",
+    backToSignIn: "العودة إلى الدخول",
     noAccount: "ليس لديك حساب؟ أنشئ واحدًا",
     haveAccount: "لديك حساب؟ سجّل الدخول",
     checking: "جارٍ التحقق…",
     available: "متاح",
     taken: "محجوز",
     working: "لحظة…",
-    confirmSent:
-      "الحساب أُنشئ، لكن المشروع ما زال يطلب تأكيد البريد. أوقف الخيار في لوحة Supabase، أو أكّد الحساب من هناك، ثم سجّل الدخول.",
+    checkMailTitle: "تفقّد بريدك",
+    confirmSent: (email: string) =>
+      `أنشأنا الحساب وأرسلنا رابط تأكيد إلى ${email}. افتحه لتفعيل الحساب.`,
+    resetSent: (email: string) =>
+      `إن كان لـ ${email} حساب عندنا، فرابط إعادة التعيين في طريقه إليه الآن.`,
+    spamHint: "لم تصل خلال دقيقة؟ تفقّد مجلد الرسائل غير المرغوب فيها.",
+    resend: "إعادة الإرسال",
+    resendWait: (s: number) => `يمكن إعادة الإرسال بعد ${s} ثانية`,
+    resendDone: "أُرسلت رسالة أخرى.",
+    badEmail: "أدخل بريدًا إلكترونيًا صحيحًا.",
+    missing: "أدخل البريد وكلمة السر.",
     lockedFor: (s: number) => `محاولات كثيرة. حاول بعد ${s} ثانية.`,
     optional: "اختياري",
   },
@@ -74,16 +86,28 @@ const COPY = {
     passwordHint: `At least ${PASSWORD_MIN} characters. Longer beats more complicated.`,
     signIn: "Sign in",
     signUp: "Create account",
-    forgotHint:
-      "Forgotten it? The app sends no email, so change your password from Settings while you are signed in.",
+    forgotTitle: "Reset your password",
+    forgotSub: "Give us your email and we will send a link to choose a new one.",
+    forgotCta: "Send reset link",
+    forgotLink: "Forgotten your password?",
+    backToSignIn: "Back to sign in",
     noAccount: "No account? Create one",
     haveAccount: "Already have an account? Sign in",
     checking: "Checking…",
     available: "Available",
     taken: "Taken",
     working: "One moment…",
-    confirmSent:
-      "The account was created, but this project still asks for email confirmation. Turn that off in the Supabase dashboard, or confirm the account there, then sign in.",
+    checkMailTitle: "Check your email",
+    confirmSent: (email: string) =>
+      `Your account is created. Open the confirmation link we sent to ${email} to activate it.`,
+    resetSent: (email: string) =>
+      `If ${email} has an account with us, a reset link is on its way to it now.`,
+    spamHint: "Not there within a minute? Have a look in your spam folder.",
+    resend: "Send it again",
+    resendWait: (s: number) => `You can send again in ${s}s`,
+    resendDone: "Another email is on its way.",
+    badEmail: "Enter a valid email address.",
+    missing: "Enter your email and password.",
     lockedFor: (s: number) => `Too many attempts. Try again in ${s}s.`,
     optional: "Optional",
   },
@@ -110,6 +134,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
+  /* Set once an email has gone out. It replaces the form entirely: leaving the
+     fields up invites a second submit that only rate-limits the first. */
+  const [sent, setSent] = useState<{
+    kind: "confirm" | "reset";
+    email: string;
+  } | null>(null);
+  const [resendIn, setResendIn] = useState(0);
+
   const t = COPY[lang];
 
   /* Match the app's language and palette, so this does not look like a
@@ -125,7 +157,8 @@ export default function LoginPage() {
         ?.setAttribute("content", theme);
     }
     const params = new URLSearchParams(window.location.search);
-    if (params.get("mode") === "signup") setMode("signup");
+    const wanted = params.get("mode");
+    if (wanted === "signup" || wanted === "forgot") setMode(wanted);
     setReady(true);
   }, []);
 
@@ -166,10 +199,34 @@ export default function LoginPage() {
     };
   }, [username, usernameValid, mode, lang]);
 
+  /* A visible cooldown on the resend button. Supabase enforces its own limit
+     server-side; this is so the second tap is a wait rather than an error. */
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const id = window.setTimeout(() => setResendIn((n) => n - 1), 1000);
+    return () => window.clearTimeout(id);
+  }, [resendIn]);
+
+  const resend = async () => {
+    if (!sent || resendIn > 0 || pending) return;
+    setError(null);
+    setDone(null);
+    setPending(true);
+    const res =
+      sent.kind === "confirm"
+        ? await auth.resendConfirmation(sent.email, lang)
+        : await auth.requestPasswordReset(sent.email, lang);
+    setPending(false);
+    if (!res.ok) return setError(res.message);
+    setDone(t.resendDone);
+    setResendIn(60);
+  };
+
   const switchMode = useCallback((next: Mode) => {
     setMode(next);
     setError(null);
     setDone(null);
+    setSent(null);
     setPassword("");
   }, []);
 
@@ -181,7 +238,22 @@ export default function LoginPage() {
     setError(null);
     setDone(null);
 
+    if (mode === "forgot") {
+      if (!email.includes("@")) return setError(t.badEmail);
+      setPending(true);
+      const res = await auth.requestPasswordReset(email, lang);
+      setPending(false);
+      if (!res.ok) return setError(res.message);
+      // Deliberately the same answer whether or not that address is registered.
+      setSent({ kind: "reset", email: email.trim().toLowerCase() });
+      setResendIn(60);
+      return;
+    }
+
     if (mode === "signin") {
+      // The form is noValidate, so nothing else stops an empty submit, and an
+      // empty submit only spends one of the five attempts before the lockout.
+      if (!email.trim() || !password) return setError(t.missing);
       setPending(true);
       const res = await auth.signIn(email, password, lang);
       setPending(false);
@@ -205,10 +277,13 @@ export default function LoginPage() {
     );
     setPending(false);
     if (!res.ok) return setError(res.message);
-    // Email confirmation is off, so signing up signs you in and the redirect
-    // effect above takes over. No session means the project has confirmation
-    // on and no mail is coming, which has to be said rather than swallowed.
-    if (res.pendingConfirmation) return setDone(t.confirmSent);
+    // No session means confirmation is on and the link is in the post. With it
+    // off, signing up signs you in and the redirect effect above takes over.
+    if (res.pendingConfirmation) {
+      setSent({ kind: "confirm", email: email.trim().toLowerCase() });
+      setResendIn(60);
+      return;
+    }
     router.replace("/");
   };
 
@@ -216,9 +291,69 @@ export default function LoginPage() {
     return <AuthShell lang={lang} title="" />;
   }
 
+  /* An email has gone out. Nothing on this page can help until it is opened,
+     so the form goes away and only the two useful actions remain: send it
+     again, or go back. */
+  if (sent) {
+    return (
+      <AuthShell lang={lang} title={t.checkMailTitle}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {error && <Notice tone="error">{error}</Notice>}
+          <Notice tone="ok">
+            {sent.kind === "confirm"
+              ? t.confirmSent(sent.email)
+              : t.resetSent(sent.email)}
+          </Notice>
+          {done && <Notice tone="info">{done}</Notice>}
+          <div
+            style={{
+              fontSize: 11.5,
+              lineHeight: 1.6,
+              color: "var(--dim-3)",
+              textAlign: "center",
+            }}
+          >
+            {t.spamHint}
+          </div>
+          <button
+            type="button"
+            onClick={resend}
+            disabled={pending || resendIn > 0}
+            style={primaryButton(pending || resendIn > 0)}
+          >
+            {pending
+              ? t.working
+              : resendIn > 0
+                ? t.resendWait(resendIn)
+                : t.resend}
+          </button>
+          <div style={{ textAlign: "center" }}>
+            <button
+              type="button"
+              style={linkButton}
+              onClick={() => switchMode("signin")}
+            >
+              {t.backToSignIn}
+            </button>
+          </div>
+        </div>
+      </AuthShell>
+    );
+  }
+
   const locked = auth.lockedForSeconds > 0;
-  const title = mode === "signin" ? t.signinTitle : t.signupTitle;
-  const subtitle = mode === "signin" ? t.signinSub : t.signupSub;
+  const title =
+    mode === "signin"
+      ? t.signinTitle
+      : mode === "signup"
+        ? t.signupTitle
+        : t.forgotTitle;
+  const subtitle =
+    mode === "signin"
+      ? t.signinSub
+      : mode === "signup"
+        ? t.signupSub
+        : t.forgotSub;
   const strength = passwordStrength(password);
 
   return (
@@ -286,7 +421,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoComplete={mode === "signup" ? "email" : "username"}
+              autoComplete={mode === "signin" ? "username" : "email"}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
@@ -297,6 +432,7 @@ export default function LoginPage() {
           )}
         </Field>
 
+        {mode !== "forgot" && (
         <Field
           label={t.password}
           hint={mode === "signup" ? t.passwordHint : undefined}
@@ -332,6 +468,7 @@ export default function LoginPage() {
               </>
             )}
         </Field>
+        )}
 
         {mode === "signup" && (
           <>
@@ -375,7 +512,13 @@ export default function LoginPage() {
           disabled={pending || locked}
           style={primaryButton(pending || locked)}
         >
-          {pending ? t.working : mode === "signin" ? t.signIn : t.signUp}
+          {pending
+            ? t.working
+            : mode === "signin"
+              ? t.signIn
+              : mode === "signup"
+                ? t.signUp
+                : t.forgotCta}
         </button>
       </form>
 
@@ -395,21 +538,14 @@ export default function LoginPage() {
             <button type="button" style={linkButton} onClick={() => switchMode("signup")}>
               {t.noAccount}
             </button>
-            <div
-              style={{
-                fontSize: 11.5,
-                lineHeight: 1.6,
-                color: "var(--dim-3)",
-                textAlign: "center",
-              }}
-            >
-              {t.forgotHint}
-            </div>
+            <button type="button" style={linkButton} onClick={() => switchMode("forgot")}>
+              {t.forgotLink}
+            </button>
           </>
         )}
-        {mode === "signup" && (
+        {mode !== "signin" && (
           <button type="button" style={linkButton} onClick={() => switchMode("signin")}>
-            {t.haveAccount}
+            {mode === "signup" ? t.haveAccount : t.backToSignIn}
           </button>
         )}
       </div>

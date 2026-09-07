@@ -22,9 +22,9 @@ export type AuthResult =
   | {
       ok: true;
       /**
-       * Set by signUp when Supabase withheld the session: the project still
-       * has email confirmation switched on. This build sends no mail, so the
-       * signup would otherwise look like it silently did nothing.
+       * Set by signUp when Supabase withheld the session: the account exists
+       * but its address is unconfirmed and a confirmation email is on its way.
+       * The caller has to say so, or the signup looks like it did nothing.
        */
       pendingConfirmation?: boolean;
     }
@@ -47,14 +47,25 @@ export type Auth = {
   signUp: (input: SignUpInput, lang: Lang) => Promise<AuthResult>;
   /**
    * Changes the password of the signed-in account. The current password is
-   * required: this app sends no mail, so there is no reset link, and the old
-   * password is the only proof of ownership left.
+   * required even though reset links now exist: an open session proves nothing
+   * about who is holding the device, so the old password is the proof.
    */
   changePassword: (
     current: string,
     next: string,
     lang: Lang,
   ) => Promise<AuthResult>;
+  /** Sends a reset link. Reports success whether or not the address has an
+      account, so this form cannot be used to discover who is registered. */
+  requestPasswordReset: (email: string, lang: Lang) => Promise<AuthResult>;
+  /** Sends the confirmation email again, for one that never arrived. */
+  resendConfirmation: (email: string, lang: Lang) => Promise<AuthResult>;
+  /**
+   * Sets the password on the session a recovery link just opened. Asks for no
+   * current password because the link was the proof. Only /reset-password
+   * calls this, and only once lib/authRecovery confirms this tab redeemed it.
+   */
+  setNewPassword: (next: string, lang: Lang) => Promise<AuthResult>;
   signOut: () => Promise<void>;
 };
 
@@ -117,11 +128,27 @@ function explain(error: { message?: string; code?: string } | null, lang: Lang):
   }
   if (code === "over_request_rate_limit" || raw.includes("rate limit")) return t.locked;
   // The signup trigger raises these when a username or phone is already held.
-  if (raw.includes("profiles_username_key") || raw.includes("username")) {
+  // Matching the bare words is not enough: an empty sign-in form comes back as
+  // "missing email or phone", which is not a phone that belongs to somebody
+  // else. So a duplication has to be stated as well as a field named.
+  const duplicate =
+    raw.includes("duplicate") || raw.includes("already") || raw.includes("unique");
+  if (raw.includes("profiles_username_key") || (duplicate && raw.includes("username"))) {
     return t.usernameTaken;
   }
-  if (raw.includes("user_private_phone_key") || raw.includes("phone")) return t.phoneTaken;
+  if (raw.includes("user_private_phone_key") || (duplicate && raw.includes("phone"))) {
+    return t.phoneTaken;
+  }
   return t.generic;
+}
+
+/**
+ * Where every link in an auth email lands. Built from the running origin so a
+ * link requested on localhost comes back to localhost, and the templates never
+ * have to hard-code a domain.
+ */
+function emailLanding(): string {
+  return `${window.location.origin}/auth/confirm`;
 }
 
 export function useAuth(): Auth {
@@ -215,6 +242,7 @@ export function useAuth(): Auth {
         email: input.email.trim().toLowerCase(),
         password: input.password,
         options: {
+          emailRedirectTo: emailLanding(),
           // Read by handle_new_user() to build the profile row in the same
           // transaction, so a taken username fails the signup outright rather
           // than leaving an account with no profile behind it.
@@ -264,6 +292,58 @@ export function useAuth(): Auth {
     [],
   );
 
+  const requestPasswordReset = useCallback(
+    async (email: string, lang: Lang): Promise<AuthResult> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, message: T[lang].generic };
+
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        { redirectTo: emailLanding() },
+      );
+
+      // Only the failures that are about this request rather than about the
+      // address are worth showing. Supabase already declines to say whether an
+      // account exists, and repeating that silence here keeps it that way.
+      if (error) return { ok: false, message: explain(error, lang) };
+      return { ok: true };
+    },
+    [],
+  );
+
+  const resendConfirmation = useCallback(
+    async (email: string, lang: Lang): Promise<AuthResult> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, message: T[lang].generic };
+
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+        options: { emailRedirectTo: emailLanding() },
+      });
+
+      if (error) return { ok: false, message: explain(error, lang) };
+      return { ok: true };
+    },
+    [],
+  );
+
+  const setNewPassword = useCallback(
+    async (next: string, lang: Lang): Promise<AuthResult> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, message: T[lang].generic };
+
+      const { error } = await supabase.auth.updateUser({ password: next });
+      if (error) return { ok: false, message: explain(error, lang) };
+
+      // Whoever forced the reset may be sitting in another session right now.
+      // This one stays; every other one goes.
+      await supabase.auth.signOut({ scope: "others" }).catch(() => {});
+      return { ok: true };
+    },
+    [],
+  );
+
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
     if (!supabase) return;
@@ -279,6 +359,9 @@ export function useAuth(): Auth {
     signIn,
     signUp,
     changePassword,
+    requestPasswordReset,
+    resendConfirmation,
+    setNewPassword,
     signOut,
   };
 }

@@ -1,0 +1,68 @@
+<!--
+  Supabase Auth -> Emails -> Templates -> "Confirm signup".
+
+  The link carries a token hash rather than Supabase's default
+  {{ .ConfirmationURL }}. The default is PKCE, whose verifier lives in the
+  localStorage of the browser that started the signup, so a link opened in a
+  mail app's in-app browser fails with a "code verifier" error even when
+  everything is configured correctly. A token hash carries its own proof and is
+  redeemed by /auth/confirm on any device.
+
+  {{ .RedirectTo }} is the emailRedirectTo the app passes, so a link asked for
+  on localhost comes back to localhost. Both origins must be listed under
+  Auth -> URL Configuration -> Redirect URLs.
+-->
+<div style="margin:0;padding:32px 16px;background:#070a15;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:480px;margin:0 auto;background:#0d1226;border:1px solid #1c2340;border-radius:16px;">
+    <tr>
+      <td style="padding:36px 32px 28px;">
+
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#e8d8b4;margin-bottom:24px;">
+          Unified Prayers
+        </div>
+
+        <h1 style="margin:0 0 12px;font-size:22px;line-height:1.35;color:#f4f1ea;font-weight:600;">
+          Confirm your email
+        </h1>
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.65;color:#b6bdd4;">
+          Tap the button below to finish creating your account. The link is
+          good for 24 hours.
+        </p>
+
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+          <tr>
+            <td style="background:#f0c775;border-radius:10px;">
+              <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=signup"
+                 style="display:inline-block;padding:13px 28px;font-size:15px;font-weight:600;color:#20180a;text-decoration:none;">
+                Confirm email
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <hr style="border:0;border-top:1px solid #1c2340;margin:0 0 24px;" />
+
+        <div dir="rtl" style="text-align:right;">
+          <h2 style="margin:0 0 12px;font-size:19px;line-height:1.4;color:#f4f1ea;font-weight:600;">
+            أكّد بريدك الإلكتروني
+          </h2>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.75;color:#b6bdd4;">
+            اضغط الزر لإتمام إنشاء حسابك. الرابط صالح لمدة ٢٤ ساعة.
+          </p>
+          <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=signup"
+             style="display:inline-block;padding:13px 28px;background:#f0c775;border-radius:10px;font-size:15px;font-weight:600;color:#20180a;text-decoration:none;">
+            تأكيد البريد
+          </a>
+        </div>
+
+        <p style="margin:28px 0 0;font-size:12.5px;line-height:1.6;color:#7a83a0;">
+          If you did not create this account, ignore this email — nothing
+          happens until the link is opened.
+          <br />
+          <span dir="rtl">إن لم تنشئ هذا الحساب فتجاهل الرسالة؛ لا شيء يحدث ما لم يُفتح الرابط.</span>
+        </p>
+
+      </td>
+    </tr>
+  </table>
+</div>
