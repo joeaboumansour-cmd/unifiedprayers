@@ -144,7 +144,8 @@ export default function LoginPage() {
   const router = useRouter();
   const auth = useAuth();
 
-  const [lang, setLang] = useState<Lang>("ar");
+  // English whatever the app language is — see useAuthChrome for why.
+  const lang: Lang = "en";
   const [mode, setMode] = useState<Mode>("signin");
   const [ready, setReady] = useState(false);
 
@@ -171,12 +172,12 @@ export default function LoginPage() {
 
   const t = COPY[lang];
 
-  /* Match the app's language and palette, so this does not look like a
-     different product than the one it is attached to. */
+  /* Match the app's palette, so this does not look like a different product
+     than the one it is attached to. The language deliberately does not
+     follow. */
   useEffect(() => {
     const prefs = readPrefs();
     if (prefs) {
-      setLang(prefs.lang);
       const { theme } = paletteInfo(prefs.palette);
       document.documentElement.dataset.palette = prefs.palette;
       document

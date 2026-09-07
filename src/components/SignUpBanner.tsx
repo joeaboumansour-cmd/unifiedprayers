@@ -16,11 +16,15 @@ import type { Auth } from "@/lib/useAuth";
  * what staying signed out costs — and it never blocks anything: the whole app
  * works without an account and keeps working after this is dismissed.
  *
- * Dismissal is a snooze rather than a refusal. Someone three days into a
- * streak has a reason to sign up that they did not have on day one, so the
- * banner comes back after a fortnight instead of going away for good. It is
- * kept per-device in localStorage, which is the only place a signed-out person
- * has.
+ * Dismissal lasts the session and no longer. Someone three days into a streak
+ * has a reason to sign up that they did not have on day one, so closing the
+ * banner puts it away for this visit rather than for good: shut the app and
+ * open it again and the invitation is back, once.
+ *
+ * That is exactly what sessionStorage means — it is per tab, and a closed app
+ * is a closed tab — so the lifetime is the storage's rather than a date this
+ * code has to compare against. A signed-out person has no server-side row to
+ * keep it in anyway.
  *
  * English only, whatever the app language is — it belongs with the account
  * surfaces it leads to (Settings, the login pages, the admin tab), which are
@@ -28,9 +32,8 @@ import type { Auth } from "@/lib/useAuth";
  * mirrored in Arabic, and English copy has to lay out as English inside it.
  */
 
-/** Only this device could remember it, so this is the one place to put it. */
-const DISMISS_KEY = "up.signupDismissedAt";
-const DISMISS_DAYS = 14;
+/** Session-scoped on purpose: closing the app is what brings the banner back. */
+const DISMISS_KEY = "up.signupDismissed";
 
 const S = {
   title: "Save your progress",
@@ -40,11 +43,12 @@ const S = {
   close: "Dismiss",
 } as const;
 
-function snoozed(): boolean {
+function dismissedThisSession(): boolean {
   try {
-    const at = Number(localStorage.getItem(DISMISS_KEY) || 0);
-    return Date.now() - at < DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    return sessionStorage.getItem(DISMISS_KEY) === "1";
   } catch {
+    // A browser refusing storage gets the banner every time, which is the
+    // right way round: it is an invitation, not something that must be shown.
     return false;
   }
 }
@@ -56,7 +60,7 @@ export default function SignUpBanner({ auth }: { auth: Auth }) {
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
-    setHidden(snoozed());
+    setHidden(dismissedThisSession());
   }, []);
 
   // "loading" is the moment before a returning member's session is restored;
@@ -128,7 +132,7 @@ export default function SignUpBanner({ auth }: { auth: Auth }) {
         onClick={() => {
           setHidden(true);
           try {
-            localStorage.setItem(DISMISS_KEY, String(Date.now()));
+            sessionStorage.setItem(DISMISS_KEY, "1");
           } catch {
             // A private window with storage refused still gets to close it,
             // for this launch at least.
