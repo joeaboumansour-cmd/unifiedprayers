@@ -129,9 +129,16 @@ export function useCouple(userId: string | null): Couple {
       if (!live) return;
       setPartnerName(prof?.display_name || prof?.username || null);
     })().catch(() => {
-      // Offline. "Alone" is the safe answer: it locks the card rather than
-      // showing one that would then refuse to open.
-      if (live) setStatus("alone");
+      if (!live) return;
+      // Offline. With no answer yet, "alone" is the safe one: it locks the
+      // card rather than showing one that would then refuse to open.
+      //
+      // With an answer already in hand it is not — a resume on bad signal is
+      // the common case, and a failed re-ask is no evidence the pairing has
+      // ended. Unlocking is the database's decision either way; all this
+      // decides is whether the reader watches their card re-lock itself every
+      // time they walk into a lift.
+      setStatus((was) => (was === "paired" ? was : "alone"));
     });
 
     return () => {
