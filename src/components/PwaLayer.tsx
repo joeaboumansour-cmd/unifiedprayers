@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { isAppBusy, subscribeAppBusy } from "@/lib/appBusy";
 import { onForeground } from "@/lib/live";
+import { sheetMotion, useSheetDrag } from "@/lib/useSheetDrag";
 
 /** Chrome's install event, which the DOM lib does not type. */
 type BeforeInstallPromptEvent = Event & {
@@ -219,6 +220,7 @@ export default function PwaLayer() {
   }, [dismiss]);
 
   const open = sheet !== null;
+  const drag = useSheetDrag(open, dismiss);
 
 
   return (
@@ -257,19 +259,32 @@ export default function PwaLayer() {
             border: "1px solid rgb(var(--veil-rgb) / .1)",
             padding: "14px 20px 22px",
             boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
-            transition: `transform .48s ${EASE}`,
-            transform: open ? "translateY(0)" : "translateY(110%)",
+            ...sheetMotion(open, drag, "110%", EASE),
           }}
         >
+          {/* Same grab area as the prayer sheets — see the note in
+              MysterySheet. Four sheets in this app draw this bar; all four
+              answer to it. */}
           <div
+            {...drag.handlers}
             style={{
-              width: 38,
-              height: 4,
-              borderRadius: 999,
-              background: "rgb(var(--veil-rgb) / .22)",
-              margin: "0 auto 18px",
+              display: "flex",
+              justifyContent: "center",
+              padding: "4px 0 14px",
+              margin: "-4px 0 0",
+              cursor: "grab",
+              touchAction: "none",
             }}
-          />
+          >
+            <div
+              style={{
+                width: 38,
+                height: 4,
+                borderRadius: 999,
+                background: "rgb(var(--veil-rgb) / .22)",
+              }}
+            />
+          </div>
 
           <div
             style={{

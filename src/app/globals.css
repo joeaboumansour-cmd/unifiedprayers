@@ -190,6 +190,152 @@ button {
   }
 }
 
+/* ---------------------------------------------------------------
+   The devotion reader.
+
+   Every tap uncovers one more piece of the page, so the motion has
+   to read as "this arrived" rather than "this is decorative": a
+   burst of light, then the words themselves settling in.
+   --------------------------------------------------------------- */
+
+/* One word landing. Words, never letters -- Arabic is cursive, and a letter
+   in its own element loses its joins and renders in isolated form. The unit
+   of this animation is the smallest one that survives shaping. */
+@keyframes devWord {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5em) scale(0.94);
+    filter: blur(5px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* The rule the word sits on, drawn under a heading as it lands. */
+@keyframes devRule {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* A single grain of light: swells, drifts, goes out. The travel and the
+   timing are per-particle inline; only the shape of the life is here. */
+@keyframes devSparkle {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.2) rotate(0deg);
+  }
+  22% {
+    opacity: 1;
+    transform: translate3d(calc(var(--dx) * 0.25), calc(var(--dy) * 0.25), 0)
+      scale(1) rotate(45deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), var(--dy), 0) scale(0.15) rotate(200deg);
+  }
+}
+
+/* The wash of light behind a burst, so the sparkles read as one event. */
+@keyframes devFlash {
+  from {
+    opacity: 0.55;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+/* The reader arriving over the app. */
+@keyframes devOpen {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The prompt at the foot of the page, breathing while it waits for a tap. */
+@keyframes devWait {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* ---------------------------------------------------------------
+   The resume cards.
+
+   These are the one part of the home screen that is asking for
+   something back — a prayer or a devotion left unfinished — so they
+   move, and nothing else on that screen does. A light travels the
+   rim, a sheen crosses the face, and the whole card breathes.
+   --------------------------------------------------------------- */
+
+/* A conic gradient turned behind the card, with the card's own face laid over
+   all but a hairline of it. That hairline is the travelling light. The element
+   is a square larger than the card's diagonal and spun about its own centre,
+   so what animates is one transform on one layer — cheaper, and smoother on a
+   phone, than animating a gradient's angle. */
+@keyframes resumeSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0turn);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(1turn);
+  }
+}
+
+/* A band of light crossing the face, well apart rather than continuous: a
+   sheen every few seconds reads as a catch of light, one every second reads
+   as a loading bar. */
+@keyframes resumeSheen {
+  0% {
+    transform: translateX(-140%) skewX(-18deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.55;
+  }
+  26% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+/* Slow enough to be felt rather than watched. */
+@keyframes resumeBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.012);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

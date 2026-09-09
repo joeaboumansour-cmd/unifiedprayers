@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnnouncementModal } from "@/components/Announcements";
 import Home from "@/components/Home";
+import CoupleSheet from "@/components/CoupleSheet";
+import DevotionReader from "@/components/DevotionReader";
 import MysterySheet from "@/components/MysterySheet";
 import NotificationsPrompt from "@/components/NotificationsPrompt";
 import Player from "@/components/Player";
@@ -25,6 +27,7 @@ import {
   readProgress,
   writeLocal,
 } from "@/lib/state";
+import type { DevotionTrack } from "@/lib/supabase/types";
 import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
 import { playChime } from "@/lib/chime";
@@ -40,6 +43,8 @@ import { usePush } from "@/lib/usePush";
 import { useRemoteContent } from "@/lib/useRemoteContent";
 import { useStats } from "@/lib/useStats";
 import { useStrayAuthToken } from "@/lib/useStrayAuthToken";
+import { useCouple } from "@/lib/useCouple";
+import { TRACKS, useDevotions } from "@/lib/useDevotions";
 import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
 
@@ -61,6 +66,10 @@ export default function Page() {
   const [spiritStep, setSpiritStep] = useState(0);
   const [maryStep, setMaryStep] = useState(0);
   const [sheet, setSheet] = useState(false);
+  // Which devotional book is open, or null for none. The reader stays mounted
+  // through the close so it can slide away rather than vanish.
+  const [devotionTrack, setDevotionTrack] = useState<DevotionTrack | null>(null);
+  const [coupleSheet, setCoupleSheet] = useState(false);
   const [fading, setFading] = useState(false);
   // The closing moment: shown after the last step is tapped past, and the only
   // way a prayer is counted as finished rather than merely left.
@@ -81,6 +90,10 @@ export default function Page() {
   const isAdmin = useAdmin(auth.user?.id ?? null) === true;
   const push = usePush(prefs.lang);
   const verse = useVerse(prefs.lang);
+  const devotions = useDevotions(prefs.lang);
+  // Whether the couples devotion is unlocked. The read policy in 0009 enforces
+  // this independently; here it only decides how the card is drawn.
+  const couple = useCouple(auth.user?.id ?? null);
   // Tri-state on purpose: "loading" is not "signed out". Passing false while
   // the session is still being read would flash a signed-out-only message at
   // somebody who is signed in.
@@ -132,9 +145,9 @@ export default function Page() {
   // service worker layer reads it to keep a new build from reloading the page
   // out from under somebody mid-decade; it applies the moment this clears.
   useEffect(() => {
-    setAppBusy(screen === "player" || done);
+    setAppBusy(screen === "player" || done || devotionTrack !== null);
     return () => setAppBusy(false);
-  }, [screen, done]);
+  }, [screen, done, devotionTrack]);
 
   useWakeLock(prefs.awake && screen === "player");
   useAmbience(prefs.audio && screen === "player");
@@ -353,6 +366,14 @@ export default function Page() {
     setStep(0);
     setScreen("player");
   };
+  const openDevotion = (track: DevotionTrack) => {
+    haptic(12);
+    setDevotionTrack(track);
+  };
+  const closeDevotion = () => {
+    haptic(8);
+    setDevotionTrack(null);
+  };
   const closePlayer = () => {
     if (done) return finish();
     if (prayer === "mary") setMaryStep(step);
@@ -365,6 +386,10 @@ export default function Page() {
     setPrefs((v) => ({ ...v, ...p, updatedAt: Date.now() }));
 
   const t = ui(prefs.lang);
+  const devotionDate = new Intl.DateTimeFormat(
+    prefs.lang === "ar" ? "ar" : "en",
+    { weekday: "long", day: "numeric", month: "long" },
+  ).format(new Date());
   const activeName = prayer === "mary" ? t.maryName : t.spiritName;
   const isPlayer = screen === "player";
 
@@ -381,6 +406,7 @@ export default function Page() {
         stats={stats}
         progress={progress}
         activeName={activeName}
+        prayer={prayer}
         mysterySet={mysterySet}
         beadStyle={prefs.beadStyle}
         palette={prefs.palette}
@@ -391,6 +417,8 @@ export default function Page() {
         isAdmin={isAdmin}
         push={push}
         verse={verse}
+        devotions={devotions}
+        paired={couple.paired}
         banner={banner}
         onDismissBanner={() => banner && dismiss(banner.id)}
         onToggleLang={() =>
@@ -407,6 +435,11 @@ export default function Page() {
           setSheet(true);
         }}
         onStartToday={startToday}
+        onOpenDevotion={openDevotion}
+        onOpenCouple={() => {
+          haptic(10);
+          setCoupleSheet(true);
+        }}
         onSetStyle={(beadStyle) => {
           haptic(6);
           patch({ beadStyle });
@@ -463,6 +496,41 @@ export default function Page() {
         onFinish={finish}
       />
 
+      <DevotionReader
+        open={devotionTrack !== null}
+        devotion={devotionTrack ? devotions.byTrack[devotionTrack] : null}
+        lang={prefs.lang}
+        dateLine={devotionDate}
+        trackLabel={
+          t.devotion.tracks[TRACKS.indexOf(devotionTrack ?? "individual")]
+        }
+        startAt={
+          // Resume where the page was left, unless it was finished — a page
+          // read this morning opens sealed again, so re-reading it is a read
+          // rather than a jump to the closing tick.
+          devotionTrack && devotions.isUnfinished(devotionTrack)
+            ? (devotions.stateOf(devotionTrack)?.shown ?? 1)
+            : 1
+        }
+        audio={prefs.audio}
+        onHaptic={haptic}
+        onProgress={(shown, total) =>
+          devotionTrack && devotions.saveProgress(devotionTrack, shown, total)
+        }
+        onComplete={() => devotionTrack && devotions.markRead(devotionTrack)}
+        onClose={closeDevotion}
+      />
+
+      <CoupleSheet
+        open={coupleSheet}
+        lang={prefs.lang}
+        couple={couple}
+        onSignIn={() => {
+          window.location.href = "/login";
+        }}
+        onClose={() => setCoupleSheet(false)}
+      />
+
       <MysterySheet
         open={sheet}
         lang={prefs.lang}
@@ -478,7 +546,7 @@ export default function Page() {
       {/* Held back until the app is on the home screen: a message over a prayer
           in progress, or over the closing moment, would be an interruption
           rather than an announcement. */}
-      {modal && !isPlayer && !done && (
+      {modal && !isPlayer && !done && devotionTrack === null && !coupleSheet && (
         <AnnouncementModal
           row={modal}
           lang={prefs.lang}
@@ -493,7 +561,14 @@ export default function Page() {
           for a reason. */}
       <NotificationsPrompt
         push={push}
-        suppressed={isPlayer || done || sheet || Boolean(modal)}
+        suppressed={
+          isPlayer ||
+          done ||
+          sheet ||
+          coupleSheet ||
+          Boolean(modal) ||
+          devotionTrack !== null
+        }
       />
     </main>
   );

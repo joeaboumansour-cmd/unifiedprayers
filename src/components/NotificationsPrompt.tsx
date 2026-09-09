@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { sheetMotion, useSheetDrag } from "@/lib/useSheetDrag";
 import type { Push } from "@/lib/usePush";
 
 /**
@@ -69,6 +70,8 @@ export default function NotificationsPrompt({
   const open =
     ready && !dismissed && !suppressed && push.state === "off" && !push.error;
 
+  const drag = useSheetDrag(open, () => setDismissed(true));
+
   // Kept mounted so the sheet can slide away rather than vanish, and so a
   // failure message has somewhere to appear on the way out.
   return (
@@ -105,19 +108,32 @@ export default function NotificationsPrompt({
           border: "1px solid rgb(var(--veil-rgb) / .1)",
           padding: "14px 20px 22px",
           boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
-          transition: `transform .48s ${EASE}`,
-          transform: open ? "translateY(0)" : "translateY(110%)",
+          ...sheetMotion(open, drag, "110%", EASE),
         }}
       >
+        {/* Same grab area as the prayer sheets — see the note in
+            MysterySheet. Four sheets in this app draw this bar; all four
+            answer to it. */}
         <div
+          {...drag.handlers}
           style={{
-            width: 38,
-            height: 4,
-            borderRadius: 999,
-            background: "rgb(var(--veil-rgb) / .22)",
-            margin: "0 auto 18px",
+            display: "flex",
+            justifyContent: "center",
+            padding: "4px 0 14px",
+            margin: "-4px 0 0",
+            cursor: "grab",
+            touchAction: "none",
           }}
-        />
+        >
+          <div
+            style={{
+              width: 38,
+              height: 4,
+              borderRadius: 999,
+              background: "rgb(var(--veil-rgb) / .22)",
+            }}
+          />
+        </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 16 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

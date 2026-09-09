@@ -1,5 +1,6 @@
 "use client";
 
+import { sheetMotion, useSheetDrag } from "@/lib/useSheetDrag";
 import {
   type Lang,
   type MysteryKey,
@@ -27,6 +28,7 @@ export default function MysterySheet({
   onClose: () => void;
 }) {
   const t = ui(lang);
+  const drag = useSheetDrag(open, onClose);
   return (
     <>
       <div
@@ -55,20 +57,36 @@ export default function MysterySheet({
           borderTop: "1px solid rgb(var(--veil-rgb) / .1)",
           padding: "14px 18px max(22px, var(--safe-b))",
           boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
-          transition: `transform .48s ${EASE}`,
-          transform: open ? "translateY(0)" : "translateY(105%)",
+          ...sheetMotion(open, drag, "105%", EASE),
           pointerEvents: open ? "auto" : "none",
         }}
       >
+        {/* The grab area. The drag lives here rather than on the whole sheet
+            because the sheet's body scrolls, and a sheet that both scrolls and
+            drags from the same pixels has to guess which one a finger meant.
+            The bar is what looks draggable, so the bar is what drags — and it
+            gets padding well beyond its 4px so it is a real target. */}
         <div
+          {...drag.handlers}
           style={{
-            width: 38,
-            height: 4,
-            borderRadius: 999,
-            background: "rgb(var(--veil-rgb) / .22)",
-            margin: "0 auto 16px",
+            display: "flex",
+            justifyContent: "center",
+            padding: "4px 0 16px",
+            margin: "-4px 0 0",
+            cursor: "grab",
+            // The browser must not also try to scroll with this finger.
+            touchAction: "none",
           }}
-        />
+        >
+          <div
+            style={{
+              width: 38,
+              height: 4,
+              borderRadius: 999,
+              background: "rgb(var(--veil-rgb) / .22)",
+            }}
+          />
+        </div>
         <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>
           {t.sheetTitle}
         </div>

@@ -218,6 +218,67 @@ export type MorningSetting = {
   url: string;
 };
 
+/* -------------------------------- devotions ------------------------------- */
+
+/** Which of the two printed books a page came out of. */
+export type DevotionTrack = "individual" | "couples";
+
+/**
+ * One page of a daily devotional, keyed by calendar day rather than by date —
+ * see supabase/migrations/0008_devotions.sql. English is nullable throughout
+ * because the books are Arabic on paper; the reader falls back per field.
+ */
+export type DevotionRow = {
+  id: string;
+  track: DevotionTrack;
+  /** 1-12. */
+  month: number;
+  /** 1-31, constrained to days the month actually has. */
+  day: number;
+  title_ar: string;
+  title_en: string | null;
+  verse_ar: string;
+  verse_en: string | null;
+  verse_ref_ar: string | null;
+  verse_ref_en: string | null;
+  /** The paragraphs, in reading order. Never empty. */
+  body_ar: string[];
+  body_en: string[] | null;
+  quote_ar: string | null;
+  quote_en: string | null;
+  quote_source_ar: string | null;
+  quote_source_en: string | null;
+  active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/* --------------------------------- couples -------------------------------- */
+
+/** Two accounts that have said they pray together. See 0009_couples.sql. */
+export type CoupleRow = {
+  id: string;
+  created_at: string;
+};
+
+/** One half of a couple. `user_id` is the primary key: one couple per person. */
+export type CoupleMemberRow = {
+  user_id: string;
+  couple_id: string;
+  joined_at: string;
+};
+
+/** A pairing code. Readable only by whoever asked for it. */
+export type CoupleInviteRow = {
+  code: string;
+  created_by: string;
+  created_at: string;
+  expires_at: string;
+  accepted_by: string | null;
+  accepted_at: string | null;
+};
+
 /** postgrest-js resolves a table to `never` unless Relationships is present. */
 type Table<Row, Insert = Row, Update = Partial<Row>> = {
   Row: Row;
@@ -263,6 +324,16 @@ export type Database = {
         Partial<Omit<VerseRow, "text_ar" | "text_en">> &
           Pick<VerseRow, "text_ar" | "text_en">
       >;
+      daily_devotions: Table<
+        DevotionRow,
+        // The day, the book and the Arabic are the transcription; everything
+        // else has a default or is optional.
+        Partial<Omit<DevotionRow, "track" | "month" | "day" | "title_ar" | "verse_ar" | "body_ar">> &
+          Pick<DevotionRow, "track" | "month" | "day" | "title_ar" | "verse_ar" | "body_ar">
+      >;
+      couples: Table<CoupleRow>;
+      couple_members: Table<CoupleMemberRow>;
+      couple_invites: Table<CoupleInviteRow>;
       announcements: Table<
         AnnouncementRow,
         Partial<Omit<AnnouncementRow, "title_ar" | "title_en">> &
@@ -309,6 +380,34 @@ export type Database = {
       streak_for: {
         Args: { uid: string; today: string };
         Returns: number;
+      };
+      /**
+       * Whether a devotion's calendar day is within a day of the UTC date.
+       * Called by the read policy on `daily_devotions`, not by the app.
+       */
+      devotion_is_due: {
+        Args: { m: number; d: number };
+        Returns: boolean;
+      };
+      /** Whether the caller is paired with someone. Also used by that policy. */
+      in_couple: {
+        Args: { uid?: string };
+        Returns: boolean;
+      };
+      /** A fresh six-character pairing code. Replaces any previous one. */
+      create_couple_invite: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      /** Redeems someone else's code and pairs the two accounts. */
+      accept_couple_invite: {
+        Args: { invite_code: string };
+        Returns: string;
+      };
+      /** Dissolves the link, for both people. */
+      leave_couple: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
     };
     Enums: Record<never, never>;

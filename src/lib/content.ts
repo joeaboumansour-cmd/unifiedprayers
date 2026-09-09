@@ -30,6 +30,35 @@ export type Mystery = {
 
 export type MysterySet = { offering?: string; mysteries: Mystery[] };
 
+/**
+ * The daily-devotion surface: two cards on the home screens, and the prompts
+ * inside the reader that uncovers a page a tap at a time.
+ *
+ * `tracks` is indexed the way `DevotionTrack` is ordered in useDevotions —
+ * [individual, couples]. It is a pair, not a map, for the same reason `days`
+ * and `sizes` are lists: the content document is edited by hand and a flat
+ * array is the shape that survives that.
+ */
+type DevotionStrings = {
+  label: string;
+  tracks: [string, string];
+  /** Under a card nobody has opened yet. */
+  reveal: string;
+  /** Under one opened and put down part-way. */
+  resume: string;
+  /** Under one already read today. */
+  read: string;
+  /** When the day has no page in that book. */
+  empty: string;
+  /** Under the couples card, before the reader is paired with anyone. */
+  locked: string;
+  tapVerse: string;
+  tapNext: string;
+  tapQuote: string;
+  tapDone: string;
+  doneNote: string;
+};
+
 type UIStrings = {
   greeting: string[];
   langSwap: string;
@@ -58,6 +87,7 @@ type UIStrings = {
   verseLabel: string;
   verse: string;
   verseRef: string;
+  devotion: DevotionStrings;
   statLabels: string[];
   search: string;
   beadStyleLabel: string;
@@ -212,10 +242,18 @@ export const glory = (lang: Lang): string => D.GLORY[lang];
  * since started reading, so the bundled copy fills any gap. Without this a
  * newer build against an older row would render an empty label.
  */
-export const ui = (lang: Lang): UIStrings => ({
-  ...BUNDLED_DESIGN.UI[lang],
-  ...D.UI[lang],
-});
+export const ui = (lang: Lang): UIStrings => {
+  const base = BUNDLED_DESIGN.UI[lang];
+  const live = D.UI[lang];
+  return {
+    ...base,
+    ...live,
+    // The one nested object in here, and shallow spread cannot reach inside
+    // it: a remote document carrying a `devotion` block written before a
+    // prompt was added would otherwise drop that prompt entirely.
+    devotion: { ...base.devotion, ...live.devotion },
+  };
+};
 export const spirit = (lang: Lang): SpiritContent => (lang === "ar" ? D.AR : D.EN);
 
 export const maryPre = (lang: Lang): NamedPrayer[] =>

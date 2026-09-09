@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
+import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
+import RosaryIcon, { IconPlate } from "@/components/RosaryIcon";
 import { AnnouncementBanner } from "@/components/Announcements";
 import NotificationsCard from "@/components/NotificationsCard";
 import SignUpBanner from "@/components/SignUpBanner";
@@ -13,6 +15,7 @@ import {
   type Lang,
   type MysteryKey,
   type Palette,
+  type PrayerId,
   setForDay,
   setLabel,
   styleLabel,
@@ -20,8 +23,9 @@ import {
   ui,
 } from "@/lib/content";
 import type { Stats } from "@/lib/sessions";
-import type { AnnouncementRow } from "@/lib/supabase/types";
+import type { AnnouncementRow, DevotionTrack } from "@/lib/supabase/types";
 import type { Auth } from "@/lib/useAuth";
+import { TRACKS, type Devotions } from "@/lib/useDevotions";
 import type { SyncStatus } from "@/lib/useCloudSync";
 import type { Push } from "@/lib/usePush";
 import type { Verse } from "@/lib/useVerse";
@@ -107,38 +111,6 @@ function Row({
     >
       {children}
     </div>
-  );
-}
-
-/** The small rosary glyphs on the two prayer rows. */
-function SpiritGlyph() {
-  const pale = (o: number) => `rgb(var(--ink-rgb) / ${o})`;
-  return (
-    <svg viewBox="0 0 44 44" style={{ width: 42, height: 42, flex: "none" }}>
-      <circle cx="22" cy="22" r="19" fill="none" stroke="rgb(var(--accent-rgb) / .22)" />
-      <circle cx="22" cy="3.4" r="2.6" fill={GOLD} />
-      <circle cx="35.4" cy="9.9" r="1.9" fill={pale(0.8)} />
-      <circle cx="40.4" cy="22" r="1.9" fill={pale(0.55)} />
-      <circle cx="35.4" cy="34.1" r="1.9" fill={pale(0.4)} />
-      <circle cx="22" cy="40.6" r="1.9" fill={pale(0.3)} />
-      <circle cx="8.6" cy="34.1" r="1.9" fill={pale(0.4)} />
-      <circle cx="3.6" cy="22" r="1.9" fill={pale(0.55)} />
-      <circle cx="8.6" cy="9.9" r="1.9" fill={pale(0.8)} />
-    </svg>
-  );
-}
-
-function MaryGlyph() {
-  const pale = (o: number) => `rgb(var(--ink-rgb) / ${o})`;
-  return (
-    <svg viewBox="0 0 44 44" style={{ width: 42, height: 42, flex: "none" }}>
-      <path d="M6 34 A18 18 0 0 1 38 34" fill="none" stroke="rgb(var(--accent-rgb) / .22)" />
-      <circle cx="22" cy="16.2" r="2.6" fill={GOLD} />
-      <circle cx="11.2" cy="21.6" r="1.9" fill={pale(0.7)} />
-      <circle cx="32.8" cy="21.6" r="1.9" fill={pale(0.7)} />
-      <circle cx="6.6" cy="30.5" r="1.9" fill={pale(0.45)} />
-      <circle cx="37.4" cy="30.5" r="1.9" fill={pale(0.45)} />
-    </svg>
   );
 }
 
@@ -248,6 +220,8 @@ export type HomeProps = {
   stats: Stats;
   progress: number;
   activeName: string;
+  /** Which prayer `activeName` and `progress` describe. Picks its art. */
+  prayer: PrayerId;
   mysterySet: MysteryKey;
   beadStyle: BeadStyle;
   palette: Palette;
@@ -260,6 +234,10 @@ export type HomeProps = {
   push: Push;
   /** Today's verse from the database, or null to use the bundled one. */
   verse: Verse | null;
+  /** Today's page from each devotional book, and what has been read. */
+  devotions: Devotions;
+  /** Half of a couple. Draws the couples devotion card unlocked. */
+  paired: boolean;
   banner: AnnouncementRow | null;
   onDismissBanner: () => void;
   onToggleLang: () => void;
@@ -268,6 +246,9 @@ export type HomeProps = {
   onOpenSpirit: () => void;
   onOpenSheet: () => void;
   onStartToday: () => void;
+  onOpenDevotion: (track: DevotionTrack) => void;
+  /** The locked couples card was tapped. Opens the pairing sheet. */
+  onOpenCouple: () => void;
   onSetStyle: (s: BeadStyle) => void;
   onSetPalette: (p: Palette) => void;
   onSetSize: (i: number) => void;
@@ -281,6 +262,7 @@ export default function Home({
   stats,
   progress,
   activeName,
+  prayer,
   beadStyle,
   palette,
   size,
@@ -290,6 +272,8 @@ export default function Home({
   isAdmin,
   push,
   verse,
+  devotions,
+  paired,
   banner,
   onDismissBanner,
   onToggleLang,
@@ -298,6 +282,8 @@ export default function Home({
   onOpenSpirit,
   onOpenSheet,
   onStartToday,
+  onOpenDevotion,
+  onOpenCouple,
   onSetStyle,
   onSetPalette,
   onSetSize,
@@ -316,6 +302,26 @@ export default function Home({
   const hour = today.getHours();
   const greet = hour < 5 ? 0 : hour < 12 ? 1 : hour < 17 ? 2 : 3;
   const todaySet = setForDay(today.getDay());
+  /* Whether there is a prayer to go back to. `progress` is the current step
+     over the total, and page.tsx resets the step both on a fresh launch with
+     no stored progress and after a prayer is completed — so "> 0" is exactly
+     "started and not finished". */
+  const started = progress > 0;
+  /* Devotions opened today and put down part-way, in book order. Together with
+     the prayer above they make the resume list: everything begun and not
+     finished, in one place, and nothing else. */
+  const halfRead = TRACKS.map((track, i) => ({
+    track,
+    label: t.devotion.tracks[i],
+    state: devotions.stateOf(track),
+  })).filter(
+    (x) =>
+      devotions.isUnfinished(x.track) &&
+      // Unlinking mid-read would otherwise leave a card offering to continue a
+      // page the database will no longer return.
+      Boolean(devotions.byTrack[x.track]),
+  );
+  const anyResumable = started || halfRead.length > 0;
 
   // Arabic-Indic digits beside the Arabic date line, Latin ones beside English.
   const num = new Intl.NumberFormat(ar ? "ar" : "en");
@@ -455,86 +461,225 @@ export default function Home({
 
           <SignUpBanner auth={auth} />
 
-          <Row
-            onClick={onResume}
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: 24,
-              padding: 20,
-              marginBottom: 26,
-              background:
-                "linear-gradient(150deg,var(--resume-a),var(--resume-b))",
-              border: "1px solid rgb(var(--veil-rgb) / .09)",
-            }}
-          >
+          {/* Everything begun and not finished, in one stack and in one
+              shape. A chaplet and a devotion are different lengths and
+              different kinds of reading, but "you left this part-way through"
+              is the same offer either way, so they are the same card: plate,
+              what it is, how far in, and the fraction. Two designs here would
+              read as two unrelated features rather than one list.
+
+              Only what was actually left part-way — a card offering to
+              continue something at 0% is offering nothing — and the whole
+              stack is gone on a first launch and again once everything is
+              finished, which is what puts the prayer list at the top of the
+              screen for someone with nothing outstanding. */}
+          {anyResumable && (
             <div
               style={{
-                position: "absolute",
-                top: -70,
-                insetInlineStart: -40,
-                width: 190,
-                height: 190,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle,rgb(var(--accent-rgb) / .3),rgb(var(--accent-rgb) / 0) 70%)",
-                pointerEvents: "none",
-              }}
-            />
-            <div
-              style={{
-                position: "relative",
                 display: "flex",
                 flexDirection: "column",
-                gap: 14,
+                gap: 10,
+                marginBottom: 26,
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 500,
-                  letterSpacing: ".12em",
-                  textTransform: "uppercase",
-                  color: "var(--accent-ink)",
-                }}
-              >
-                {t.resumeKicker}
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.35 }}>
-                {activeName}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div
+              {[
+                ...(started
+                  ? [
+                      {
+                        key: "prayer",
+                        icon: <RosaryIcon prayer={prayer} size={44} />,
+                        kicker: t.resumeKicker,
+                        name: activeName,
+                        frac: progress,
+                        onClick: onResume,
+                      },
+                    ]
+                  : []),
+                ...halfRead.map(({ track, label, state }) => ({
+                  key: track,
+                  icon: (
+                    <IconPlate size={44}>
+                      <TrackGlyph track={track} lit />
+                    </IconPlate>
+                  ),
+                  kicker: t.devotion.resume,
+                  name: label,
+                  // Blocks past the first over blocks left to uncover: the
+                  // title is on screen before the first tap, so counting it
+                  // would start every devotion at something above zero.
+                  frac:
+                    state && state.total > 1
+                      ? (state.shown - 1) / (state.total - 1)
+                      : 0,
+                  onClick: () => onOpenDevotion(track),
+                })),
+              ].map((item, i) => (
+                <Row
+                  key={item.key}
+                  onClick={item.onClick}
                   style={{
-                    flex: 1,
-                    height: 3,
-                    borderRadius: 999,
-                    background: "rgb(var(--veil-rgb) / .12)",
+                    position: "relative",
                     overflow: "hidden",
+                    borderRadius: 22,
+                    /* The card is the rim. Its one pixel of padding is the only
+                       part of the spinning conic gradient below that is left
+                       uncovered by the face laid over it. */
+                    padding: 1,
+                    background: "rgb(var(--veil-rgb) / .09)",
+                    animation: `resumeBreathe 5.5s ease-in-out ${i * 0.7}s infinite`,
                   }}
                 >
+                  {/* The travelling light. Square and larger than the card's
+                      diagonal, so a corner is never briefly uncovered as it
+                      turns. */}
                   <div
+                    aria-hidden="true"
                     style={{
-                      height: "100%",
-                      borderRadius: 999,
-                      background: `linear-gradient(90deg,${GOLD},var(--accent-soft))`,
-                      transition: `width .6s ${EASE}`,
-                      width: `${(progress * 100).toFixed(1)}%`,
+                      position: "absolute",
+                      top: "50%",
+                      insetInlineStart: "50%",
+                      width: "180%",
+                      aspectRatio: "1",
+                      background:
+                        "conic-gradient(from 0deg, transparent 0deg, transparent 250deg, rgb(var(--accent-rgb) / .5) 300deg, var(--accent-glow) 330deg, rgb(var(--accent-rgb) / .5) 350deg, transparent 360deg)",
+                      animation: `resumeSpin 6s linear ${i * -1.6}s infinite`,
+                      pointerEvents: "none",
                     }}
                   />
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: "var(--soft)",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {Math.round(progress * 100)}%
-                </div>
-              </div>
+                  <div
+                    style={{
+                      position: "relative",
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: 15,
+                      borderRadius: 21,
+                      background:
+                        "linear-gradient(150deg,var(--resume-a),var(--resume-b))",
+                      // The face is opaque over the spinner behind it; the
+                      // gradient stops above are translucent, so the ground
+                      // goes under them.
+                      backgroundColor: "var(--surface)",
+                    }}
+                  >
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      top: -70,
+                      insetInlineStart: -40,
+                      width: 180,
+                      height: 180,
+                      borderRadius: "50%",
+                      background:
+                        "radial-gradient(circle,rgb(var(--accent-rgb) / .26),rgb(var(--accent-rgb) / 0) 70%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  {/* The sheen. Staggered per card so a stack of two does not
+                      flash in unison. */}
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      bottom: 0,
+                      insetInlineStart: 0,
+                      width: "45%",
+                      background:
+                        "linear-gradient(90deg,transparent,rgb(var(--veil-rgb) / .16),transparent)",
+                      animation: `resumeSheen 7s ease-in-out ${i * 2.2}s infinite`,
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <div style={{ position: "relative", flex: "none" }}>
+                    {item.icon}
+                  </div>
+                  <div
+                    style={{
+                      position: "relative",
+                      flex: 1,
+                      minWidth: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 10.5,
+                        fontWeight: 500,
+                        letterSpacing: ".12em",
+                        textTransform: "uppercase",
+                        color: "var(--accent-ink)",
+                      }}
+                    >
+                      {item.kicker}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        lineHeight: 1.3,
+                        // One line: the stack is a list of things to get back
+                        // to, and a wrapping title turns it into a wall.
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {item.name}
+                    </div>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <div
+                        style={{
+                          flex: 1,
+                          height: 3,
+                          borderRadius: 999,
+                          background: "rgb(var(--veil-rgb) / .12)",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            borderRadius: 999,
+                            background: `linear-gradient(90deg,${GOLD},var(--accent-soft))`,
+                            transition: `width .6s ${EASE}`,
+                            width: `${(item.frac * 100).toFixed(1)}%`,
+                          }}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "var(--soft)",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {Math.round(item.frac * 100)}%
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                </Row>
+              ))}
             </div>
-          </Row>
+          )}
+
+          <div style={sectionLabel}>{t.devotion.label}</div>
+          <div style={{ marginBottom: 26 }}>
+            <DevotionCards
+              lang={lang}
+              devotions={devotions}
+              paired={paired}
+              onOpen={onOpenDevotion}
+              onLocked={onOpenCouple}
+            />
+          </div>
 
           <div style={sectionLabel}>{t.libraryLabel}</div>
           <div
@@ -542,18 +687,17 @@ export default function Home({
               display: "flex",
               flexDirection: "column",
               gap: 10,
-              marginBottom: 26,
             }}
           >
             {[
               {
-                glyph: <SpiritGlyph />,
+                glyph: <RosaryIcon prayer="spirit" />,
                 name: t.spiritName,
                 meta: t.spiritMeta,
                 onClick: onOpenSpirit,
               },
               {
-                glyph: <MaryGlyph />,
+                glyph: <RosaryIcon prayer="mary" />,
                 name: t.maryName,
                 meta: t.maryMeta,
                 onClick: onOpenSheet,
@@ -586,50 +730,6 @@ export default function Home({
             ))}
           </div>
 
-          <div style={sectionLabel}>{t.comingLabel}</div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 10,
-            }}
-          >
-            {t.coming.map((name) => (
-              <div
-                key={name}
-                style={{
-                  padding: "15px 14px",
-                  borderRadius: 16,
-                  background: "rgb(var(--veil-rgb) / .028)",
-                  border: "1px solid rgb(var(--veil-rgb) / .05)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                  minHeight: 78,
-                }}
-              >
-                <div
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 6,
-                    border: "1px solid rgb(var(--accent-rgb) / .35)",
-                    background: "rgb(var(--accent-rgb) / .07)",
-                  }}
-                />
-                <div
-                  style={{
-                    fontSize: 13.5,
-                    fontWeight: 500,
-                    color: "var(--soft)",
-                    lineHeight: 1.35,
-                  }}
-                >
-                  {name}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
@@ -689,6 +789,17 @@ export default function Home({
               </div>
             </div>
           </Row>
+
+          <div style={sectionLabel}>{t.devotion.label}</div>
+          <div style={{ marginBottom: 26 }}>
+            <DevotionCards
+              lang={lang}
+              devotions={devotions}
+              paired={paired}
+              onOpen={onOpenDevotion}
+              onLocked={onOpenCouple}
+            />
+          </div>
 
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             {[stats.streak, stats.monthPrayers, stats.monthMinutes].map((n, i) => (

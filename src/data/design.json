@@ -273,6 +273,23 @@
       "verseLabel": "آية اليوم",
       "verse": "أرسل روحك فيُخلقوا، وتجدد وجه الأرض.",
       "verseRef": "مزمور ١٠٤",
+      "devotion": {
+        "label": "تأمّل اليوم",
+        "tracks": [
+          "تأمّلي",
+          "تأمّل الزوجين"
+        ],
+        "reveal": "اضغط لتكشف",
+        "resume": "تابع التأمّل",
+        "read": "تمّ اليوم",
+        "empty": "لم يُضف بعد",
+        "locked": "للأزواج المرتبطَين",
+        "tapVerse": "اضغط لتكشف الآية",
+        "tapNext": "اضغط للمتابعة",
+        "tapQuote": "اضغط لتكشف الختام",
+        "tapDone": "اضغط لتختم",
+        "doneNote": "تمّ تأمّل اليوم. شكراً لوقتك مع الله."
+      },
       "statLabels": [
         "يوم متتابع",
         "صلاة هذا الشهر",
@@ -369,6 +386,23 @@
       "verseLabel": "Verse of the day",
       "verse": "Send forth your Spirit, and they shall be created; and you shall renew the face of the earth.",
       "verseRef": "Psalm 104",
+      "devotion": {
+        "label": "Today's devotion",
+        "tracks": [
+          "For me",
+          "For us"
+        ],
+        "reveal": "Tap to reveal",
+        "resume": "Continue reading",
+        "read": "Read today",
+        "empty": "Not added yet",
+        "locked": "For linked partners",
+        "tapVerse": "Tap to reveal the verse",
+        "tapNext": "Tap to continue",
+        "tapQuote": "Tap to reveal the closing",
+        "tapDone": "Tap to finish",
+        "doneNote": "Today's devotion is done. Thank you for your time with God."
+      },
       "statLabels": [
         "day streak",
         "prayers this month",

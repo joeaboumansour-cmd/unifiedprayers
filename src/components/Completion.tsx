@@ -11,6 +11,13 @@ const TICK_LEN = 64;
 export type CompletionProps = {
   open: boolean;
   lang: Lang;
+  /**
+   * The two lines under the tick. Defaulted to the rosary's, because that is
+   * what this closed for years and it is still the common case; the devotion
+   * reader ends on the same tick with its own words.
+   */
+  title?: string;
+  note?: string;
   onDismiss: () => void;
 };
 
@@ -18,7 +25,13 @@ export type CompletionProps = {
  * The closing moment of a prayer: a tick draws itself, a word of thanks rises,
  * and the player hands itself back to the home screen.
  */
-export default function Completion({ open, lang, onDismiss }: CompletionProps) {
+export default function Completion({
+  open,
+  lang,
+  title,
+  note,
+  onDismiss,
+}: CompletionProps) {
   const t = ui(lang);
 
   /* The tap that completed the prayer must not also dismiss the thing it just
@@ -143,7 +156,7 @@ export default function Completion({ open, lang, onDismiss }: CompletionProps) {
             animation: open ? "doneRise .6s var(--ease) 1s both" : "none",
           }}
         >
-          {t.doneTitle}
+          {title ?? t.doneTitle}
         </div>
         <div
           style={{
@@ -154,7 +167,7 @@ export default function Completion({ open, lang, onDismiss }: CompletionProps) {
             animation: open ? "doneRise .6s var(--ease) 1.18s both" : "none",
           }}
         >
-          {t.doneNote}
+          {note ?? t.doneNote}
         </div>
       </div>
     </div>
