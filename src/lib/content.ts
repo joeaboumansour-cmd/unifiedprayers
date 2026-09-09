@@ -64,8 +64,6 @@ type UIStrings = {
   langSwap: string;
   resumeKicker: string;
   libraryLabel: string;
-  comingLabel: string;
-  soon: string;
   spiritName: string;
   maryName: string;
   back: string;
@@ -74,7 +72,6 @@ type UIStrings = {
   doneNote: string;
   tabs: string[];
   pages: string[];
-  coming: string[];
   spiritMeta: string;
   maryMeta: string;
   sheetTitle: string;
@@ -89,7 +86,6 @@ type UIStrings = {
   verseRef: string;
   devotion: DevotionStrings;
   statLabels: string[];
-  search: string;
   beadStyleLabel: string;
   readingLabel: string;
   textSize: string;
@@ -98,7 +94,6 @@ type UIStrings = {
   toggles: [string, string][];
   about: string;
   version: string;
-  groups: string[];
 };
 
 type Design = {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { onForeground } from "@/lib/live";
 import { getSupabase } from "@/lib/supabase/client";
 
 /**
@@ -13,6 +14,13 @@ import { getSupabase } from "@/lib/supabase/client";
  * is not half of a couple gets nothing back from the database for that book,
  * whatever this hook happens to be holding. So `paired` going stale costs a
  * lock icon, not a leak.
+ *
+ * Pairing is the one piece of state in the app that a *different* device
+ * changes: the other person types your code in on their phone, and nothing
+ * happens on yours. So this re-asks on every foreground, the same beat as the
+ * rest of the app. Without that, the partner who handed the code over stays
+ * "alone" until they happen to relaunch — which on an installed PWA can be
+ * days.
  *
  * Nothing is cached to localStorage, deliberately. Everything else the app
  * keeps offline is content; this is a relationship between two accounts, and
@@ -32,6 +40,14 @@ export type Couple = {
   paired: boolean;
   /** The partner's display name or username, once paired. */
   partnerName: string | null;
+  /**
+   * The couple's id, once paired, and null otherwise.
+   *
+   * Exported because what the database will hand over for the couples book
+   * changes the moment this changes, and the devotion cache has to be able to
+   * tell "no page today" from "no page for who I was when I asked".
+   */
+  coupleId: string | null;
   /** This account's open pairing code, if one has been asked for. */
   code: string | null;
   /** Asks for a code, replacing any previous one. Returns it, or null. */
@@ -49,6 +65,7 @@ export type JoinError = "empty" | "unknown" | "own" | "already" | "failed";
 export function useCouple(userId: string | null): Couple {
   const [status, setStatus] = useState<CoupleStatus>("loading");
   const [partnerName, setPartnerName] = useState<string | null>(null);
+  const [coupleId, setCoupleId] = useState<string | null>(null);
   const [code, setCode] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -59,12 +76,16 @@ export function useCouple(userId: string | null): Couple {
     if (!supabase || !userId) {
       setStatus("signed-out");
       setPartnerName(null);
+      setCoupleId(null);
       setCode(null);
       return;
     }
 
     let live = true;
-    setStatus("loading");
+    // Only the first ask shows "loading". A foreground re-ask that dropped
+    // back through it would report `paired: false` for the length of a round
+    // trip, flickering the card to locked and back on every resume.
+    setStatus((was) => (was === "loading" || was === "signed-out" ? "loading" : was));
 
     (async () => {
       // Both halves of the couple, or nothing. The policy scopes this to the
@@ -79,6 +100,7 @@ export function useCouple(userId: string | null): Couple {
       if (!partner) {
         setStatus("alone");
         setPartnerName(null);
+        setCoupleId(null);
         // Only meaningful while unpaired: an open code is what the screen
         // shows someone waiting for their partner to type it in.
         const { data: invites } = await supabase
@@ -93,6 +115,7 @@ export function useCouple(userId: string | null): Couple {
       }
 
       setCode(null);
+      setCoupleId(partner.couple_id);
       setStatus("paired");
 
       // A separate read because profiles is its own table with its own policy.
@@ -115,6 +138,22 @@ export function useCouple(userId: string | null): Couple {
       live = false;
     };
   }, [userId, tick]);
+
+  /*
+   * The other half of this pair is on another phone. Coming back to the
+   * foreground is the only signal this device gets that they have acted, so it
+   * is the one that has to re-ask. Five minutes is the beat the devotions
+   * already use; pairing is not urgent in itself, but being wrong about it
+   * locks a book.
+   *
+   * Its own effect, depending on the account and nothing else. Subscribing
+   * inside the effect above would tear the listener down and rebuild it on
+   * every answer, restarting the interval each time it fired.
+   */
+  useEffect(() => {
+    if (!userId || !getSupabase()) return;
+    return onForeground(refresh, 5 * 60 * 1000);
+  }, [userId, refresh]);
 
   const invite = useCallback(async () => {
     const supabase = getSupabase();
@@ -165,6 +204,7 @@ export function useCouple(userId: string | null): Couple {
     status,
     paired: status === "paired",
     partnerName,
+    coupleId,
     code,
     invite,
     join,

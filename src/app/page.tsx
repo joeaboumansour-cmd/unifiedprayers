@@ -5,9 +5,11 @@ import { AnnouncementModal } from "@/components/Announcements";
 import Home from "@/components/Home";
 import CoupleSheet from "@/components/CoupleSheet";
 import DevotionReader from "@/components/DevotionReader";
+import FeastSheet from "@/components/FeastSheet";
 import MysterySheet from "@/components/MysterySheet";
 import NotificationsPrompt from "@/components/NotificationsPrompt";
 import Player from "@/components/Player";
+import RiteSheet from "@/components/RiteSheet";
 import TabBar from "@/components/TabBar";
 import {
   type MysteryKey,
@@ -27,6 +29,7 @@ import {
   readProgress,
   writeLocal,
 } from "@/lib/state";
+import type { Day, Feast } from "@/lib/liturgy";
 import type { DevotionTrack } from "@/lib/supabase/types";
 import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
@@ -44,6 +47,7 @@ import { useRemoteContent } from "@/lib/useRemoteContent";
 import { useStats } from "@/lib/useStats";
 import { useStrayAuthToken } from "@/lib/useStrayAuthToken";
 import { useCouple } from "@/lib/useCouple";
+import { useLiturgy } from "@/lib/useLiturgy";
 import { TRACKS, useDevotions } from "@/lib/useDevotions";
 import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
@@ -70,6 +74,13 @@ export default function Page() {
   // through the close so it can slide away rather than vanish.
   const [devotionTrack, setDevotionTrack] = useState<DevotionTrack | null>(null);
   const [coupleSheet, setCoupleSheet] = useState(false);
+  // The church picker, and the feast the calendar has open. The feast is held
+  // as a pair rather than a date because a day can keep more than one, and it
+  // stays set through the closing transition so the sheet can slide away with
+  // its text still in it.
+  const [riteSheet, setRiteSheet] = useState(false);
+  const [feast, setFeast] = useState<{ feast: Feast; day: Day } | null>(null);
+  const [feastOpen, setFeastOpen] = useState(false);
   const [fading, setFading] = useState(false);
   // The closing moment: shown after the last step is tapped past, and the only
   // way a prayer is counted as finished rather than merely left.
@@ -90,10 +101,17 @@ export default function Page() {
   const isAdmin = useAdmin(auth.user?.id ?? null) === true;
   const push = usePush(prefs.lang);
   const verse = useVerse(prefs.lang);
-  const devotions = useDevotions(prefs.lang);
   // Whether the couples devotion is unlocked. The read policy in 0009 enforces
   // this independently; here it only decides how the card is drawn.
+  //
+  // Declared before the devotions because it is an input to them: the couples
+  // page is withheld from an account that is not half of a couple, so pairing
+  // changes what that query returns and has to re-ask it.
   const couple = useCouple(auth.user?.id ?? null);
+  const devotions = useDevotions(prefs.lang, couple.coupleId);
+  // Which church's year the Calendar tab keeps. Held on the device, outside
+  // the synced prefs — see the note in useLiturgy.
+  const liturgy = useLiturgy();
   // Tri-state on purpose: "loading" is not "signed out". Passing false while
   // the session is still being read would flash a signed-out-only message at
   // somebody who is signed in.
@@ -418,6 +436,7 @@ export default function Page() {
         push={push}
         verse={verse}
         devotions={devotions}
+        liturgy={liturgy}
         paired={couple.paired}
         banner={banner}
         onDismissBanner={() => banner && dismiss(banner.id)}
@@ -436,6 +455,15 @@ export default function Page() {
         }}
         onStartToday={startToday}
         onOpenDevotion={openDevotion}
+        onOpenRites={() => {
+          haptic(10);
+          setRiteSheet(true);
+        }}
+        onOpenFeast={(f, d) => {
+          setFeast({ feast: f, day: d });
+          setFeastOpen(true);
+        }}
+        onHaptic={haptic}
         onOpenCouple={() => {
           haptic(10);
           setCoupleSheet(true);
@@ -531,6 +559,22 @@ export default function Page() {
         onClose={() => setCoupleSheet(false)}
       />
 
+      <FeastSheet
+        open={feastOpen}
+        feast={feast?.feast ?? null}
+        day={feast?.day ?? null}
+        lang={prefs.lang}
+        onClose={() => setFeastOpen(false)}
+      />
+
+      <RiteSheet
+        open={riteSheet}
+        lang={prefs.lang}
+        liturgy={liturgy}
+        onClose={() => setRiteSheet(false)}
+        onHaptic={haptic}
+      />
+
       <MysterySheet
         open={sheet}
         lang={prefs.lang}
@@ -546,7 +590,13 @@ export default function Page() {
       {/* Held back until the app is on the home screen: a message over a prayer
           in progress, or over the closing moment, would be an interruption
           rather than an announcement. */}
-      {modal && !isPlayer && !done && devotionTrack === null && !coupleSheet && (
+      {modal &&
+        !isPlayer &&
+        !done &&
+        devotionTrack === null &&
+        !coupleSheet &&
+        !riteSheet &&
+        !feastOpen && (
         <AnnouncementModal
           row={modal}
           lang={prefs.lang}
@@ -566,6 +616,8 @@ export default function Page() {
           done ||
           sheet ||
           coupleSheet ||
+          riteSheet ||
+          feastOpen ||
           Boolean(modal) ||
           devotionTrack !== null
         }

@@ -1,0 +1,911 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+
+import { type Lang, setForDay, setLabel } from "@/lib/content";
+import {
+  RITE_LABEL,
+  buildAgenda,
+  buildMonth,
+  colourVar,
+  dayInfo,
+  type CalendarView,
+  type Day,
+  type Feast,
+} from "@/lib/liturgy";
+import { at, dayKey } from "@/lib/liturgy/computus";
+import type { Liturgy } from "@/lib/useLiturgy";
+
+const EASE = "cubic-bezier(.22,1,.36,1)";
+
+/** How far ahead the agenda looks. Six weeks — the rest of this season. */
+const AGENDA_SPAN = 42;
+
+/**
+ * Chrome, not prayer text, but the calendar is the one tab of the four that
+ * is neither settings nor an operator surface: it is read, and what it names
+ * — feasts, seasons, Sundays — is already bilingual in the data. So these
+ * follow the app's language rather than pinning to English the way Settings
+ * does.
+ */
+const T = {
+  month: { ar: "الشهر", en: "Month" },
+  agenda: { ar: "اللائحة", en: "Agenda" },
+  today: { ar: "اليوم", en: "Today" },
+  week: { ar: "الأسبوع", en: "Week" },
+  sundayTitle: { ar: "إنّه يوم الأحد. إلى القداس.", en: "It's Sunday. Go to Mass." },
+  sundayBody: {
+    ar: "الالتزام الوحيد الذي يحمله الأسبوع فعلًا. وكل ما عداه في هذه الروزنامة دعوة.",
+    en: "The one obligation the week actually carries. Everything else on this calendar is an invitation.",
+  },
+  mysteries: { ar: "مسبحة اليوم", en: "Today's mysteries" },
+  mysteriesOn: { ar: "مسبحة هذا اليوم", en: "The set for this day" },
+  pray: { ar: "صلِّ", en: "Pray" },
+  kept: { ar: "في هذا اليوم", en: "Kept today" },
+  alsoKept: { ar: "يُذكر أيضًا", en: "Also commemorated" },
+  empty: {
+    ar: "لا عيد في هذا اليوم — يوم من أيام الزمن.",
+    en: "No feast kept — a weekday of the season.",
+  },
+  agendaEmpty: {
+    ar: "لا شيء في الأسابيع الستة المقبلة.",
+    en: "Nothing in the next six weeks.",
+  },
+} as const;
+
+const sectionLabel: CSSProperties = {
+  fontSize: 11,
+  fontWeight: 500,
+  letterSpacing: ".12em",
+  textTransform: "uppercase",
+  color: "var(--dim-3)",
+  marginTop: 6,
+  marginBottom: 8,
+};
+
+export default function Calendar({
+  lang,
+  liturgy,
+  onOpenRites,
+  onOpenFeast,
+  onStartToday,
+  onHaptic,
+}: {
+  lang: Lang;
+  liturgy: Liturgy;
+  onOpenRites: () => void;
+  onOpenFeast: (feast: Feast, day: Day) => void;
+  /** Opens the player on today's mystery set. Only offered on today. */
+  onStartToday: () => void;
+  onHaptic: (ms?: number) => void;
+}) {
+  const ar = lang === "ar";
+  const today = useMemo(() => at(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate(),
+  ), []);
+  const todayKey = dayKey(today);
+
+  const [cursor, setCursor] = useState({ y: today.getFullYear(), m: today.getMonth() });
+  const [selectedKey, setSelectedKey] = useState(todayKey);
+  const [agenda, setAgenda] = useState(false);
+
+  const view: CalendarView = {
+    rite: liturgy.rite,
+    alsoRoman: liturgy.alsoRoman,
+    lang,
+  };
+
+  const cells = useMemo(
+    () => buildMonth(cursor.y, cursor.m, view),
+    // The view object is rebuilt every render; its three fields are what matter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cursor.y, cursor.m, liturgy.rite, liturgy.alsoRoman, lang],
+  );
+
+  const selected = useMemo(() => {
+    const [y, m, d] = selectedKey.split("-").map(Number);
+    return dayInfo(at(y, m - 1, d), view);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedKey, liturgy.rite, liturgy.alsoRoman, lang]);
+
+  const agendaDays = useMemo(
+    () => (agenda ? buildAgenda(today, AGENDA_SPAN, view) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [agenda, liturgy.rite, liturgy.alsoRoman, lang, todayKey],
+  );
+
+  const monthName = new Intl.DateTimeFormat(ar ? "ar" : "en", { month: "long" })
+    .format(at(cursor.y, cursor.m, 1));
+  const yearLabel = new Intl.NumberFormat(ar ? "ar" : "en", { useGrouping: false })
+    .format(cursor.y);
+  const num = new Intl.NumberFormat(ar ? "ar" : "en");
+
+  /** S M T W T F S, starting Sunday, in the reader's language. */
+  const dowInitials = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(ar ? "ar" : "en", { weekday: "narrow" });
+    // 4 January 1970 was a Sunday, so this walks a week from Sunday.
+    return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(1970, 0, 4 + i)));
+  }, [ar]);
+
+  const step = (n: number) => {
+    onHaptic(6);
+    const d = at(cursor.y, cursor.m + n, 1);
+    setCursor({ y: d.getFullYear(), m: d.getMonth() });
+  };
+
+  const goToday = () => {
+    onHaptic(8);
+    setCursor({ y: today.getFullYear(), m: today.getMonth() });
+    setSelectedKey(todayKey);
+  };
+
+  const pick = (cell: (typeof cells)[number]) => {
+    onHaptic(5);
+    setSelectedKey(cell.key);
+    // Tapping a spilled-in date is how a thumb moves to the next month.
+    if (cell.outside) setCursor({ y: cell.date.getFullYear(), m: cell.date.getMonth() });
+  };
+
+  const offMonth = cursor.y !== today.getFullYear() || cursor.m !== today.getMonth();
+
+  return (
+    <div>
+      {/* ---------------- month nav ---------------- */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+        }}
+      >
+        <Arrow dir="back" onClick={() => step(-1)} />
+        <div style={{ textAlign: "center", lineHeight: 1.15 }}>
+          <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: "-.01em" }}>
+            {monthName}
+          </div>
+          <div
+            style={{
+              fontSize: 11.5,
+              color: "var(--dim-3)",
+              letterSpacing: ".1em",
+              marginTop: 2,
+            }}
+          >
+            {yearLabel}
+          </div>
+        </div>
+        <Arrow dir="forward" onClick={() => step(1)} />
+      </div>
+
+      {/* ---------------- rite chip + view switch ---------------- */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          marginTop: 14,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            onHaptic(8);
+            onOpenRites();
+          }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 7,
+            minWidth: 0,
+            padding: "7px 12px",
+            borderRadius: 999,
+            background: "rgb(var(--veil-rgb) / .05)",
+            border: "1px solid rgb(var(--veil-rgb) / .08)",
+            fontSize: 12.5,
+            color: "var(--soft)",
+          }}
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+            style={{ flex: "none" }}
+          >
+            <path d="M12 3v18M6.5 8.5h11" />
+          </svg>
+          <span
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {RITE_LABEL[liturgy.rite][lang]}
+          </span>
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ flex: "none" }}
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+
+        <div
+          style={{
+            display: "flex",
+            padding: 3,
+            borderRadius: 999,
+            background: "rgb(var(--veil-rgb) / .05)",
+            flex: "none",
+          }}
+        >
+          {[false, true].map((isAgenda) => {
+            const on = agenda === isAgenda;
+            return (
+              <button
+                key={String(isAgenda)}
+                type="button"
+                aria-pressed={on}
+                onClick={() => {
+                  onHaptic(5);
+                  setAgenda(isAgenda);
+                }}
+                style={{
+                  padding: "5px 13px",
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  transition: `background .25s ${EASE}, color .25s ${EASE}`,
+                  background: on ? "rgb(var(--accent-rgb) / .16)" : "transparent",
+                  color: on ? "var(--accent-ink)" : "var(--dim-3)",
+                }}
+              >
+                {(isAgenda ? T.agenda : T.month)[lang]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ---------------- the season ribbon ----------------
+          Above the grid rather than in it: the season is the context that
+          makes every dot below legible, and it changes four or five times a
+          year rather than daily. */}
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "11px 14px",
+          borderRadius: 13,
+          background:
+            "linear-gradient(90deg,rgb(var(--veil-rgb) / .055),rgb(var(--veil-rgb) / .02))",
+          border: "1px solid rgb(var(--veil-rgb) / .06)",
+          borderInlineStart: `3px solid ${colourVar(selected.season.colour)}`,
+        }}
+      >
+        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--body)", minWidth: 0 }}>
+          {selected.season.name}
+        </div>
+        <div
+          style={{
+            marginInlineStart: "auto",
+            fontSize: 11,
+            color: "var(--dim-3)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {T.week[lang]} {num.format(selected.season.week)}
+        </div>
+      </div>
+
+      {agenda ? (
+        <AgendaList
+          days={agendaDays}
+          lang={lang}
+          todayKey={todayKey}
+          onOpenFeast={onOpenFeast}
+        />
+      ) : (
+        <>
+          {/* ---------------- the grid ---------------- */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(7,1fr)",
+              marginTop: 18,
+            }}
+          >
+            {dowInitials.map((d, i) => (
+              <span
+                key={i}
+                style={{
+                  textAlign: "center",
+                  fontSize: 10.5,
+                  letterSpacing: ".1em",
+                  paddingBottom: 8,
+                  color: i === 0 ? "var(--accent-ink)" : "var(--dim-4)",
+                }}
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)" }}>
+            {cells.map((c, i) => {
+              const isSunday = i % 7 === 0;
+              const isToday = c.key === todayKey;
+              const isSel = c.key === selectedKey;
+              const lastRow = i >= cells.length - 7;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => pick(c)}
+                  aria-label={new Intl.DateTimeFormat(ar ? "ar" : "en", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  }).format(c.date)}
+                  aria-current={isToday ? "date" : undefined}
+                  style={{
+                    height: 50,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 4,
+                    fontVariantNumeric: "tabular-nums",
+                    // A faint band the full height of the month, so the shape
+                    // of the week reads before a single number does.
+                    background: isSunday ? "rgb(var(--accent-rgb) / .05)" : "none",
+                    borderStartStartRadius: isSunday && i === 0 ? 12 : 0,
+                    borderStartEndRadius: isSunday && i === 0 ? 12 : 0,
+                    borderEndStartRadius: isSunday && lastRow ? 12 : 0,
+                    borderEndEndRadius: isSunday && lastRow ? 12 : 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: "50%",
+                      display: "grid",
+                      placeItems: "center",
+                      fontSize: 14.5,
+                      transition: `background .2s ${EASE}, color .2s ${EASE}`,
+                      opacity: c.outside ? 0.42 : 1,
+                      fontWeight: isToday || (c.high && !c.outside) ? 600 : 400,
+                      color: isToday
+                        ? "var(--on-accent)"
+                        : c.high && !c.outside
+                          ? "var(--accent-ink)"
+                          : "var(--body)",
+                      background: isToday ? "var(--accent)" : "transparent",
+                      boxShadow: isSel
+                        ? isToday
+                          ? "0 0 0 1.5px rgb(var(--bg-base-rgb)),0 0 0 3px var(--accent)"
+                          : "inset 0 0 0 1.5px var(--accent)"
+                        : "none",
+                    }}
+                  >
+                    {num.format(c.date.getDate())}
+                  </span>
+                  {/* Three at most. A day that keeps five things still has to
+                      fit in a 57px column, and the fourth dot is the one that
+                      turns a calendar into a rash. */}
+                  <span style={{ display: "flex", gap: 3, height: 5, alignItems: "center" }}>
+                    {c.feasts.slice(0, 3).map((f) => (
+                      <span
+                        key={f.id}
+                        style={{
+                          width: f.high ? 6 : 5,
+                          height: f.high ? 6 : 5,
+                          borderRadius: "50%",
+                          background: colourVar(f.colour),
+                          opacity: c.outside ? 0.4 : 1,
+                        }}
+                      />
+                    ))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {offMonth && (
+            <button
+              type="button"
+              onClick={goToday}
+              style={{
+                display: "block",
+                margin: "14px auto 0",
+                padding: "6px 16px",
+                borderRadius: 999,
+                fontSize: 12.5,
+                fontWeight: 500,
+                color: "var(--accent-ink)",
+                background: "rgb(var(--accent-rgb) / .12)",
+              }}
+            >
+              {T.today[lang]}
+            </button>
+          )}
+
+          <DayDetail
+            day={selected}
+            lang={lang}
+            isToday={selected.key === todayKey}
+            onOpenFeast={onOpenFeast}
+            onStartToday={onStartToday}
+            onHaptic={onHaptic}
+            mysteryLabel={setLabel(lang, setForDay(selected.date.getDay()))}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+/* --------------------------------- pieces -------------------------------- */
+
+function Arrow({ dir, onClick }: { dir: "back" | "forward"; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={dir}
+      style={{
+        width: 34,
+        height: 34,
+        borderRadius: "50%",
+        display: "grid",
+        placeItems: "center",
+        color: "var(--dim-2)",
+        flex: "none",
+      }}
+    >
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        // Mirrors with the shell, so "back" is always towards the start edge.
+        style={{ transform: dir === "forward" ? "scaleX(1)" : "scaleX(-1)" }}
+      >
+        <path d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  );
+}
+
+/**
+ * The selected day.
+ *
+ * Only one thing on this screen is a filled, lit object and it is the Sunday
+ * prompt. Everything else — the mystery set, each feast — is a hairline row.
+ * That is the whole hierarchy of the tab: on Sunday the calendar asks
+ * something of you, and the other six days it tells you things.
+ */
+function DayDetail({
+  day,
+  lang,
+  isToday,
+  mysteryLabel,
+  onOpenFeast,
+  onStartToday,
+  onHaptic,
+}: {
+  day: Day;
+  lang: Lang;
+  isToday: boolean;
+  mysteryLabel: string;
+  onOpenFeast: (f: Feast, d: Day) => void;
+  onStartToday: () => void;
+  onHaptic: (ms?: number) => void;
+}) {
+  const ar = lang === "ar";
+  const dateLine = new Intl.DateTimeFormat(ar ? "ar" : "en", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(day.date);
+
+  return (
+    <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 12 }}>
+      <div>
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: ".13em",
+            textTransform: "uppercase",
+            color: day.sunday ? "var(--accent-ink)" : "var(--dim-3)",
+          }}
+        >
+          {dateLine}
+          {isToday ? ` · ${T.today[lang]}` : ""}
+        </div>
+        <div
+          style={{
+            fontSize: 17,
+            fontWeight: 500,
+            lineHeight: 1.35,
+            marginTop: 5,
+            textWrap: "balance",
+          }}
+        >
+          {day.title}
+        </div>
+      </div>
+
+      {day.sunday && (
+        <div
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            padding: 18,
+            borderRadius: 20,
+            background:
+              "radial-gradient(120% 130% at 12% 0%,rgb(var(--accent-rgb) / .2),rgb(var(--accent-rgb) / .05) 62%),rgb(var(--veil-rgb) / .035)",
+            border: "1px solid rgb(var(--accent-rgb) / .22)",
+            display: "flex",
+            gap: 13,
+            alignItems: "flex-start",
+          }}
+        >
+          <div
+            style={{
+              flex: "none",
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              display: "grid",
+              placeItems: "center",
+              background: "rgb(var(--accent-rgb) / .16)",
+              color: "var(--accent-ink)",
+            }}
+          >
+            <svg
+              width="21"
+              height="21"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2v4M10 4h4" />
+              <path d="M12 6 5 11v10h14V11z" />
+              <path d="M10 21v-5h4v5" />
+            </svg>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: "-.005em" }}>
+              {T.sundayTitle[lang]}
+            </div>
+            <div
+              style={{
+                fontSize: 12.8,
+                lineHeight: 1.6,
+                color: "var(--soft)",
+                marginTop: 5,
+              }}
+            >
+              {T.sundayBody[lang]}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* The set traditionally prayed on this weekday. Tappable only on today:
+          an offer to pray Thursday's mysteries on Monday is not an offer. */}
+      <div
+        onClick={
+          isToday
+            ? () => {
+                onHaptic(10);
+                onStartToday();
+              }
+            : undefined
+        }
+        role={isToday ? "button" : undefined}
+        tabIndex={isToday ? 0 : undefined}
+        className={isToday ? "tap" : undefined}
+        onKeyDown={
+          isToday
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onStartToday();
+                }
+              }
+            : undefined
+        }
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "13px 14px",
+          borderRadius: 15,
+          background: "rgb(var(--veil-rgb) / .04)",
+          border: "1px solid rgb(var(--veil-rgb) / .06)",
+          cursor: isToday ? "pointer" : "default",
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 22 22" style={{ flex: "none" }}>
+          <circle cx="11" cy="11" r="8" fill="none" stroke="var(--accent)" strokeWidth={1.4} />
+          <circle cx="11" cy="11" r="2.6" fill="var(--accent)" />
+        </svg>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", fontSize: 14, fontWeight: 500 }}>
+            {mysteryLabel}
+          </span>
+          <span style={{ display: "block", fontSize: 11.5, color: "var(--dim-3)", marginTop: 3 }}>
+            {(isToday ? T.mysteries : T.mysteriesOn)[lang]}
+          </span>
+        </span>
+        {isToday && (
+          <span
+            style={{
+              flex: "none",
+              fontSize: 11,
+              padding: "4px 10px",
+              borderRadius: 999,
+              background: "rgb(var(--accent-rgb) / .13)",
+              color: "var(--accent-ink)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {T.pray[lang]}
+          </span>
+        )}
+      </div>
+
+      <div style={sectionLabel}>{(day.sunday ? T.alsoKept : T.kept)[lang]}</div>
+      {day.feasts.length === 0 ? (
+        <div style={{ fontSize: 13, color: "var(--dim-3)", marginTop: -4 }}>
+          {T.empty[lang]}
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", marginTop: -4 }}>
+          {day.feasts.map((f, i) => (
+            <FeastRow
+              key={f.id}
+              feast={f}
+              lang={lang}
+              last={i === day.feasts.length - 1}
+              onClick={() => {
+                onHaptic(8);
+                onOpenFeast(f, day);
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** One feast. The colour rail is the vestment colour, not a decoration. */
+function FeastRow({
+  feast,
+  lang,
+  last,
+  onClick,
+}: {
+  feast: Feast;
+  lang: Lang;
+  last: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "3px 1fr auto",
+        gap: 13,
+        alignItems: "center",
+        width: "100%",
+        textAlign: "start",
+        padding: "12px 0",
+        borderBottom: last ? "none" : "1px solid rgb(var(--veil-rgb) / .05)",
+      }}
+    >
+      <span
+        style={{
+          height: 26,
+          borderRadius: 2,
+          background: colourVar(feast.colour),
+        }}
+      />
+      <span style={{ minWidth: 0 }}>
+        <span style={{ display: "block", fontSize: 14, lineHeight: 1.35, color: "var(--ink)" }}>
+          {feast.name}
+        </span>
+        <span
+          style={{
+            display: "block",
+            fontSize: 11.5,
+            color: "var(--dim-3)",
+            marginTop: 3,
+          }}
+        >
+          {feast.borrowed ? RITE_LABEL.roman[lang] : ""}
+        </span>
+      </span>
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ color: "var(--dim-4)" }}
+      >
+        <path d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  );
+}
+
+/**
+ * Six weeks ahead, as a list.
+ *
+ * The grid answers "what is this month shaped like"; this answers "what is
+ * coming". Only Sundays and days that keep something appear — an empty
+ * Tuesday is a gap, and listing it would bury the days that are not.
+ */
+function AgendaList({
+  days,
+  lang,
+  todayKey,
+  onOpenFeast,
+}: {
+  days: Day[];
+  lang: Lang;
+  todayKey: string;
+  onOpenFeast: (f: Feast, d: Day) => void;
+}) {
+  const ar = lang === "ar";
+  const num = new Intl.NumberFormat(ar ? "ar" : "en");
+  const dow = new Intl.DateTimeFormat(ar ? "ar" : "en", { weekday: "short" });
+
+  if (days.length === 0) {
+    return (
+      <div style={{ fontSize: 13, color: "var(--dim-3)", marginTop: 22 }}>
+        {T.agendaEmpty[lang]}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 18 }}>
+      {days.map((day) => (
+        <div
+          key={day.key}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "46px 1fr",
+            gap: 12,
+            padding: "13px 0",
+            borderTop: "1px solid rgb(var(--veil-rgb) / .055)",
+            background: day.sunday ? "rgb(var(--accent-rgb) / .045)" : "none",
+            borderRadius: day.sunday ? 10 : 0,
+            paddingInline: day.sunday ? 8 : 0,
+            marginInline: day.sunday ? -8 : 0,
+          }}
+        >
+          <div style={{ textAlign: "center", paddingTop: 1 }}>
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: ".08em",
+                color: day.sunday ? "var(--accent-ink)" : "var(--dim-4)",
+              }}
+            >
+              {dow.format(day.date)}
+            </div>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 500,
+                fontVariantNumeric: "tabular-nums",
+                color: day.key === todayKey ? "var(--accent-ink)" : "var(--body)",
+              }}
+            >
+              {num.format(day.date.getDate())}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 7, minWidth: 0 }}>
+            {day.sunday && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "3px 1fr",
+                  gap: 11,
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    height: "100%",
+                    minHeight: 18,
+                    borderRadius: 2,
+                    background: "var(--accent)",
+                  }}
+                />
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontSize: 13.5, color: "var(--accent-ink)" }}>
+                    {day.title}
+                  </span>
+                </span>
+              </div>
+            )}
+            {day.feasts.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => onOpenFeast(f, day)}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "3px 1fr",
+                  gap: 11,
+                  alignItems: "center",
+                  width: "100%",
+                  textAlign: "start",
+                }}
+              >
+                <span
+                  style={{
+                    height: "100%",
+                    minHeight: 18,
+                    borderRadius: 2,
+                    background: colourVar(f.colour),
+                  }}
+                />
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontSize: 13.5, color: "var(--ink)" }}>
+                    {f.name}
+                  </span>
+                  {f.borrowed && (
+                    <span style={{ display: "block", fontSize: 11, color: "var(--dim-3)" }}>
+                      {RITE_LABEL.roman[lang]}
+                    </span>
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

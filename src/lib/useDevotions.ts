@@ -20,6 +20,14 @@ import type { DevotionRow, DevotionTrack } from "@/lib/supabase/types";
  * The cache is keyed by the local date and thrown away when the date changes.
  * Yesterday's page shown today would not be a stale verse, it would be the
  * wrong page of a book, so there is no reason to keep it.
+ *
+ * It is keyed by the couple as well, and that is not an optimisation. The
+ * couples page is withheld by the read policy in 0009 from an account that is
+ * not half of a couple, so *what this query returns depends on who is asking*,
+ * not only on the day. A cache written before pairing says "no couples page
+ * today" — and reused after pairing, it goes on saying it, which is the wrong
+ * answer to a different question. Pairing changes the identity, so it
+ * invalidates the cache.
  */
 
 const CACHE_KEY = "up_devotions_v1";
@@ -76,19 +84,30 @@ export type Devotions = {
   markRead: (track: DevotionTrack) => void;
 };
 
-type Cached = { date: string; at: number; rows: DevotionRow[] };
+type Cached = {
+  date: string;
+  at: number;
+  rows: DevotionRow[];
+  /** The couple this answer was fetched as, or null for "not paired then". */
+  couple: string | null;
+};
 
 /** The device's own calendar date. Also the cache key. */
 function today(): string {
   return new Intl.DateTimeFormat("en-CA").format(new Date());
 }
 
-function readCache(): Cached | null {
+function readCache(coupleId: string | null): Cached | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const c = JSON.parse(raw) as Cached;
-    return c?.date === today() && Array.isArray(c.rows) ? c : null;
+    if (c?.date !== today() || !Array.isArray(c.rows)) return null;
+    // Written as somebody else — an unpaired self, or the other side of a
+    // link since dissolved. The rows are not wrong, they are answers to a
+    // question this reader is no longer asking.
+    if ((c.couple ?? null) !== coupleId) return null;
+    return c;
   } catch {
     return null;
   }
@@ -143,7 +162,12 @@ function toDevotion(r: DevotionRow, lang: Lang): Devotion {
   };
 }
 
-export function useDevotions(lang: Lang): Devotions {
+/**
+ * @param coupleId The reader's couple, from `useCouple`. Changing it re-asks
+ *   immediately: it is the one input to this query that the reader can change
+ *   from outside it, and the freshness window must not sit on top of it.
+ */
+export function useDevotions(lang: Lang, coupleId: string | null): Devotions {
   const [rows, setRows] = useState<DevotionRow[] | null>(null);
   const [date, setDate] = useState(today);
   const [log, setLog] = useState<Record<string, DevotionState>>({});
@@ -151,8 +175,11 @@ export function useDevotions(lang: Lang): Devotions {
   useEffect(() => setLog(readState()), []);
 
   useEffect(() => {
-    const cache = readCache();
-    if (cache) setRows(cache.rows);
+    const cache = readCache(coupleId);
+    // Rows fetched as someone else are not shown while the new answer lands.
+    // Left up, a pre-pairing cache draws the couples card empty-and-inert for
+    // the length of a round trip, which is the exact state this is fixing.
+    setRows(cache ? cache.rows : null);
 
     const supabase = getSupabase();
     if (!supabase) {
@@ -206,7 +233,12 @@ export function useDevotions(lang: Lang): Devotions {
         try {
           localStorage.setItem(
             CACHE_KEY,
-            JSON.stringify({ date: stamp, at: fetchedAt, rows: data } satisfies Cached),
+            JSON.stringify({
+              date: stamp,
+              at: fetchedAt,
+              rows: data,
+              couple: coupleId,
+            } satisfies Cached),
           );
         } catch {
           /* private mode — it just asks again next launch */
@@ -228,7 +260,7 @@ export function useDevotions(lang: Lang): Devotions {
       live = false;
       stop();
     };
-  }, []);
+  }, [coupleId]);
 
   /** One write, so the two callers below cannot disagree about the shape. */
   const put = useCallback(

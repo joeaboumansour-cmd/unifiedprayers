@@ -227,8 +227,6 @@
       "langSwap": "English",
       "resumeKicker": "تابع الصلاة",
       "libraryLabel": "الصلوات",
-      "comingLabel": "قريباً",
-      "soon": "قريباً",
       "spiritName": "مسبحة الروح القدس",
       "maryName": "مسبحة مريم العذراء",
       "back": "رجوع",
@@ -238,20 +236,14 @@
       "tabs": [
         "الصلوات",
         "اليوم",
-        "المكتبة",
+        "الروزنامة",
         "الإعدادات"
       ],
       "pages": [
         "الصلوات",
         "اليوم",
-        "المكتبة",
+        "الروزنامة",
         "الإعدادات"
-      ],
-      "coming": [
-        "القداس الماروني",
-        "القراءات اليومية",
-        "الكتاب المقدس",
-        "النافلات"
       ],
       "spiritMeta": "٧ مواهب · ٥٦ حبة · ١٥ دقيقة",
       "maryMeta": "٥ أسرار · ٦٠ حبة · ٢٠ دقيقة",
@@ -295,7 +287,6 @@
         "صلاة هذا الشهر",
         "دقيقة"
       ],
-      "search": "ابحث في الصلوات",
       "beadStyleLabel": "شكل الحبات",
       "readingLabel": "القراءة والصوت",
       "textSize": "حجم النص",
@@ -324,11 +315,7 @@
         ]
       ],
       "about": "عن التطبيق",
-      "version": "الإصدار ٢٠٢٦.١",
-      "groups": [
-        "المسابح",
-        "قريباً"
-      ]
+      "version": "الإصدار ٢٠٢٦.١"
     },
     "en": {
       "greeting": [
@@ -340,8 +327,6 @@
       "langSwap": "العربية",
       "resumeKicker": "Continue praying",
       "libraryLabel": "Prayers",
-      "comingLabel": "Coming soon",
-      "soon": "Coming soon",
       "spiritName": "Chaplet of the Holy Spirit",
       "maryName": "Rosary of the Virgin Mary",
       "back": "Back",
@@ -351,20 +336,14 @@
       "tabs": [
         "Prayers",
         "Today",
-        "Library",
+        "Calendar",
         "Settings"
       ],
       "pages": [
         "Prayers",
         "Today",
-        "Library",
+        "Calendar",
         "Settings"
-      ],
-      "coming": [
-        "Maronite Mass",
-        "Daily readings",
-        "Holy Scripture",
-        "Novenas"
       ],
       "spiritMeta": "7 gifts · 56 beads · 15 min",
       "maryMeta": "5 mysteries · 60 beads · 20 min",
@@ -408,7 +387,6 @@
         "prayers this month",
         "minutes"
       ],
-      "search": "Search prayers",
       "beadStyleLabel": "Bead style",
       "readingLabel": "Reading & sound",
       "textSize": "Text size",
@@ -437,11 +415,7 @@
         ]
       ],
       "about": "About",
-      "version": "Version 2026.1",
-      "groups": [
-        "Rosaries",
-        "Coming soon"
-      ]
+      "version": "Version 2026.1"
     }
   }
 }

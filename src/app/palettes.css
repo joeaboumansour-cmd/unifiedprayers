@@ -40,6 +40,10 @@
                    a graphic colour and not a readable one.
      --danger      invalid-field and destructive-action ink, with
                    --danger-rgb its channel triplet.
+     --lit-*       the five liturgical vestment colours, read by the Calendar
+                   tab. Not decoration: white, red, green, violet and rose are
+                   what the church itself puts on a given day, so the calendar
+                   colours a feast the way the altar does.
    --------------------------------------------------------------- */
 
 /* Deep blue ground, warm gold accent — the original. */
@@ -89,6 +93,17 @@
     rgba(0, 0, 0, 0.28);
   --danger-rgb: 242 162 176;
   --danger: rgb(var(--danger-rgb));
+
+  /* The five vestment colours. The Calendar tab encodes a feast's rank and
+     kind with them rather than inventing a key of its own -- anyone who has
+     been to Mass already reads this one. `white` is the accent gold, which is
+     what white-and-gold vestments actually look like from a pew, and what a
+     near-white dot on this ground could never be. */
+  --lit-white: #e8c77e;
+  --lit-red: #d97a70;
+  --lit-green: #7fae86;
+  --lit-violet: #a98ac9;
+  --lit-rose: #dda0b6;
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,
@@ -157,6 +172,14 @@
     rgba(0, 0, 0, 0.06);
   --danger-rgb: 180 64 79;
   --danger: rgb(var(--danger-rgb));
+
+  /* Deepened rather than reused: the dark palette's dots are lit to glow on a
+     near-black ground and would wash out to pastel on paper. */
+  --lit-white: #b08445;
+  --lit-red: #b4404f;
+  --lit-green: #4d7a55;
+  --lit-violet: #7a5a99;
+  --lit-rose: #b26f88;
 
   --grad-app: radial-gradient(
     120% 80% at 50% -10%,

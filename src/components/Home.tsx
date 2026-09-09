@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
+import Calendar from "@/components/Calendar";
 import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
 import RosaryIcon, { IconPlate } from "@/components/RosaryIcon";
 import { AnnouncementBanner } from "@/components/Announcements";
@@ -22,11 +23,13 @@ import {
   styles,
   ui,
 } from "@/lib/content";
+import type { Day, Feast } from "@/lib/liturgy";
 import type { Stats } from "@/lib/sessions";
 import type { AnnouncementRow, DevotionTrack } from "@/lib/supabase/types";
 import type { Auth } from "@/lib/useAuth";
 import { TRACKS, type Devotions } from "@/lib/useDevotions";
 import type { SyncStatus } from "@/lib/useCloudSync";
+import type { Liturgy } from "@/lib/useLiturgy";
 import type { Push } from "@/lib/usePush";
 import type { Verse } from "@/lib/useVerse";
 
@@ -236,6 +239,8 @@ export type HomeProps = {
   verse: Verse | null;
   /** Today's page from each devotional book, and what has been read. */
   devotions: Devotions;
+  /** Which church's year the Calendar tab keeps, and the setters for it. */
+  liturgy: Liturgy;
   /** Half of a couple. Draws the couples devotion card unlocked. */
   paired: boolean;
   banner: AnnouncementRow | null;
@@ -247,6 +252,15 @@ export type HomeProps = {
   onOpenSheet: () => void;
   onStartToday: () => void;
   onOpenDevotion: (track: DevotionTrack) => void;
+  /** Opens the church picker over the app. */
+  onOpenRites: () => void;
+  /** Opens one feast from the calendar. */
+  onOpenFeast: (feast: Feast, day: Day) => void;
+  /**
+   * The app's own haptic, already gated on the setting. Passed down rather
+   * than re-derived so the calendar's taps feel like every other tap.
+   */
+  onHaptic: (ms?: number) => void;
   /** The locked couples card was tapped. Opens the pairing sheet. */
   onOpenCouple: () => void;
   onSetStyle: (s: BeadStyle) => void;
@@ -273,6 +287,7 @@ export default function Home({
   push,
   verse,
   devotions,
+  liturgy,
   paired,
   banner,
   onDismissBanner,
@@ -283,6 +298,9 @@ export default function Home({
   onOpenSheet,
   onStartToday,
   onOpenDevotion,
+  onOpenRites,
+  onOpenFeast,
+  onHaptic,
   onOpenCouple,
   onSetStyle,
   onSetPalette,
@@ -938,115 +956,16 @@ export default function Home({
         </div>
       )}
 
-      {/* ---------- LIBRARY ---------- */}
+      {/* ---------- CALENDAR ---------- */}
       {tab === 2 && (
-        <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 9,
-              height: 42,
-              padding: "0 14px",
-              borderRadius: 14,
-              background: "rgb(var(--veil-rgb) / .05)",
-              border: "1px solid rgb(var(--veil-rgb) / .08)",
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                border: "1.5px solid var(--dim-3)",
-                flex: "none",
-              }}
-            />
-            <div style={{ fontSize: 13.5, color: "var(--dim-3)" }}>{t.search}</div>
-          </div>
-
-          {[
-            {
-              title: t.groups[0],
-              items: [
-                { name: t.spiritName, meta: t.spiritMeta, ready: true, onClick: onOpenSpirit },
-                { name: t.maryName, meta: t.maryMeta, ready: true, onClick: onOpenSheet },
-              ],
-            },
-            {
-              title: t.groups[1],
-              items: t.coming.map((n) => ({
-                name: n,
-                meta: t.soon,
-                ready: false,
-                onClick: undefined,
-              })),
-            },
-          ].map((g) => (
-            <div key={g.title} style={{ marginBottom: 22 }}>
-              <div style={sectionLabel}>{g.title}</div>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 8 }}
-              >
-                {g.items.map((it) => (
-                  <Row
-                    key={it.name}
-                    onClick={it.onClick}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      padding: "15px 16px",
-                      borderRadius: 16,
-                      background: it.ready
-                        ? "rgb(var(--veil-rgb) / .045)"
-                        : "rgb(var(--veil-rgb) / .022)",
-                      border: "1px solid rgb(var(--veil-rgb) / .06)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 4,
-                        minWidth: 0,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 500,
-                          color: it.ready ? "var(--ink)" : "var(--dim)",
-                        }}
-                      >
-                        {it.name}
-                      </div>
-                      <div style={{ fontSize: 11.5, color: "var(--dim-3)" }}>
-                        {it.meta}
-                      </div>
-                    </div>
-                    {it.ready && (
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: "var(--accent-ink)",
-                          padding: "4px 9px",
-                          borderRadius: 999,
-                          background: "rgb(var(--accent-rgb) / .12)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {ar ? "جاهزة" : "Ready"}
-                      </div>
-                    )}
-                  </Row>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <Calendar
+          lang={lang}
+          liturgy={liturgy}
+          onOpenRites={onOpenRites}
+          onOpenFeast={onOpenFeast}
+          onStartToday={onStartToday}
+          onHaptic={onHaptic}
+        />
       )}
 
       {/* ---------- SETTINGS ---------- */}

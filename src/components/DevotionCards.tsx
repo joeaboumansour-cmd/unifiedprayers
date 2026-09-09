@@ -126,9 +126,15 @@ export default function DevotionCards({
            entry. Saying "not added yet" there would be a lie. */
         const locked = track === "couples" && !paired;
         const has = !locked && Boolean(page);
-        // A locked card is not inert — it is the only place the pairing
-        // mechanism is explained, so tapping it has to do something.
-        const tappable = has || locked;
+        /* The couples card always does something, and the padlock is not what
+           decides that. This card is the only door to the pairing sheet, so a
+           paired reader with no page in hand — a day with no entry, a fetch
+           that failed, a link the database disagrees about — must not be left
+           holding an inert tile with the door behind it. Tapping it then opens
+           the sheet, which is where "you are linked with X" and the way to
+           undo it both live. */
+        const toSheet = track === "couples" && !has;
+        const tappable = has || toSheet;
 
         return (
           <button
@@ -136,7 +142,7 @@ export default function DevotionCards({
             type="button"
             className={tappable ? "tap" : undefined}
             disabled={!tappable}
-            onClick={() => (locked ? onLocked() : has && onOpen(track))}
+            onClick={() => (has ? onOpen(track) : toSheet && onLocked())}
             style={{
               appearance: "none",
               textAlign: "start",
