@@ -81,7 +81,11 @@ export type DevotionCardsProps = {
    */
   paired: boolean;
   onOpen: (track: DevotionTrack) => void;
-  /** Tapping the locked card. Opens the pairing sheet rather than the page. */
+  /**
+   * Tapping the couples card when there is no page to open — locked, or
+   * paired with nothing for today. Opens the pairing sheet rather than the
+   * page; it is the only way in to it, so it must stay reachable in both.
+   */
   onLocked: () => void;
 };
 
