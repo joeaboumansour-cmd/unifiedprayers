@@ -133,6 +133,30 @@ const YEARS: Record<Rite, RiteYear> = {
   coptic: copticYear,
   armenian: armenianYear,
   syriac: syriacYear,
+  // The Eastern Catholic years are their Orthodox counterparts' years. Not an
+  // approximation: these churches kept their own rite when they entered
+  // communion, which is the entire point of their being Eastern *Catholic*.
+  melkite: byzantineYear,
+  "coptic-catholic": copticYear,
+  "syriac-catholic": syriacYear,
+};
+
+/**
+ * The rite whose feasts a rite inherits.
+ *
+ * A Melkite parish keeps the Byzantine calendar; a Syriac Catholic one keeps
+ * the West Syriac calendar. Rather than tag forty rows three more times — and
+ * then have the copies drift apart the first time somebody edits one — a rite
+ * can name the one it shares a sanctorale with, and the tag on the row is
+ * read as covering both.
+ *
+ * It is one level deep and deliberately not a chain: these are the same
+ * calendar under two jurisdictions, not a hierarchy.
+ */
+const SHARES_WITH: Partial<Record<Rite, Rite>> = {
+  melkite: "byzantine",
+  "coptic-catholic": "coptic",
+  "syriac-catholic": "syriac",
 };
 
 /** A celebration resolved for one reader: their language, their church. */
@@ -238,7 +262,9 @@ function falls(f: RawFeast, d: Date, rite: Rite): boolean {
     // The Coptic church keeps Pascha with the Byzantine one.
     // Everyone on the older reckoning counts from Pascha; the Armenian church
     // keeps the Gregorian Easter, so it counts with the West.
-    const eastern = rite === "byzantine" || rite === "coptic" || rite === "syriac";
+    const eastern =
+      rite === "byzantine" || rite === "coptic" || rite === "syriac" ||
+      rite === "melkite" || rite === "coptic-catholic" || rite === "syriac-catholic";
     return f.easter === (eastern ? fromPascha(d) : fromEaster(d));
   }
   if (f.sunday) {
@@ -258,7 +284,8 @@ function feastsOn(d: Date, view: CalendarView): Feast[] {
   for (const f of FEASTS) {
     if (!falls(f, d, view.rite)) continue;
     const rites = rawRites(f);
-    const own = rites.includes(view.rite);
+    const parent = SHARES_WITH[view.rite];
+    const own = rites.includes(view.rite) || (parent !== undefined && rites.includes(parent));
     // The second layer is Latin only, and only for a reader who is not already
     // reading the Latin calendar.
     const lent = view.alsoRoman && view.rite !== "roman" && rites.includes("roman");
@@ -292,12 +319,13 @@ export function dayInfo(d: Date, view: CalendarView): Day {
   /* Great and Holy Friday is not a Sunday and is not in the feast table; it is
      named by where it sits against Pascha. Without this the most solemn day of
      the Byzantine year reads as "a weekday of the season". */
+  const base = SHARES_WITH[view.rite] ?? view.rite;
   const named =
-    view.rite === "byzantine"
+    base === "byzantine"
       ? byzantineDayName(d, view.lang)
-      : view.rite === "coptic"
+      : base === "coptic"
         ? copticDayName(d, view.lang)
-        : view.rite === "armenian"
+        : base === "armenian"
           ? armenianDayName(d, view.lang)
           : null;
 

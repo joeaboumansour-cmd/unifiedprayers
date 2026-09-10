@@ -42,7 +42,9 @@ const NAME = {
 const OF = {
   epiphany: { ar: "من زمن الدنح", en: "after the Epiphany" },
   resurrection: { ar: "من زمن القيامة", en: "of the Resurrection" },
-  pentecost: { ar: "من زمن العنصرة", en: "of Pentecost" },
+  // "After Pentecost", where the Maronite books say "of the season of
+  // Pentecost" — the same count, printed differently by the two churches.
+  pentecost: { ar: "بعد العنصرة", en: "after Pentecost" },
   cross: { ar: "من زمن الصليب", en: "of the Holy Cross" },
 };
 

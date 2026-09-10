@@ -10,15 +10,21 @@ export type Rite =
   | "byzantine"
   | "coptic"
   | "armenian"
-  | "syriac";
+  | "syriac"
+  | "melkite"
+  | "coptic-catholic"
+  | "syriac-catholic";
 
 export const RITES: Rite[] = [
   "maronite",
   "roman",
+  "melkite",
   "byzantine",
-  "coptic",
-  "armenian",
   "syriac",
+  "syriac-catholic",
+  "coptic",
+  "coptic-catholic",
+  "armenian",
 ];
 
 export const RITE_LABEL: Record<Rite, Record<Lang, string>> = {
@@ -28,6 +34,9 @@ export const RITE_LABEL: Record<Rite, Record<Lang, string>> = {
   coptic: { ar: "الكنيسة القبطية", en: "Coptic Orthodox" },
   armenian: { ar: "الكنيسة الأرمنية", en: "Armenian Apostolic" },
   syriac: { ar: "الكنيسة السريانية الأرثوذكسية", en: "Syriac Orthodox" },
+  melkite: { ar: "الروم الملكيّون الكاثوليك", en: "Melkite Greek Catholic" },
+  "coptic-catholic": { ar: "الكنيسة القبطية الكاثوليكية", en: "Coptic Catholic" },
+  "syriac-catholic": { ar: "الكنيسة السريانية الكاثوليكية", en: "Syriac Catholic" },
 };
 
 export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
@@ -60,6 +69,21 @@ export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
   syriac: {
     ar: "الكنيسة السريانية الأنطاكية — الفصح بالحساب القديم",
     en: "The West Syriac year, with Pascha on the older reckoning",
+  },
+  // The three Eastern Catholic churches keep the year of their Orthodox
+  // counterparts — same seasons, same Pascha — and differ in communion, which
+  // a calendar cannot show. The hint is where that is said plainly.
+  melkite: {
+    ar: "السنة البيزنطية بالعربية — بشركة مع روما",
+    en: "The Byzantine year, in communion with Rome",
+  },
+  "coptic-catholic": {
+    ar: "التقويم القبطي — بشركة مع روما",
+    en: "The Coptic calendar, in communion with Rome",
+  },
+  "syriac-catholic": {
+    ar: "السنة السريانية الغربية — بشركة مع روما",
+    en: "The West Syriac year, in communion with Rome",
   },
 };
 

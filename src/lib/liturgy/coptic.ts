@@ -88,8 +88,6 @@ const NAME = {
   apostles: { ar: "صوم الرسل", en: "The Apostles' Fast" },
 };
 
-const OF = { pentecost: { ar: "بعد العنصرة", en: "after Pentecost" } };
-
 /**
  * The Great Fast is fifty-five days, not forty.
  *
@@ -150,8 +148,21 @@ function sundayOf(d: Date, lang: Lang): SundayInfo {
   if (named) return { title: named[lang], high: Boolean(named.high) };
 
   const s = seasonOf(d, lang);
-  if (s.id === "year" || s.id === "apostles")
-    return { title: nthSunday(s.week, OF.pentecost, lang), high: false };
+  if (s.id === "year" || s.id === "apostles") {
+    /*
+     * "The third Sunday of the month of Thout".
+     *
+     * Outside the fast and the fifty days, this calendar does not count from
+     * Pentecost the way the Byzantine and Syriac years do — it counts within
+     * the Coptic month, and starts again at one when the month turns. Since
+     * every month here is exactly thirty days, which Sunday of the month it is
+     * follows straight from the day of the month.
+     */
+    const [, month, day] = copticOf(d);
+    const nth = Math.floor((day - 1) / 7) + 1;
+    const of = { ar: `من شهر ${MONTHS.ar[month - 1]}`, en: `of ${MONTHS.en[month - 1]}` };
+    return { title: nthSunday(nth, of, lang), high: false };
+  }
   return { title: lang === "ar" ? "يوم الرب" : "The Lord's Day", high: false };
 }
 
