@@ -46,7 +46,31 @@ const SPARQL = "https://query.wikidata.org/sparql";
 
 /* --------------------------------- romcal -------------------------------- */
 
-const bundle = require("@romcal/calendar.general-roman");
+/*
+ * romcal is NOT a dependency of this project, on purpose.
+ *
+ * Nothing the app ships imports it — the app reads src/data/liturgy/roman.json,
+ * which this script writes and which is committed. Keeping romcal in
+ * devDependencies made every deploy install it, and `romcal@3.0.0` and
+ * `@romcal/calendar.general-roman@3.0.0-alpha.0` disagree about their peer
+ * range, so a plain `npm install` fails outright. The local install only ever
+ * worked because it was made with --legacy-peer-deps.
+ *
+ * Regenerating the Roman calendar is a rare and deliberate act, so the two
+ * packages are installed for it and not kept: `npm run liturgy:deps`.
+ */
+let bundle;
+try {
+  bundle = require("@romcal/calendar.general-roman");
+} catch {
+  console.error(
+    "\nromcal is not installed — it is not a dependency of this project.\n" +
+      "Install it just for this run:\n\n  npm run liturgy:deps\n\n" +
+      "and then run this again. Nothing the app ships needs it; only this\n" +
+      "generator does, and its output is committed.\n",
+  );
+  process.exit(1);
+}
 const EN = bundle.GeneralRoman_En;
 const LA = bundle.GeneralRoman_La;
 
