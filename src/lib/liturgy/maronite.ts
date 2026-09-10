@@ -42,7 +42,16 @@ const OF = {
   epiphany: { ar: "من زمن الدنح", en: "after the Glorious Epiphany" },
   resurrection: { ar: "من زمن القيامة", en: "of the Resurrection" },
   pentecost: { ar: "من زمن العنصرة", en: "of Pentecost" },
-  cross: { ar: "من زمن الصليب", en: "of the Holy Cross" },
+  /*
+   * "After the Feast of the Cross", not "of the season of the Cross".
+   *
+   * This is how the Maronite books name these Sundays and how the Patriarchate
+   * prints them: the season is dated from the feast on 14 September, and each
+   * Sunday counts the weeks since it. The first Sunday after the 14th is the
+   * first — which is also why the ordinal here is counted separately from the
+   * season's own week number below, and not derived from it.
+   */
+  cross: { ar: "بعد عيد الصليب", en: "after the Feast of the Cross" },
 };
 
 /** The seven Sundays of the Announcements, in the order they are kept. */
@@ -169,7 +178,14 @@ function sundayOf(d: Date, lang: Lang): SundayInfo {
   if (s.id === "epiphany") return { title: nthSunday(s.week, OF.epiphany, lang), high: false };
   if (s.id === "resurrection") return { title: nthSunday(s.week, OF.resurrection, lang), high: false };
   if (s.id === "pentecost") return { title: nthSunday(s.week, OF.pentecost, lang), high: false };
-  if (s.id === "cross") return { title: nthSunday(s.week, OF.cross, lang), high: false };
+  if (s.id === "cross") {
+    /* Sundays *since* the feast, so the first Sunday after 14 September is the
+       first. The season's own week number counts from the feast day itself and
+       is therefore one ahead of this for most of the season — they are two
+       different counts and only one of them is a Sunday's name. */
+    const since = Math.ceil(daysBetween(a.cross, d) / 7);
+    return { title: nthSunday(Math.max(1, since), OF.cross, lang), high: false };
+  }
 
   return { title: ar ? "أحد الرب" : "The Lord's Day", high: false };
 }

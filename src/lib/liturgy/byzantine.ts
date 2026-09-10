@@ -141,10 +141,47 @@ function seasonOf(d: Date, lang: Lang): Season {
            week: 1 + weeks(prev.pentecost, sundayOnOrBefore(d)) };
 }
 
+/**
+ * The three great fixed feasts whose neighbouring Sundays are named for them.
+ *
+ * The Byzantine year numbers its Sundays from Pentecost all autumn and winter,
+ * except around these: the Sunday on either side of the Exaltation, the
+ * Nativity and the Theophany takes its name from the feast instead, because
+ * those Sundays carry that feast's own gospel. A calendar that called 20
+ * September "the seventeenth Sunday after Pentecost" would be counting
+ * correctly and still not saying what anyone in the pew would call it.
+ */
+const AROUND: { month: number; day: number; before: Record<Lang, string>; after: Record<Lang, string> }[] = [
+  {
+    month: 9, day: 14,
+    before: { ar: "الأحد قبل عيد الصليب", en: "Sunday before the Exaltation of the Cross" },
+    after: { ar: "الأحد بعد عيد الصليب", en: "Sunday after the Exaltation of the Cross" },
+  },
+  {
+    month: 12, day: 25,
+    before: { ar: "الأحد قبل الميلاد — أحد النسبة", en: "Sunday before the Nativity · of the Genealogy" },
+    after: { ar: "الأحد بعد الميلاد", en: "Sunday after the Nativity" },
+  },
+  {
+    month: 1, day: 6,
+    before: { ar: "الأحد قبل الظهور الإلهي", en: "Sunday before the Theophany" },
+    after: { ar: "الأحد بعد الظهور الإلهي", en: "Sunday after the Theophany" },
+  },
+];
+
 function sundayOf(d: Date, lang: Lang): SundayInfo {
   const p = daysBetween(orthodoxEaster(d.getFullYear()), d);
   const named = MOVABLE_SUNDAYS[p];
   if (named) return { title: named[lang], high: Boolean(named.high) };
+
+  // A named neighbour outranks the count from Pentecost, but never outranks
+  // the Paschal cycle above: in the years those overlap, Pascha wins.
+  for (const f of AROUND) {
+    const feast = at(d.getFullYear(), f.month - 1, f.day);
+    const gap = daysBetween(feast, d);
+    if (gap < 0 && gap >= -7) return { title: f.before[lang], high: false };
+    if (gap > 0 && gap <= 7) return { title: f.after[lang], high: false };
+  }
 
   const s = seasonOf(d, lang);
   if (s.id === "pentecost") return { title: nthSunday(s.week, OF.pentecost, lang), high: false };

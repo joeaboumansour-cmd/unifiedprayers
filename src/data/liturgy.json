@@ -2364,7 +2364,9 @@
       "ar": "تذكار القديسَين يواكيم وحنّة",
       "wikiTitle": "Saint Anne",
       "noteEn": "The day after the Nativity of the Mother of God belongs to her parents. The East has always kept them here, on the morning after, rather than on the 26th of July where the Latin church put them — a feast placed by the logic of the story rather than by a date of its own.",
-      "noteAr": "اليوم التالي لميلاد والدة الإله هو لوالِدَيها. حفظهما الشرق دائمًا هنا، في صباح اليوم التالي، لا في السادس والعشرين من تموز حيث وضعتهما الكنيسة اللاتينية — عيد موضعه منطق الحكاية لا تاريخ خاص به."
+      "noteAr": "اليوم التالي لميلاد والدة الإله هو لوالِدَيها. حفظهما الشرق دائمًا هنا، في صباح اليوم التالي، لا في السادس والعشرين من تموز حيث وضعتهما الكنيسة اللاتينية — عيد موضعه منطق الحكاية لا تاريخ خاص به.",
+      "wiki": "Saint Anne",
+      "wikiAr": "حنة (أم مريم العذراء)"
     },
     {
       "id": "copt-joachim-anne",
@@ -2379,7 +2381,25 @@
       "colour": "white",
       "en": "Sts Joachim and Anne",
       "ar": "القديسان يواكيم وحنّة",
-      "wikiTitle": "Saint Anne"
+      "wikiTitle": "Saint Anne",
+      "wiki": "Saint Anne",
+      "wikiAr": "حنة (أم مريم العذراء)"
+    },
+    {
+      "id": "byz-dedication-resurrection",
+      "on": "09-13",
+      "rites": [
+        "byzantine"
+      ],
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Dedication of the Church of the Resurrection",
+      "ar": "تذكار تدشين كنيسة القيامة",
+      "wikiTitle": "Church of the Holy Sepulchre",
+      "noteEn": "The consecration of the church Constantine built over the tomb in Jerusalem, in 335. The Exaltation of the Cross the next day grew out of this feast rather than the other way round.",
+      "noteAr": "تدشين الكنيسة التي بناها قسطنطين فوق القبر في أورشليم سنة ٣٣٥. وعيد ارتفاع الصليب في اليوم التالي نشأ عن هذا العيد لا العكس.",
+      "wiki": "Church of the Holy Sepulchre",
+      "wikiAr": "كنيسة القيامة"
     }
   ]
 }
