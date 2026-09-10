@@ -66,7 +66,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -85,7 +86,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -101,7 +103,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -116,7 +119,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -201,7 +205,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -291,14 +296,16 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
       "id": "maron",
       "on": "02-09",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "solemnity",
       "colour": "white",
@@ -412,7 +419,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -431,7 +439,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -747,7 +756,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -765,7 +775,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -839,7 +850,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -858,7 +870,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -910,7 +923,8 @@
       "id": "thecla",
       "on": "09-24",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "feast",
       "colour": "red",
@@ -1149,7 +1163,8 @@
       "id": "barbara",
       "on": "12-04",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "memorial",
       "colour": "red",
@@ -1251,7 +1266,8 @@
       "rites": [
         "maronite",
         "roman",
-        "byzantine"
+        "byzantine",
+        "syriac"
       ]
     },
     {
@@ -1305,7 +1321,8 @@
       "id": "john-baptist-commemoration",
       "on": "01-07",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "memorial",
       "colour": "white",
@@ -1353,7 +1370,8 @@
       "id": "elijah-prophet",
       "on": "07-20",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "feast",
       "colour": "white",
@@ -1398,7 +1416,8 @@
       "id": "simeon-stylite",
       "on": "09-01",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "memorial",
       "colour": "white",
@@ -1414,7 +1433,8 @@
       "id": "sergius-and-bacchus",
       "on": "10-07",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "memorial",
       "colour": "red",
@@ -1430,7 +1450,8 @@
       "id": "congratulations-to-the-mother-of-god",
       "on": "12-26",
       "rites": [
-        "maronite"
+        "maronite",
+        "syriac"
       ],
       "rank": "feast",
       "colour": "white",
@@ -2079,6 +2100,256 @@
       "noteAr": "أظهر أنطونيوس أن المسيحي يستطيع أن يعيش وحده في البرّية، وأوجد باخوميوس كيف يعيشون فيها معًا. وكل دير له قانون ينحدر من قانونه.",
       "wiki": "Pachomius the Great",
       "wikiAr": "باخوم"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-theophany",
+      "on": "01-06",
+      "rank": "solemnity",
+      "colour": "white",
+      "high": true,
+      "en": "The Holy Nativity and Theophany of the Lord",
+      "ar": "عيد الميلاد والظهور الإلهي",
+      "wikiTitle": "Epiphany (holiday)",
+      "noteEn": "Nativity and Baptism in one feast, on the day they were always kept together. Every other church split them in the fourth century and this one did not — so an Armenian Christmas is not a late Christmas, it is the original arrangement, never changed.",
+      "noteAr": "الميلاد والعماد في عيد واحد، في اليوم الذي كانا يُحفَظان فيه معًا دائمًا. فصلت بينهما سائر الكنائس في القرن الرابع ولم تفعل هذه، فعيد الميلاد الأرمني ليس ميلادًا متأخّرًا بل هو الترتيب الأصلي الذي لم يتبدّل.",
+      "wiki": "Epiphany (holiday)",
+      "wikiAr": "عيد الظهور الإلهي"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-presentation",
+      "on": "02-14",
+      "rank": "feast",
+      "colour": "white",
+      "en": "Tyarnendaraj · the Presentation of the Lord",
+      "ar": "عيد دخول السيد إلى الهيكل",
+      "wikiTitle": "Candlemas",
+      "noteEn": "Forty days after the sixth of January, which is why it is the fourteenth of February here and the second everywhere else. The count is the same; the day it counts from is not.",
+      "noteAr": "أربعون يومًا بعد السادس من كانون الثاني، ولذلك يقع في الرابع عشر من شباط هنا وفي الثاني في غيرها. العدّ واحد، أما اليوم الذي يبدأ منه فمختلف.",
+      "wiki": "Candlemas",
+      "wikiAr": "عيد تطهير مريم العذراء"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-vardavar",
+      "easter": 98,
+      "rank": "solemnity",
+      "colour": "white",
+      "high": true,
+      "en": "Vardavar · the Transfiguration",
+      "ar": "عيد الوردافار — التجلّي",
+      "wikiTitle": "Vardavar",
+      "noteEn": "Ninety-eight days after Easter, and the one feast of the Christian year on which everybody throws water over everybody else. The custom is older than the feast it was attached to, and the church kept it rather than fight it.",
+      "noteAr": "بعد الفصح بثمانية وتسعين يومًا، وهو العيد الوحيد في السنة المسيحية الذي يرشّ فيه الناس الماء بعضهم على بعض. العادة أقدم من العيد الذي أُلحقت به، وقد أبقتها الكنيسة بدل أن تحاربها.",
+      "wiki": "Vardavar"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-assumption",
+      "nearestSunday": {
+        "month": 8,
+        "day": 15
+      },
+      "rank": "solemnity",
+      "colour": "white",
+      "en": "The Assumption of the Holy Mother of God",
+      "ar": "عيد انتقال والدة الله",
+      "wikiTitle": "Assumption of Mary",
+      "noteEn": "Kept on the Sunday nearest the fifteenth of August, not on the day. Three of the five Tabernacle Feasts move like this, so that the greatest days of the year always fall when the people are in church.",
+      "noteAr": "يُحفَظ في الأحد الأقرب إلى الخامس عشر من آب، لا في اليوم نفسه. ثلاثة من أعياد المظال الخمسة تتحرّك هكذا، لتقع أعظم أيام السنة حين يكون الشعب في الكنيسة.",
+      "wiki": "Assumption of Mary",
+      "wikiAr": "انتقال العذراء"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-exaltation",
+      "nearestSunday": {
+        "month": 9,
+        "day": 14
+      },
+      "rank": "solemnity",
+      "colour": "red",
+      "en": "The Exaltation of the Holy Cross",
+      "ar": "عيد ارتفاع الصليب المقدس",
+      "wikiTitle": "Feast of the Cross",
+      "wiki": "Feast of the Cross",
+      "wikiAr": "عيد الصليب"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-gregory-illuminator",
+      "on": "06-20",
+      "rank": "feast",
+      "colour": "white",
+      "en": "St Gregory the Illuminator",
+      "ar": "القديس غريغوريوس المنوّر",
+      "wikiTitle": "Gregory the Illuminator",
+      "noteEn": "He converted King Trdat around 301, which made Armenia the first kingdom on earth to become Christian — a decade before Constantine's edict.",
+      "noteAr": "هدى الملك تِرداط نحو سنة ٣٠١، فصارت أرمينيا أول مملكة على الأرض تعتنق المسيحية، قبل مرسوم قسطنطين بعقد من الزمن.",
+      "wiki": "Gregory the Illuminator",
+      "wikiAr": "غريغوريوس المستنير"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-thaddeus-bartholomew",
+      "on": "12-05",
+      "rank": "feast",
+      "colour": "red",
+      "en": "Sts Thaddeus and Bartholomew, first enlighteners of Armenia",
+      "ar": "القديسان تداوس وبرتلماوس، أولا منوّري أرمينيا",
+      "wikiTitle": "Bartholomew the Apostle",
+      "wiki": "Bartholomew the Apostle",
+      "wikiAr": "برثولماوس"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-holy-translators",
+      "on": "10-11",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Feast of the Holy Translators",
+      "ar": "عيد المترجمين القديسين",
+      "wikiTitle": "Holy Translators",
+      "noteEn": "Mesrop Mashtots made an alphabet so that the scriptures could be read in Armenian, and the men who then translated them are kept as saints. No other church has a feast for a piece of writing.",
+      "noteAr": "وضع مسروب ماشتوتس أبجدية ليُقرأ الكتاب بالأرمنية، والذين ترجموه بعدها يُكرَّمون كقدّيسين. ولا كنيسة أخرى لها عيد لكتابةٍ ذاتها.",
+      "wiki": "Holy Translators"
+    },
+    {
+      "rites": [
+        "armenian"
+      ],
+      "id": "arm-genocide-martyrs",
+      "on": "04-24",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Holy Martyrs of the Armenian Genocide",
+      "ar": "شهداء الإبادة الأرمنية القديسون",
+      "wikiTitle": "Armenian genocide",
+      "noteEn": "Canonized together in 2015, a hundred years to the year. It is the largest canonization the Christian church has ever made, and the only one whose number nobody can give exactly.",
+      "noteAr": "أُعلنت قداستهم معًا سنة ٢٠١٥، بعد مئة سنة بالتمام. وهي أكبر عملية تطويب في تاريخ الكنيسة المسيحية، والوحيدة التي لا يستطيع أحد أن يحصي عددها بدقّة.",
+      "wiki": "Armenian genocide",
+      "wikiAr": "الإبادة الجماعية للأرمن"
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-ephrem",
+      "on": "06-09",
+      "rank": "feast",
+      "colour": "white",
+      "en": "Mor Ephrem the Syrian",
+      "ar": "مار أفرام السرياني",
+      "wikiTitle": "Ephrem the Syrian",
+      "noteEn": "The Harp of the Spirit, who wrote the faith in hymns in this church's own language, and whose verse is still sung in it.",
+      "noteAr": "قيثارة الروح القدس، الذي كتب الإيمان أناشيدَ بلغة هذه الكنيسة نفسها، ولا يزال شعره يُرتَّل فيها.",
+      "wiki": "Ephrem the Syrian",
+      "wikiAr": "أفرام السرياني"
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-jacob-serugh",
+      "on": "11-29",
+      "rank": "memorial",
+      "colour": "white",
+      "en": "Mor Jacob of Serugh",
+      "ar": "مار يعقوب السروجي",
+      "wikiTitle": "Jacob of Serugh",
+      "noteEn": "Called the Flute of the Holy Spirit, as Ephrem was called its Harp. He left some seven hundred verse homilies.",
+      "noteAr": "دُعي مزمار الروح القدس كما دُعي أفرام قيثارته. وترك نحو سبعمئة ميمر شعري.",
+      "wiki": "Jacob of Serugh",
+      "wikiAr": "يعقوب السروجي"
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-barsoumo",
+      "on": "02-03",
+      "rank": "memorial",
+      "colour": "white",
+      "en": "Mor Barsoumo",
+      "ar": "مار برصوم",
+      "wikiTitle": null
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-severus",
+      "on": "02-08",
+      "rank": "feast",
+      "colour": "white",
+      "en": "Mor Severus of Antioch",
+      "ar": "مار ساويرس الأنطاكي",
+      "wikiTitle": "Severus of Antioch",
+      "noteEn": "Patriarch of Antioch and the theologian this church's christology is largely built on. He died in exile in Egypt.",
+      "noteAr": "بطريرك أنطاكية واللاهوتي الذي بُني عليه في معظمه تعليم هذه الكنيسة في المسيح. ومات منفيًّا في مصر.",
+      "wiki": "Severus of Antioch",
+      "wikiAr": "سويرس الأنطاكي"
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-mary-seeds",
+      "on": "05-15",
+      "rank": "feast",
+      "colour": "white",
+      "en": "Our Lady of the Harvest",
+      "ar": "عيد سيدة الزروع",
+      "wikiTitle": null,
+      "noteEn": "A feast of the Mother of God kept over the standing crop, in the days before it is cut. One of two in the year that ask her for the harvest.",
+      "noteAr": "عيد لوالدة الله يُقام على الزرع القائم قبل حصاده بأيام. وهو أحد عيدين في السنة يُطلَب فيهما منها الحصاد."
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-forty-martyrs",
+      "on": "03-09",
+      "rank": "memorial",
+      "colour": "red",
+      "en": "The Forty Martyrs of Sebaste",
+      "ar": "الشهداء الأربعون",
+      "wikiTitle": "Forty Martyrs of Sebaste",
+      "wiki": "Forty Martyrs of Sebaste",
+      "wikiAr": "شهداء سبسطية الأربعون"
+    },
+    {
+      "rites": [
+        "syriac"
+      ],
+      "id": "syr-sayfo",
+      "on": "06-15",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Martyrs of the Sayfo",
+      "ar": "شهداء سيفو",
+      "wikiTitle": "Sayfo",
+      "noteEn": "The Syriac word is simply “sword”. The church remembers the killings of 1915 in the Tur Abdin and Hakkari on this day.",
+      "noteAr": "الكلمة السريانية تعني ببساطة «السيف». تذكر الكنيسة في هذا اليوم مذابح سنة ١٩١٥ في طور عبدين وهكاري.",
+      "wiki": "Sayfo",
+      "wikiAr": "مذابح سيفو"
     }
   ]
 }

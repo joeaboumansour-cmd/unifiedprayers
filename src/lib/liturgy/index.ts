@@ -23,10 +23,12 @@ import {
   fromPascha,
   monthDay,
 } from "@/lib/liturgy/computus";
+import { armenianDayName, armenianYear, isSundayNearest } from "@/lib/liturgy/armenian";
 import { byzantineDayName, byzantineYear } from "@/lib/liturgy/byzantine";
 import { copticDayName, copticYear, isCopticDay } from "@/lib/liturgy/coptic";
 import { maroniteYear } from "@/lib/liturgy/maronite";
 import { romanYear } from "@/lib/liturgy/roman";
+import { syriacYear } from "@/lib/liturgy/syriac";
 import {
   RANK_WEIGHT,
   RITES,
@@ -45,6 +47,8 @@ type RawFeast = {
   sunday?: { month: number; nth: number };
   /** A day of the Coptic calendar, which is not a Gregorian day at all. */
   coptic?: { month: number; day: number };
+  /** The Sunday nearest a date — how the Armenian Tabernacle Feasts are kept. */
+  nearestSunday?: { month: number; day: number };
   rites?: Rite[];
   rank: Rank;
   colour: LitColour;
@@ -127,6 +131,8 @@ const YEARS: Record<Rite, RiteYear> = {
   roman: romanYear,
   byzantine: byzantineYear,
   coptic: copticYear,
+  armenian: armenianYear,
+  syriac: syriacYear,
 };
 
 /** A celebration resolved for one reader: their language, their church. */
@@ -226,9 +232,13 @@ function wikiLink(f: RawFeast, ar: boolean): string | undefined {
 function falls(f: RawFeast, d: Date, rite: Rite): boolean {
   if (f.on) return f.on === monthDay(d);
   if (f.coptic) return isCopticDay(d, f.coptic.month, f.coptic.day);
+  if (f.nearestSunday)
+    return isSundayNearest(d, f.nearestSunday.month, f.nearestSunday.day);
   if (f.easter !== undefined) {
     // The Coptic church keeps Pascha with the Byzantine one.
-    const eastern = rite === "byzantine" || rite === "coptic";
+    // Everyone on the older reckoning counts from Pascha; the Armenian church
+    // keeps the Gregorian Easter, so it counts with the West.
+    const eastern = rite === "byzantine" || rite === "coptic" || rite === "syriac";
     return f.easter === (eastern ? fromPascha(d) : fromEaster(d));
   }
   if (f.sunday) {
@@ -287,7 +297,9 @@ export function dayInfo(d: Date, view: CalendarView): Day {
       ? byzantineDayName(d, view.lang)
       : view.rite === "coptic"
         ? copticDayName(d, view.lang)
-        : null;
+        : view.rite === "armenian"
+          ? armenianDayName(d, view.lang)
+          : null;
 
   return {
     key: dayKey(d),

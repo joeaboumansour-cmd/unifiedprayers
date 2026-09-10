@@ -4,15 +4,30 @@ import type { Lang } from "@/lib/content";
  * The churches the calendar keeps. Adding another is a season module and a
  * `rites` tag in the feast table — nothing in the UI has to change.
  */
-export type Rite = "maronite" | "roman" | "byzantine" | "coptic";
+export type Rite =
+  | "maronite"
+  | "roman"
+  | "byzantine"
+  | "coptic"
+  | "armenian"
+  | "syriac";
 
-export const RITES: Rite[] = ["maronite", "roman", "byzantine", "coptic"];
+export const RITES: Rite[] = [
+  "maronite",
+  "roman",
+  "byzantine",
+  "coptic",
+  "armenian",
+  "syriac",
+];
 
 export const RITE_LABEL: Record<Rite, Record<Lang, string>> = {
   maronite: { ar: "الكنيسة المارونية", en: "Maronite" },
   roman: { ar: "الكنيسة اللاتينية", en: "Roman Catholic" },
   byzantine: { ar: "الكنيسة الأرثوذكسية", en: "Orthodox" },
   coptic: { ar: "الكنيسة القبطية", en: "Coptic Orthodox" },
+  armenian: { ar: "الكنيسة الأرمنية", en: "Armenian Apostolic" },
+  syriac: { ar: "الكنيسة السريانية الأرثوذكسية", en: "Syriac Orthodox" },
 };
 
 export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
@@ -36,6 +51,15 @@ export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
     // Coptic one, and the app converts.
     ar: "التقويم القبطي — تقويم الشهداء",
     en: "The Coptic calendar, the Era of the Martyrs",
+  },
+  armenian: {
+    // The one church that never split the Nativity from the Baptism.
+    ar: "التقويم الأرمني — الميلاد والغطاس معًا",
+    en: "The Armenian year, Nativity and Theophany together",
+  },
+  syriac: {
+    ar: "الكنيسة السريانية الأنطاكية — الفصح بالحساب القديم",
+    en: "The West Syriac year, with Pascha on the older reckoning",
   },
 };
 
