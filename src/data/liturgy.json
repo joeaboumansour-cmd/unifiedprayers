@@ -725,7 +725,6 @@
       "wiki": "Saint Anne",
       "wikiAr": "حنة (أم مريم العذراء)",
       "rites": [
-        "maronite",
         "roman"
       ]
     },
@@ -2350,6 +2349,37 @@
       "noteAr": "الكلمة السريانية تعني ببساطة «السيف». تذكر الكنيسة في هذا اليوم مذابح سنة ١٩١٥ في طور عبدين وهكاري.",
       "wiki": "Sayfo",
       "wikiAr": "مذابح سيفو"
+    },
+    {
+      "id": "synaxis-joachim-anne",
+      "on": "09-09",
+      "rites": [
+        "maronite",
+        "byzantine",
+        "syriac"
+      ],
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Synaxis of Sts Joachim and Anne",
+      "ar": "تذكار القديسَين يواكيم وحنّة",
+      "wikiTitle": "Saint Anne",
+      "noteEn": "The day after the Nativity of the Mother of God belongs to her parents. The East has always kept them here, on the morning after, rather than on the 26th of July where the Latin church put them — a feast placed by the logic of the story rather than by a date of its own.",
+      "noteAr": "اليوم التالي لميلاد والدة الإله هو لوالِدَيها. حفظهما الشرق دائمًا هنا، في صباح اليوم التالي، لا في السادس والعشرين من تموز حيث وضعتهما الكنيسة اللاتينية — عيد موضعه منطق الحكاية لا تاريخ خاص به."
+    },
+    {
+      "id": "copt-joachim-anne",
+      "coptic": {
+        "month": 1,
+        "day": 3
+      },
+      "rites": [
+        "coptic"
+      ],
+      "rank": "memorial",
+      "colour": "white",
+      "en": "Sts Joachim and Anne",
+      "ar": "القديسان يواكيم وحنّة",
+      "wikiTitle": "Saint Anne"
     }
   ]
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { type Lang, setForDay, setLabel } from "@/lib/content";
@@ -15,6 +15,7 @@ import {
   type Feast,
 } from "@/lib/liturgy";
 import { at, dayKey } from "@/lib/liturgy/computus";
+import { rememberedOn, type Remembered } from "@/lib/liturgy/martyrology";
 import type { Liturgy } from "@/lib/useLiturgy";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
@@ -52,6 +53,13 @@ const T = {
     ar: "لا شيء في الأسابيع الستة المقبلة.",
     en: "Nothing in the next six weeks.",
   },
+  remembered: { ar: "ويُذكر في هذا اليوم أيضًا", en: "Also remembered on this day" },
+  rememberedNote: {
+    ar: "قدّيسون تحفظهم كنائس أخرى في هذا اليوم. اضغط على الاسم لقراءة سيرته.",
+    en: "Saints kept on this day by other churches. Tap a name to read about them.",
+  },
+  loading: { ar: "لحظة…", en: "One moment…" },
+  more: { ar: "أظهر الجميع", en: "Show all" },
 } as const;
 
 const sectionLabel: CSSProperties = {
@@ -705,7 +713,109 @@ function DayDetail({
           ))}
         </div>
       )}
+
+      <Remembrance day={day} lang={lang} />
     </div>
+  );
+}
+
+/**
+ * Everyone else the day belongs to.
+ *
+ * Below the feasts and visibly quieter than them, because it is a different
+ * kind of fact: these are not what this church celebrates today, they are who
+ * is remembered today somewhere. Collapsing that distinction would turn a
+ * calendar into a list.
+ *
+ * The table is 380 KB and loads on demand, so the first day a reader opens
+ * shows nothing here for a moment and then fills in. There is no spinner: a
+ * section that is *extra* should not announce itself as missing before it
+ * arrives.
+ */
+function Remembrance({ day, lang }: { day: Day; lang: Lang }) {
+  const [saints, setSaints] = useState<Remembered[] | null>(null);
+  const [all, setAll] = useState(false);
+
+  /* What is already on screen above, as one string. A dependency on the array
+     itself would re-run this effect on every render the moment somebody drops
+     the useMemo that currently makes `day` stable — and each run ends in a
+     setState, so that mistake would be an infinite loop rather than a slow
+     screen. */
+  const above = day.feasts.map((f) => f.name).join("|");
+
+  useEffect(() => {
+    let live = true;
+    setAll(false);
+    // Matched by name, because the two tables share no id: one is hand-written
+    // and romcal's, the other is Wikidata's.
+    rememberedOn(day.key, lang, above ? above.split("|") : [])
+      .then((r) => live && setSaints(r))
+      .catch(() => live && setSaints([]));
+    return () => {
+      live = false;
+    };
+  }, [day.key, lang, above]);
+
+  if (!saints?.length) return null;
+  const shown = all ? saints : saints.slice(0, 6);
+
+  return (
+    <>
+      <div style={{ ...sectionLabel, marginTop: 22 }}>{T.remembered[lang]}</div>
+      <div style={{ fontSize: 12, color: "var(--dim-3)", lineHeight: 1.6, margin: "-2px 0 8px" }}>
+        {T.rememberedNote[lang]}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {shown.map((s) => (
+          <a
+            key={s.link}
+            href={s.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "baseline",
+              gap: 5,
+              padding: "6px 11px",
+              borderRadius: 999,
+              fontSize: 12.5,
+              textDecoration: "none",
+              color: "var(--soft)",
+              background: "rgb(var(--veil-rgb) / .04)",
+              border: "1px solid rgb(var(--veil-rgb) / .07)",
+            }}
+          >
+            {s.name}
+            {s.died !== null && (
+              // The year they died, which for most of these is the reason the
+              // day is theirs at all.
+              <span style={{ fontSize: 10.5, color: "var(--dim-4)" }} dir="ltr">
+                {s.died < 0 ? `${-s.died} BC` : s.died}
+              </span>
+            )}
+          </a>
+        ))}
+        {!all && saints.length > shown.length && (
+          <button
+            type="button"
+            onClick={() => setAll(true)}
+            style={{
+              appearance: "none",
+              padding: "6px 11px",
+              borderRadius: 999,
+              fontSize: 12.5,
+              fontFamily: "inherit",
+              cursor: "pointer",
+              color: "var(--accent-ink)",
+              background: "rgb(var(--accent-rgb) / .08)",
+              border: "1px solid rgb(var(--accent-rgb) / .2)",
+            }}
+          >
+            {T.more[lang]} · {saints.length - shown.length}
+          </button>
+        )}
+      </div>
+    </>
   );
 }
 
