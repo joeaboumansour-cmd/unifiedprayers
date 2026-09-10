@@ -48,6 +48,8 @@ import { useStats } from "@/lib/useStats";
 import { useStrayAuthToken } from "@/lib/useStrayAuthToken";
 import { useCouple } from "@/lib/useCouple";
 import { useLiturgy } from "@/lib/useLiturgy";
+import { useReadings } from "@/lib/useReadings";
+import { useReadingProgress } from "@/lib/useReadingProgress";
 import { TRACKS, useDevotions } from "@/lib/useDevotions";
 import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
@@ -112,6 +114,19 @@ export default function Page() {
   // Which church's year the Calendar tab keeps. Held on the device, outside
   // the synced prefs — see the note in useLiturgy.
   const liturgy = useLiturgy();
+  /* Today's readings, for the church the reader keeps. Held here rather than
+     inside Home because the home screen and the Today tab both draw them and
+     must not each start their own fetch of the same day. */
+  const todayKey = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, []);
+  const readings = useReadings(todayKey, liturgy.rite);
+  const readingProgress = useReadingProgress(
+    todayKey,
+    liturgy.rite,
+    useMemo(() => (readings.data?.readings ?? []).map((r) => r.kind), [readings.data]),
+  );
   // Tri-state on purpose: "loading" is not "signed out". Passing false while
   // the session is still being read would flash a signed-out-only message at
   // somebody who is signed in.
@@ -437,6 +452,8 @@ export default function Page() {
         verse={verse}
         devotions={devotions}
         liturgy={liturgy}
+        readings={readings}
+        readingProgress={readingProgress}
         paired={couple.paired}
         banner={banner}
         onDismissBanner={() => banner && dismiss(banner.id)}

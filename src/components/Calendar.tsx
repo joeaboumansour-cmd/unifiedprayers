@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
-import { type Lang, setForDay, setLabel } from "@/lib/content";
+import { type Lang } from "@/lib/content";
 import {
   RITE_LABEL,
   buildAgenda,
@@ -42,9 +42,6 @@ const T = {
     ar: "الالتزام الوحيد الذي يحمله الأسبوع فعلًا. وكل ما عداه في هذه الروزنامة دعوة.",
     en: "The one obligation the week actually carries. Everything else on this calendar is an invitation.",
   },
-  mysteries: { ar: "مسبحة اليوم", en: "Today's mysteries" },
-  mysteriesOn: { ar: "مسبحة هذا اليوم", en: "The set for this day" },
-  pray: { ar: "صلِّ", en: "Pray" },
   kept: { ar: "في هذا اليوم", en: "Kept today" },
   alsoKept: { ar: "يُذكر أيضًا", en: "Also commemorated" },
   empty: {
@@ -82,15 +79,12 @@ export default function Calendar({
   liturgy,
   onOpenRites,
   onOpenFeast,
-  onStartToday,
   onHaptic,
 }: {
   lang: Lang;
   liturgy: Liturgy;
   onOpenRites: () => void;
   onOpenFeast: (feast: Feast, day: Day) => void;
-  /** Opens the player on today's mystery set. Only offered on today. */
-  onStartToday: () => void;
   onHaptic: (ms?: number) => void;
 }) {
   const ar = lang === "ar";
@@ -469,9 +463,7 @@ export default function Calendar({
             lang={lang}
             isToday={selected.key === todayKey}
             onOpenFeast={onOpenFeast}
-            onStartToday={onStartToday}
             onHaptic={onHaptic}
-            mysteryLabel={setLabel(lang, setForDay(selected.date.getDay()))}
           />
         </>
       )}
@@ -528,9 +520,7 @@ function DayDetail({
   lang,
   rite,
   isToday,
-  mysteryLabel,
   onOpenFeast,
-  onStartToday,
   onHaptic,
 }: {
   day: Day;
@@ -538,9 +528,7 @@ function DayDetail({
   /** Whose readings to ask for — nine churches read nine different things. */
   rite: Rite;
   isToday: boolean;
-  mysteryLabel: string;
   onOpenFeast: (f: Feast, d: Day) => void;
-  onStartToday: () => void;
   onHaptic: (ms?: number) => void;
 }) {
   const ar = lang === "ar";
@@ -636,70 +624,6 @@ function DayDetail({
           </div>
         </div>
       )}
-
-      {/* The set traditionally prayed on this weekday. Tappable only on today:
-          an offer to pray Thursday's mysteries on Monday is not an offer. */}
-      <div
-        onClick={
-          isToday
-            ? () => {
-                onHaptic(10);
-                onStartToday();
-              }
-            : undefined
-        }
-        role={isToday ? "button" : undefined}
-        tabIndex={isToday ? 0 : undefined}
-        className={isToday ? "tap" : undefined}
-        onKeyDown={
-          isToday
-            ? (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onStartToday();
-                }
-              }
-            : undefined
-        }
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "13px 14px",
-          borderRadius: 15,
-          background: "rgb(var(--veil-rgb) / .04)",
-          border: "1px solid rgb(var(--veil-rgb) / .06)",
-          cursor: isToday ? "pointer" : "default",
-        }}
-      >
-        <svg width="20" height="20" viewBox="0 0 22 22" style={{ flex: "none" }}>
-          <circle cx="11" cy="11" r="8" fill="none" stroke="var(--accent)" strokeWidth={1.4} />
-          <circle cx="11" cy="11" r="2.6" fill="var(--accent)" />
-        </svg>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: "block", fontSize: 14, fontWeight: 500 }}>
-            {mysteryLabel}
-          </span>
-          <span style={{ display: "block", fontSize: 11.5, color: "var(--dim-3)", marginTop: 3 }}>
-            {(isToday ? T.mysteries : T.mysteriesOn)[lang]}
-          </span>
-        </span>
-        {isToday && (
-          <span
-            style={{
-              flex: "none",
-              fontSize: 11,
-              padding: "4px 10px",
-              borderRadius: 999,
-              background: "rgb(var(--accent-rgb) / .13)",
-              color: "var(--accent-ink)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {T.pray[lang]}
-          </span>
-        )}
-      </div>
 
       <div style={sectionLabel}>{(day.sunday ? T.alsoKept : T.kept)[lang]}</div>
       {day.feasts.length === 0 ? (

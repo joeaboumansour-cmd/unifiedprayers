@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
 import Calendar from "@/components/Calendar";
 import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
+import ReadingCards, { readingsEmpty, readingsLabel } from "@/components/ReadingCards";
 import RosaryIcon, { IconPlate } from "@/components/RosaryIcon";
 import { AnnouncementBanner } from "@/components/Announcements";
 import NotificationsCard from "@/components/NotificationsCard";
@@ -30,6 +31,8 @@ import type { Auth } from "@/lib/useAuth";
 import { TRACKS, type Devotions } from "@/lib/useDevotions";
 import type { SyncStatus } from "@/lib/useCloudSync";
 import type { Liturgy } from "@/lib/useLiturgy";
+import type { ReadingsState } from "@/lib/useReadings";
+import type { ReadingProgress } from "@/lib/useReadingProgress";
 import type { Push } from "@/lib/usePush";
 import type { Verse } from "@/lib/useVerse";
 
@@ -241,6 +244,9 @@ export type HomeProps = {
   devotions: Devotions;
   /** Which church's year the Calendar tab keeps, and the setters for it. */
   liturgy: Liturgy;
+  /** Today's readings for the reader's own church, and how far through them. */
+  readings: ReadingsState;
+  readingProgress: ReadingProgress;
   /** Half of a couple. Draws the couples devotion card unlocked. */
   paired: boolean;
   banner: AnnouncementRow | null;
@@ -288,6 +294,8 @@ export default function Home({
   verse,
   devotions,
   liturgy,
+  readings,
+  readingProgress,
   paired,
   banner,
   onDismissBanner,
@@ -699,6 +707,28 @@ export default function Home({
             />
           </div>
 
+          <div style={sectionLabel}>{readingsLabel(lang)}</div>
+          <div style={{ marginBottom: 26 }}>
+            {readings.data?.readings.length ? (
+              <ReadingCards
+                readings={readings.data.readings}
+                progress={readingProgress}
+                lang={lang}
+                translation={readings.data.translation}
+                source={readings.data.source}
+              />
+            ) : (
+              /* Nothing yet for this day in this church — the mirror has not
+                 reached it, or no source covers that rite. Said plainly rather
+                 than left as a gap, because the section heading is already
+                 promising something. */
+              <div style={{ fontSize: 13, color: "var(--dim-3)", lineHeight: 1.7 }}>
+                {readingsEmpty(lang)}
+              </div>
+            )}
+          </div>
+
+
           <div style={sectionLabel}>{t.libraryLabel}</div>
           <div
             style={{
@@ -818,6 +848,28 @@ export default function Home({
               onLocked={onOpenCouple}
             />
           </div>
+
+          <div style={sectionLabel}>{readingsLabel(lang)}</div>
+          <div style={{ marginBottom: 26 }}>
+            {readings.data?.readings.length ? (
+              <ReadingCards
+                readings={readings.data.readings}
+                progress={readingProgress}
+                lang={lang}
+                translation={readings.data.translation}
+                source={readings.data.source}
+              />
+            ) : (
+              /* Nothing yet for this day in this church — the mirror has not
+                 reached it, or no source covers that rite. Said plainly rather
+                 than left as a gap, because the section heading is already
+                 promising something. */
+              <div style={{ fontSize: 13, color: "var(--dim-3)", lineHeight: 1.7 }}>
+                {readingsEmpty(lang)}
+              </div>
+            )}
+          </div>
+
 
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             {[stats.streak, stats.monthPrayers, stats.monthMinutes].map((n, i) => (
@@ -963,7 +1015,6 @@ export default function Home({
           liturgy={liturgy}
           onOpenRites={onOpenRites}
           onOpenFeast={onOpenFeast}
-          onStartToday={onStartToday}
           onHaptic={onHaptic}
         />
       )}

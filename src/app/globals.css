@@ -400,3 +400,88 @@ button {
     filter: brightness(calc(1 + (var(--tap-bright) - 1) * 0.28));
   }
 }
+
+/* ---------------------------------------------------------------
+   The daily readings.
+
+   These are the one thing on the home screen that arrives from
+   outside — appointed by a church, not chosen by the reader — so
+   opening one should read as a page being turned rather than a
+   drawer sliding out. The passage unrolls to its own height and the
+   words follow it in, a beat behind, so the text is never the thing
+   doing the moving.
+   --------------------------------------------------------------- */
+
+/* Height is animated from 0 to the measured height, set inline as
+   --rd-h: `auto` cannot be transitioned, and a fixed max-height
+   large enough for a long gospel makes a short epistle snap open. */
+@keyframes rdUnroll {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--rd-h);
+    opacity: 1;
+  }
+}
+
+@keyframes rdWords {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* The tick on a reading just finished: the circle draws, then the check. */
+@keyframes rdDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The whole card when the last reading of the day lands. One pulse of the
+   accent through the border, and no more — a day completed is worth a moment,
+   not an ongoing animation on a screen somebody is trying to read. */
+@keyframes rdComplete {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 10px rgb(var(--accent-rgb) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / 0);
+  }
+}
+
+/* The streak count arriving after the day is finished. */
+@keyframes rdStreak {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Everything above is motion for its own sake to somebody who has asked the
+   system not to have any. */
+@media (prefers-reduced-motion: reduce) {
+  .rd-unroll,
+  .rd-words,
+  .rd-streak,
+  .rd-complete {
+    animation: none !important;
+  }
+  .rd-unroll {
+    height: auto !important;
+    opacity: 1 !important;
+  }
+}
