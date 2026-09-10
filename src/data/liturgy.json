@@ -62,7 +62,12 @@
       "ar": "خميس الأسرار",
       "wikiTitle": "Maundy Thursday",
       "wiki": "Maundy Thursday",
-      "wikiAr": "خميس الأسرار"
+      "wikiAr": "خميس الأسرار",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "good-friday",
@@ -76,7 +81,12 @@
       "noteAr": "اليوم الوحيد في السنة الذي لا يُقام فيه قداس في أي مكان من العالم. يوم صوم وانقطاع في الكنيستين.",
       "wikiTitle": "Good Friday",
       "wiki": "Good Friday",
-      "wikiAr": "الجمعة العظيمة"
+      "wikiAr": "الجمعة العظيمة",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "holy-saturday",
@@ -87,7 +97,12 @@
       "ar": "سبت النور",
       "wikiTitle": "Holy Saturday",
       "wiki": "Holy Saturday",
-      "wikiAr": "سبت النور"
+      "wikiAr": "سبت النور",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "ascension",
@@ -97,7 +112,12 @@
       "en": "The Ascension of the Lord",
       "ar": "عيد صعود الرب",
       "wiki": "Ascension of Jesus",
-      "wikiAr": "صعود يسوع"
+      "wikiAr": "صعود يسوع",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "corpus-christi",
@@ -177,7 +197,12 @@
       "noteAr": "في الشرق هو عيد عماد المسيح في نهر الأردن، ويوم تبريك المياه؛ وفي الغرب هو مجيء المجوس. عيد واحد وجهان لظهور واحد.",
       "wikiTitle": "Epiphany (holiday)",
       "wiki": "Epiphany (holiday)",
-      "wikiAr": "عيد الظهور الإلهي"
+      "wikiAr": "عيد الظهور الإلهي",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "anthony-great",
@@ -188,7 +213,12 @@
       "ar": "القديس أنطونيوس الكبير",
       "romcal": "anthony_of_egypt_abbot",
       "wiki": "Anthony the Great",
-      "wikiAr": "أنطونيوس الكبير"
+      "wikiAr": "أنطونيوس الكبير",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "agnes",
@@ -215,7 +245,11 @@
       "romcal": "conversion_of_saint_paul_the_apostle",
       "wikiTitle": "Conversion of Paul the Apostle",
       "wiki": "Conversion of Paul the Apostle",
-      "wikiAr": "تحول بولس إلى المسيحية"
+      "wikiAr": "تحول بولس إلى المسيحية",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "thomas-aquinas",
@@ -253,7 +287,12 @@
       "en": "The Presentation of the Lord",
       "ar": "عيد دخول الرب إلى الهيكل",
       "romcal": "presentation_of_the_lord",
-      "wiki": "Presentation of Jesus"
+      "wiki": "Presentation of Jesus",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "maron",
@@ -337,7 +376,11 @@
       "romcal": "joseph_spouse_of_mary",
       "wikiTitle": "Saint Joseph",
       "wiki": "Saint Joseph",
-      "wikiAr": "يوسف النجار"
+      "wikiAr": "يوسف النجار",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "rafqa",
@@ -365,7 +408,12 @@
       "romcal": "annunciation",
       "wikiTitle": "Annunciation",
       "wiki": "Annunciation",
-      "wikiAr": "البشارة"
+      "wikiAr": "البشارة",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "george",
@@ -379,7 +427,12 @@
       "romcal": "george_of_lydda_martyr",
       "wikiTitle": "Saint George",
       "wiki": "Saint George",
-      "wikiAr": "جرجس"
+      "wikiAr": "جرجس",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "mark",
@@ -390,7 +443,12 @@
       "ar": "عيد القديس مرقس الإنجيلي",
       "romcal": "mark_evangelist",
       "wiki": "Mark the Evangelist",
-      "wikiAr": "مرقس"
+      "wikiAr": "مرقس",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "catherine-siena",
@@ -532,7 +590,12 @@
       "ar": "عيد مولد القديس يوحنا المعمدان",
       "romcal": "nativity_of_john_the_baptist",
       "wiki": "Nativity of John the Baptist",
-      "wikiAr": "عيد ذكرى ميلاد يوحنا المعمدان"
+      "wikiAr": "عيد ذكرى ميلاد يوحنا المعمدان",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "peter-paul",
@@ -543,7 +606,12 @@
       "ar": "عيد القديسين بطرس وبولس، هامتي الرسل",
       "romcal": "peter_and_paul_apostles",
       "wikiTitle": "Feast of Saints Peter and Paul",
-      "wiki": "Feast of Saints Peter and Paul"
+      "wiki": "Feast of Saints Peter and Paul",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "thomas-apostle",
@@ -554,7 +622,11 @@
       "ar": "عيد مار توما الرسول",
       "romcal": "thomas_apostle",
       "wiki": "Thomas the Apostle",
-      "wikiAr": "توما"
+      "wikiAr": "توما",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "benedict",
@@ -579,7 +651,11 @@
       "en": "Our Lady of Mount Carmel",
       "ar": "سيدة جبل الكرمل",
       "romcal": "our_lady_of_mount_carmel",
-      "wiki": "Our Lady of Mount Carmel"
+      "wiki": "Our Lady of Mount Carmel",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "mary-magdalene",
@@ -590,7 +666,12 @@
       "ar": "القديسة مريم المجدلية",
       "romcal": "mary_magdalene",
       "wiki": "Mary Magdalene",
-      "wikiAr": "مريم المجدلية"
+      "wikiAr": "مريم المجدلية",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "charbel",
@@ -633,7 +714,11 @@
       "romcal": "joachim_and_anne_parents_of_mary",
       "wikiTitle": "Saint Anne",
       "wiki": "Saint Anne",
-      "wikiAr": "حنة (أم مريم العذراء)"
+      "wikiAr": "حنة (أم مريم العذراء)",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "martha",
@@ -658,7 +743,12 @@
       "ar": "عيد تجلي الرب",
       "romcal": "transfiguration",
       "wiki": "Transfiguration of Jesus",
-      "wikiAr": "تجلي يسوع"
+      "wikiAr": "تجلي يسوع",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "assumption",
@@ -671,7 +761,12 @@
       "noteAr": "أعظم أعياد العذراء في الكنيستين، ويسبقه في التقويم الماروني صوم خمسة عشر يومًا.",
       "romcal": "assumption",
       "wiki": "Assumption of Mary",
-      "wikiAr": "انتقال العذراء"
+      "wikiAr": "انتقال العذراء",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "queenship-mary",
@@ -724,7 +819,12 @@
       "ar": "عيد قطع رأس القديس يوحنا المعمدان",
       "romcal": "passion_of_saint_john_the_baptist",
       "wiki": "Beheading of John the Baptist",
-      "wikiAr": "قطع رأس يوحنا المعمدان"
+      "wikiAr": "قطع رأس يوحنا المعمدان",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "nativity-mary",
@@ -735,7 +835,12 @@
       "ar": "عيد ميلاد السيدة العذراء",
       "romcal": "nativity_of_mary",
       "wiki": "Nativity of Mary",
-      "wikiAr": "ميلاد مريم العذراء"
+      "wikiAr": "ميلاد مريم العذراء",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "exaltation-cross",
@@ -749,7 +854,12 @@
       "noteAr": "ليس عيدًا فحسب في السنة المارونية بل مفصلًا: يبدأ اليوم زمن الصليب ويحمل الروزنامة حتى زمن البشارات في تشرين الثاني.",
       "romcal": "exaltation_of_the_holy_cross",
       "wiki": "Feast of the Cross",
-      "wikiAr": "عيد الصليب"
+      "wikiAr": "عيد الصليب",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "our-lady-sorrows",
@@ -760,7 +870,11 @@
       "ar": "سيدة الأحزان",
       "romcal": "our_lady_of_sorrows",
       "wiki": "Our Lady of Sorrows",
-      "wikiAr": "سيدة الآلام"
+      "wikiAr": "سيدة الآلام",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "matthew",
@@ -772,7 +886,11 @@
       "romcal": "matthew_apostle",
       "wikiTitle": "Matthew the Apostle",
       "wiki": "Matthew the Apostle",
-      "wikiAr": "متى"
+      "wikiAr": "متى",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "padre-pio",
@@ -826,7 +944,11 @@
       "romcal": "michael_gabriel_and_raphael_archangels",
       "wikiTitle": "Michael (archangel)",
       "wiki": "Michael (archangel)",
-      "wikiAr": "ميخائيل (ملاك)"
+      "wikiAr": "ميخائيل (ملاك)",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "jerome",
@@ -894,7 +1016,11 @@
       "noteEn": "The feast of the prayer this app was built around. October is kept as the month of the Rosary.",
       "noteAr": "عيد الصلاة التي بُني حولها هذا التطبيق. ويُحفظ تشرين الأول شهرًا للوردية.",
       "romcal": "our_lady_of_the_rosary",
-      "wiki": "Our Lady of the Rosary"
+      "wiki": "Our Lady of the Rosary",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "teresa-avila",
@@ -919,7 +1045,12 @@
       "ar": "عيد القديس لوقا الإنجيلي",
       "romcal": "luke_evangelist",
       "wiki": "Luke the Evangelist",
-      "wikiAr": "لوقا"
+      "wikiAr": "لوقا",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "simon-jude",
@@ -946,7 +1077,11 @@
       "romcal": "all_saints",
       "wikiTitle": "All Saints' Day",
       "wiki": "All Saints' Day",
-      "wikiAr": "عيد جميع القديسين"
+      "wikiAr": "عيد جميع القديسين",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "all-souls",
@@ -960,7 +1095,11 @@
       "romcal": "all_souls",
       "wiki": "All Souls' Day",
       "wikiAr": "يوم ذكرى الأموات",
-      "wikiTitle": "All Souls' Day"
+      "wikiTitle": "All Souls' Day",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "lateran",
@@ -983,7 +1122,12 @@
       "en": "The Presentation of the Blessed Virgin Mary",
       "ar": "عيد دخول السيدة العذراء إلى الهيكل",
       "romcal": "presentation_of_mary",
-      "wiki": "Presentation of Mary"
+      "wiki": "Presentation of Mary",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "andrew",
@@ -994,7 +1138,12 @@
       "ar": "عيد القديس أندراوس الرسول",
       "romcal": "andrew_apostle",
       "wiki": "Andrew the Apostle",
-      "wikiAr": "أندراوس"
+      "wikiAr": "أندراوس",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "barbara",
@@ -1022,7 +1171,12 @@
       "romcal": "nicholas_of_myra_bishop",
       "wikiTitle": "Nicholas of Myra",
       "wiki": "Saint Nicholas",
-      "wikiAr": "نقولا"
+      "wikiAr": "نقولا",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "immaculate-conception",
@@ -1033,7 +1187,11 @@
       "ar": "عيد الحبل بلا دنس بالعذراء مريم",
       "romcal": "immaculate_conception_of_mary",
       "wiki": "Immaculate Conception",
-      "wikiAr": "الحبل بلا دنس"
+      "wikiAr": "الحبل بلا دنس",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "guadalupe",
@@ -1089,7 +1247,12 @@
       "noteEn": "The Maronite year has been walking towards this day since the Consecration of the Church in November, through seven Sundays of announcements.",
       "noteAr": "تسير السنة المارونية نحو هذا اليوم منذ أحد تقديس البيعة في تشرين الثاني، عبر سبعة آحاد من البشارات.",
       "wiki": "Christmas",
-      "wikiAr": "عيد الميلاد"
+      "wikiAr": "عيد الميلاد",
+      "rites": [
+        "maronite",
+        "roman",
+        "byzantine"
+      ]
     },
     {
       "id": "stephen",
@@ -1101,7 +1264,11 @@
       "romcal": "stephen_the_first_martyr",
       "wikiTitle": "Saint Stephen",
       "wiki": "Saint Stephen",
-      "wikiAr": "إسطفانوس"
+      "wikiAr": "إسطفانوس",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "john-evangelist",
@@ -1113,7 +1280,11 @@
       "romcal": "john_apostle",
       "wikiTitle": "John the Apostle",
       "wiki": "John the Apostle",
-      "wikiAr": "يوحنا بن زبدي"
+      "wikiAr": "يوحنا بن زبدي",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "holy-innocents",
@@ -1124,7 +1295,11 @@
       "ar": "عيد الأطفال الأبرياء، الشهداء",
       "romcal": "holy_innocents_martyrs",
       "wiki": "Massacre of the Innocents",
-      "wikiAr": "مذبحة الأبرياء"
+      "wikiAr": "مذبحة الأبرياء",
+      "rites": [
+        "maronite",
+        "roman"
+      ]
     },
     {
       "id": "john-baptist-commemoration",
@@ -1263,6 +1438,274 @@
       "ar": "تهنئة والدة الله",
       "noteEn": "The day after Christmas, the Syriac churches turn from the child to his mother and simply congratulate her. There is no Latin equivalent: it is a feast made of one gesture.",
       "noteAr": "في اليوم التالي للميلاد تلتفت الكنائس السريانية من الطفل إلى أمّه لتهنّئها. لا مقابل لهذا العيد في الطقس اللاتيني: إنه عيد قوامه لفتة واحدة."
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-indiction",
+      "on": "09-01",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Beginning of the Church Year · the Indiction",
+      "ar": "رأس السنة الطقسية — الإنديكتيون",
+      "wikiTitle": "Byzantine calendar",
+      "noteEn": "The Byzantine year opens on the first of September, not in Advent. An old Roman tax cycle became the church’s own reckoning of time, and the first feast of the year is simply that the year has begun.",
+      "noteAr": "تبدأ السنة الطقسية البيزنطية في أول أيلول، لا في زمن المجيء. دورة ضريبية رومانية قديمة صارت حساب الكنيسة للزمن، وأول عيد في السنة هو ببساطة أن السنة قد بدأت.",
+      "wiki": "Byzantine calendar",
+      "wikiAr": "تقويم بيزنطي"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-basil",
+      "on": "01-01",
+      "rank": "feast",
+      "colour": "white",
+      "en": "St Basil the Great",
+      "ar": "القديس باسيليوس الكبير",
+      "wikiTitle": "Basil of Caesarea",
+      "noteEn": "Archbishop of Caesarea, and the author of the liturgy served ten times a year in his name. The first of January is his and the Circumcision of the Lord, together.",
+      "noteAr": "رئيس أساقفة قيصرية، وواضع القداس الذي يُخدَم باسمه عشر مرات في السنة. أول كانون الثاني له ولعيد ختانة الرب معًا.",
+      "wiki": "Basil of Caesarea",
+      "wikiAr": "باسيليوس القيصري"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-synaxis-baptist",
+      "on": "01-07",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Synaxis of St John the Baptist",
+      "ar": "تذكار القديس يوحنا المعمدان",
+      "wikiTitle": "John the Baptist",
+      "noteEn": "The day after the Theophany belongs to the one whose hand was on the Lord’s head. The East puts the Forerunner immediately after the baptism, every year.",
+      "noteAr": "اليوم التالي للظهور الإلهي هو للذي كانت يده على رأس الرب. يضع الشرق السابق مباشرةً بعد المعمودية، في كل سنة.",
+      "wiki": "John the Baptist",
+      "wikiAr": "يوحنا المعمدان"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-three-hierarchs",
+      "on": "01-30",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Three Holy Hierarchs",
+      "ar": "عيد الأقطاب الثلاثة",
+      "wikiTitle": "Three Holy Hierarchs",
+      "noteEn": "Basil the Great, Gregory the Theologian and John Chrysostom kept on one day — instituted in the eleventh century precisely to stop people arguing about which of the three was greatest.",
+      "noteAr": "باسيليوس الكبير وغريغوريوس اللاهوتي ويوحنا الذهبي الفم في يوم واحد. رُسِم العيد في القرن الحادي عشر تحديدًا ليضع حدًا للجدال في أيّهم الأعظم.",
+      "wiki": "Three Holy Hierarchs"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-forty-martyrs",
+      "on": "03-09",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Forty Martyrs of Sebaste",
+      "ar": "الشهداء الأربعون في سبسطية",
+      "wikiTitle": "Forty Martyrs of Sebaste",
+      "wiki": "Forty Martyrs of Sebaste",
+      "wikiAr": "شهداء سبسطية الأربعون"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-constantine-helen",
+      "on": "05-21",
+      "rank": "feast",
+      "colour": "white",
+      "en": "Sts Constantine and Helen",
+      "ar": "القديسان قسطنطين وهيلانة",
+      "wikiTitle": "Constantine the Great",
+      "noteEn": "The emperor who ended the persecutions and his mother, who is said to have found the Cross in Jerusalem. Kept together, and called Equal-to-the-Apostles.",
+      "noteAr": "الإمبراطور الذي أنهى الاضطهادات وأمّه التي يُقال إنها وجدت الصليب في أورشليم. يُكرّمان معًا ويُدعيان المعادلَي الرسل.",
+      "wiki": "Constantine the Great",
+      "wikiAr": "قسطنطين العظيم"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-twelve-apostles",
+      "on": "06-30",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Synaxis of the Twelve Apostles",
+      "ar": "تذكار الرسل الاثني عشر",
+      "wikiTitle": "Twelve Apostles",
+      "wiki": "Apostles in the New Testament",
+      "wikiAr": "تلاميذ المسيح"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-elijah",
+      "on": "07-20",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Holy Prophet Elijah",
+      "ar": "النبي إيليا",
+      "wikiTitle": "Elijah",
+      "wiki": "Elijah",
+      "wikiAr": "إيليا"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-dormition-fast",
+      "on": "08-01",
+      "rank": "commemoration",
+      "colour": "violet",
+      "en": "The Dormition Fast begins",
+      "ar": "بدء صوم رقاد السيدة",
+      "wikiTitle": null,
+      "noteEn": "Two weeks of fasting to the Dormition, and the only fast of the year that falls in high summer.",
+      "noteAr": "أسبوعان من الصوم حتى عيد الرقاد، وهو الصوم الوحيد في السنة الذي يقع في عزّ الصيف."
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-john-theologian",
+      "on": "09-26",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Repose of St John the Theologian",
+      "ar": "رقاد القديس يوحنا اللاهوتي",
+      "wikiTitle": "John the Apostle",
+      "wiki": "John the Apostle",
+      "wikiAr": "يوحنا بن زبدي"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-protection",
+      "on": "10-01",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Protection of the Mother of God",
+      "ar": "عيد سجدة والدة الإله",
+      "wikiTitle": "Intercession of the Theotokos",
+      "noteEn": "A vision at Blachernae of the Mother of God spreading her veil over the city. The feast is of her protection itself — the cloth, not an event in her life.",
+      "noteAr": "رؤيا في البلاشرن لوالدة الإله تبسط خمارها فوق المدينة. العيد هو للحماية نفسها — للخمار، لا لحادثة من حياتها.",
+      "wiki": "Intercession of the Theotokos"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-demetrios",
+      "on": "10-26",
+      "rank": "feast",
+      "colour": "red",
+      "en": "St Demetrios the Myrrh-streamer",
+      "ar": "القديس ديمتريوس المفيض الطيب",
+      "wikiTitle": "Demetrius of Thessaloniki",
+      "wiki": "Demetrius of Thessaloniki",
+      "wikiAr": "ديمتريوس (قديس)"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-archangels",
+      "on": "11-08",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Synaxis of the Archangel Michael and all the Bodiless Powers",
+      "ar": "تذكار رئيس الملائكة ميخائيل وسائر القوات غير المتجسدة",
+      "wikiTitle": "Michael (archangel)",
+      "wiki": "Michael (archangel)",
+      "wikiAr": "ميخائيل (ملاك)"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-chrysostom",
+      "on": "11-13",
+      "rank": "feast",
+      "colour": "white",
+      "en": "St John Chrysostom",
+      "ar": "القديس يوحنا الذهبي الفم",
+      "wikiTitle": "John Chrysostom",
+      "noteEn": "Archbishop of Constantinople, exiled twice for saying what he thought of the court. The liturgy served on most Sundays of the year carries his name.",
+      "noteAr": "رئيس أساقفة القسطنطينية، نُفي مرّتين لأنه قال في البلاط ما رآه. والقداس الذي يُخدَم في معظم آحاد السنة يحمل اسمه.",
+      "wiki": "John Chrysostom",
+      "wikiAr": "يوحنا ذهبي الفم"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-nativity-fast",
+      "on": "11-15",
+      "rank": "commemoration",
+      "colour": "violet",
+      "en": "The Nativity Fast begins",
+      "ar": "بدء صوم الميلاد",
+      "wikiTitle": "Nativity Fast",
+      "noteEn": "Forty days to Christmas, beginning the day after St Philip — which is why it is often simply called Philip’s Fast.",
+      "noteAr": "أربعون يومًا حتى الميلاد، تبدأ في اليوم التالي لعيد القديس فيلبس، ولذلك يُسمّى غالبًا صوم فيلبس.",
+      "wiki": "Nativity Fast",
+      "wikiAr": "الصوم الصغير"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-conception-anna",
+      "on": "12-09",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Conception of the Mother of God by St Anna",
+      "ar": "حبل القديسة حنة بوالدة الإله",
+      "wikiTitle": "Saint Anne",
+      "noteEn": "The East keeps the conception on the ninth of December and does not read it as the Latin Immaculate Conception; the two feasts are near neighbours and are not the same claim.",
+      "noteAr": "يحفظ الشرق عيد الحبل في التاسع من كانون الأول ولا يقرأه كالحبل بلا دنس اللاتيني. العيدان متجاوران ولكنهما ليسا الدعوى نفسها.",
+      "wiki": "Saint Anne",
+      "wikiAr": "حنة (أم مريم العذراء)"
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-synaxis-theotokos",
+      "on": "12-26",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Synaxis of the Mother of God",
+      "ar": "تذكار والدة الإله",
+      "wikiTitle": null,
+      "noteEn": "The day after the Nativity turns to the one who bore him — the same instinct as the Syriac Congratulations, kept on the same day by a different church.",
+      "noteAr": "اليوم التالي للميلاد يلتفت إلى التي حملته — الحدس نفسه الذي في «تهنئة» السريان، تحفظه كنيسة أخرى في اليوم نفسه."
+    },
+    {
+      "rites": [
+        "byzantine"
+      ],
+      "id": "byz-stephen",
+      "on": "12-27",
+      "rank": "feast",
+      "colour": "red",
+      "en": "St Stephen the Protomartyr",
+      "ar": "القديس إسطفانوس أول الشهداء",
+      "wikiTitle": "Saint Stephen",
+      "wiki": "Saint Stephen",
+      "wikiAr": "إسطفانوس"
     }
   ]
 }

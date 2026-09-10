@@ -1,16 +1,17 @@
 import type { Lang } from "@/lib/content";
 
 /**
- * The two churches the calendar keeps. Adding a third is a season module and a
- * `rites` tag in the feast table — nothing here or in the UI has to change.
+ * The churches the calendar keeps. Adding another is a season module and a
+ * `rites` tag in the feast table — nothing in the UI has to change.
  */
-export type Rite = "maronite" | "roman";
+export type Rite = "maronite" | "roman" | "byzantine";
 
-export const RITES: Rite[] = ["maronite", "roman"];
+export const RITES: Rite[] = ["maronite", "roman", "byzantine"];
 
 export const RITE_LABEL: Record<Rite, Record<Lang, string>> = {
   maronite: { ar: "الكنيسة المارونية", en: "Maronite" },
   roman: { ar: "الكنيسة اللاتينية", en: "Roman Catholic" },
+  byzantine: { ar: "الكنيسة الأرثوذكسية", en: "Orthodox" },
 };
 
 export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
@@ -21,6 +22,13 @@ export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
   roman: {
     ar: "الروزنامة اللاتينية العامة",
     en: "The Latin general calendar",
+  },
+  byzantine: {
+    // Fixed feasts on the ordinary calendar, Pascha on the older reckoning —
+    // which is the Antiochian and Greek practice, and the one a reader in
+    // Lebanon is most likely to be keeping.
+    ar: "السنة الطقسية البيزنطية — الفصح بالحساب القديم",
+    en: "The Byzantine year, with Pascha on the older reckoning",
   },
 };
 

@@ -80,6 +80,50 @@ export function easter(year: number): Date {
   return at(year, Math.floor(n / 31) - 1, (n % 31) + 1);
 }
 
+/**
+ * Orthodox Pascha, as a date on the ordinary (Gregorian) calendar.
+ *
+ * The rule is the same rule — the Sunday after the first full moon on or after
+ * 21 March — but reckoned on the Julian calendar, with the Julian March
+ * equinox and the Metonic cycle uncorrected. Two things follow, and both are
+ * the point rather than a rounding error:
+ *
+ *   The Julian calendar has drifted thirteen days behind the Gregorian, so the
+ *   answer must be shifted forward to be shown on a phone. The shift is not a
+ *   constant: it grows by a day each century that is not a leap year in the
+ *   Gregorian reckoning, so it is computed rather than hard-coded at 13. It is
+ *   13 for the whole of the 1900s and 2000s and becomes 14 in 2100.
+ *
+ *   Pascha can therefore fall as much as five weeks after the Western Easter,
+ *   and once or twice a decade the two coincide. A church on this reckoning is
+ *   not keeping a late Easter; it is keeping the older arithmetic.
+ *
+ * The Meeus Julian algorithm gives the day in the Julian calendar; the rest
+ * converts it. Nothing here is used by the Latin or Maronite years, which both
+ * keep the Gregorian computus above.
+ */
+export function orthodoxEaster(year: number): Date {
+  // Meeus, Julian algorithm: the residues a/b/c and the day it lands on.
+  const a = year % 4;
+  const b = year % 7;
+  const c = year % 19;
+  const d = (19 * c + 15) % 30;
+  const e = (2 * a + 4 * b - d + 34) % 7;
+  const month = Math.floor((d + e + 114) / 31); // 3 = March, 4 = April
+  const day = ((d + e + 114) % 31) + 1;
+
+  // Julian -> Gregorian. Whole centuries that the Gregorian reform does not
+  // count as leap years are exactly the days the two calendars differ by.
+  const century = Math.floor(year / 100);
+  const drift = century - Math.floor(century / 4) - 2;
+
+  return at(year, month - 1, day + drift);
+}
+
 /** Days from Easter, negative before it. The offset every movable feast uses. */
 export const fromEaster = (d: Date): number =>
   daysBetween(easter(d.getFullYear()), d);
+
+/** The same, against Orthodox Pascha. */
+export const fromPascha = (d: Date): number =>
+  daysBetween(orthodoxEaster(d.getFullYear()), d);

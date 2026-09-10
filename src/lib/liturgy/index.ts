@@ -20,8 +20,10 @@ import {
   at,
   dayKey,
   fromEaster,
+  fromPascha,
   monthDay,
 } from "@/lib/liturgy/computus";
+import { byzantineDayName, byzantineYear } from "@/lib/liturgy/byzantine";
 import { maroniteYear } from "@/lib/liturgy/maronite";
 import { romanYear } from "@/lib/liturgy/roman";
 import {
@@ -120,6 +122,7 @@ const FEASTS: RawFeast[] = [
 const YEARS: Record<Rite, RiteYear> = {
   maronite: maroniteYear,
   roman: romanYear,
+  byzantine: byzantineYear,
 };
 
 /** A celebration resolved for one reader: their language, their church. */
@@ -175,7 +178,19 @@ export type CalendarView = {
 
 /* ------------------------------ resolution ------------------------------ */
 
-const rawRites = (f: RawFeast): Rite[] => f.rites ?? RITES;
+/**
+ * The churches that keep a row which does not say.
+ *
+ * The Western two, and deliberately not every rite. The table was written when
+ * those were the only two the app had, so an untagged row means "both of
+ * these" and not "all of them" — and letting a third church inherit that
+ * silence would have put Our Lady of the Rosary and the Immaculate Conception
+ * into the Orthodox calendar, which keeps neither. A rite added later has to
+ * be named on each row that actually belongs to it.
+ */
+const DEFAULT_RITES: Rite[] = ["maronite", "roman"];
+
+const rawRites = (f: RawFeast): Rite[] => f.rites ?? DEFAULT_RITES;
 
 /**
  * The reference link for a feast, in the reader's language where there is one.
@@ -195,10 +210,20 @@ function wikiLink(f: RawFeast, ar: boolean): string | undefined {
   return `https://${host}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
 }
 
-/** Whether a row falls on this date, in whichever of the three forms it uses. */
-function falls(f: RawFeast, d: Date): boolean {
+/**
+ * Whether a row falls on this date, in whichever of the three forms it uses.
+ *
+ * An `easter` offset is counted against *the reader's own* Easter, which is
+ * what makes one row for Great and Holy Friday serve all three churches: the
+ * Latin and Maronite years measure from the Gregorian Easter, the Byzantine
+ * from Pascha on the older reckoning, and in the years the two fall five weeks
+ * apart each reader still sees it in their own Holy Week.
+ */
+function falls(f: RawFeast, d: Date, rite: Rite): boolean {
   if (f.on) return f.on === monthDay(d);
-  if (f.easter !== undefined) return f.easter === fromEaster(d);
+  if (f.easter !== undefined) {
+    return f.easter === (rite === "byzantine" ? fromPascha(d) : fromEaster(d));
+  }
   if (f.sunday) {
     return (
       d.getDay() === 0 &&
@@ -214,7 +239,7 @@ function feastsOn(d: Date, view: CalendarView): Feast[] {
   const out: Feast[] = [];
 
   for (const f of FEASTS) {
-    if (!falls(f, d)) continue;
+    if (!falls(f, d, view.rite)) continue;
     const rites = rawRites(f);
     const own = rites.includes(view.rite);
     // The second layer is Latin only, and only for a reader who is not already
@@ -247,6 +272,10 @@ export function dayInfo(d: Date, view: CalendarView): Day {
   const feasts = feastsOn(d, view);
   const sunday = d.getDay() === 0;
   const proper = sunday ? year.sundayOf(d, view.lang) : null;
+  /* Great and Holy Friday is not a Sunday and is not in the feast table; it is
+     named by where it sits against Pascha. Without this the most solemn day of
+     the Byzantine year reads as "a weekday of the season". */
+  const named = view.rite === "byzantine" ? byzantineDayName(d, view.lang) : null;
 
   return {
     key: dayKey(d),
@@ -255,6 +284,7 @@ export function dayInfo(d: Date, view: CalendarView): Day {
     season,
     title:
       proper?.title ??
+      named ??
       feasts[0]?.name ??
       (view.lang === "ar" ? "يوم من أيام الزمن" : "A weekday of the season"),
     feasts,
