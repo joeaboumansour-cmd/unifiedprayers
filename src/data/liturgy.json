@@ -33,7 +33,9 @@
       "en": "Ash Wednesday",
       "ar": "أربعاء الرماد",
       "noteEn": "The Latin church begins the forty days of Lent. Ashes from last year's palms are traced on the forehead — a day of fasting and abstinence.",
-      "noteAr": "تبدأ الكنيسة اللاتينية أربعين يوم الصوم الكبير. يُرسم الرماد على الجبين، وهو رماد سعف الشعانين من السنة الماضية. يوم صوم وانقطاع."
+      "noteAr": "تبدأ الكنيسة اللاتينية أربعين يوم الصوم الكبير. يُرسم الرماد على الجبين، وهو رماد سعف الشعانين من السنة الماضية. يوم صوم وانقطاع.",
+      "wiki": "Ash Wednesday",
+      "wikiAr": "أربعاء الرماد"
     },
     {
       "id": "ash-monday",
@@ -47,7 +49,8 @@
       "en": "Ash Monday · the Great Fast begins",
       "ar": "اثنين الرماد — بدء الصوم الكبير",
       "noteEn": "The Maronite Great Fast opens on the Monday after Cana Sunday, two days earlier than the Latin Lent, and runs to Hosanna Sunday.",
-      "noteAr": "يبدأ الصوم الكبير الماروني يوم الاثنين الذي يلي أحد قانا، أي قبل الصوم اللاتيني بيومين، ويمتد حتى أحد الشعانين."
+      "noteAr": "يبدأ الصوم الكبير الماروني يوم الاثنين الذي يلي أحد قانا، أي قبل الصوم اللاتيني بيومين، ويمتد حتى أحد الشعانين.",
+      "wikiTitle": null
     },
     {
       "id": "holy-thursday",
@@ -56,7 +59,10 @@
       "colour": "white",
       "high": true,
       "en": "Holy Thursday of the Mysteries",
-      "ar": "خميس الأسرار"
+      "ar": "خميس الأسرار",
+      "wikiTitle": "Maundy Thursday",
+      "wiki": "Maundy Thursday",
+      "wikiAr": "خميس الأسرار"
     },
     {
       "id": "good-friday",
@@ -67,7 +73,10 @@
       "en": "Good Friday of the Passion",
       "ar": "الجمعة العظيمة",
       "noteEn": "The one day of the year with no Mass anywhere in the world. A day of fasting and abstinence in both churches.",
-      "noteAr": "اليوم الوحيد في السنة الذي لا يُقام فيه قداس في أي مكان من العالم. يوم صوم وانقطاع في الكنيستين."
+      "noteAr": "اليوم الوحيد في السنة الذي لا يُقام فيه قداس في أي مكان من العالم. يوم صوم وانقطاع في الكنيستين.",
+      "wikiTitle": "Good Friday",
+      "wiki": "Good Friday",
+      "wikiAr": "الجمعة العظيمة"
     },
     {
       "id": "holy-saturday",
@@ -75,7 +84,10 @@
       "rank": "feast",
       "colour": "white",
       "en": "Holy Saturday of the Light",
-      "ar": "سبت النور"
+      "ar": "سبت النور",
+      "wikiTitle": "Holy Saturday",
+      "wiki": "Holy Saturday",
+      "wikiAr": "سبت النور"
     },
     {
       "id": "ascension",
@@ -83,7 +95,9 @@
       "rank": "solemnity",
       "colour": "white",
       "en": "The Ascension of the Lord",
-      "ar": "عيد صعود الرب"
+      "ar": "عيد صعود الرب",
+      "wiki": "Ascension of Jesus",
+      "wikiAr": "صعود يسوع"
     },
     {
       "id": "corpus-christi",
@@ -94,7 +108,10 @@
       "rank": "solemnity",
       "colour": "white",
       "en": "The Body and Blood of Christ",
-      "ar": "عيد جسد الرب ودمه"
+      "ar": "عيد جسد الرب ودمه",
+      "wikiTitle": "Feast of Corpus Christi",
+      "wiki": "Feast of Corpus Christi",
+      "wikiAr": "خميس الجسد"
     },
     {
       "id": "sacred-heart",
@@ -105,7 +122,9 @@
       "rank": "solemnity",
       "colour": "white",
       "en": "The Most Sacred Heart of Jesus",
-      "ar": "عيد قلب يسوع الأقدس"
+      "ar": "عيد قلب يسوع الأقدس",
+      "wiki": "Sacred Heart",
+      "wikiAr": "قلب يسوع الأقدس"
     },
     {
       "id": "immaculate-heart",
@@ -116,7 +135,9 @@
       "rank": "memorial",
       "colour": "white",
       "en": "The Immaculate Heart of Mary",
-      "ar": "قلب مريم الطاهر"
+      "ar": "قلب مريم الطاهر",
+      "wiki": "Immaculate Heart of Mary",
+      "wikiAr": "قلب مريم الطاهر"
     },
     {
       "id": "mary-mother-of-god",
@@ -127,7 +148,9 @@
       "rank": "solemnity",
       "colour": "white",
       "en": "Mary, the Holy Mother of God",
-      "ar": "مريم أم الله القدوس"
+      "ar": "مريم أم الله القدوس",
+      "wikiTitle": "Solemnity of Mary, Mother of God",
+      "wiki": "Solemnity of Mary, Mother of God"
     },
     {
       "id": "naming-of-jesus",
@@ -138,7 +161,10 @@
       "rank": "feast",
       "colour": "white",
       "en": "The Circumcision and Naming of the Lord",
-      "ar": "عيد ختانة الرب وتسميته"
+      "ar": "عيد ختانة الرب وتسميته",
+      "wikiTitle": "Feast of the Circumcision of Christ",
+      "wiki": "Feast of the Circumcision of Christ",
+      "wikiAr": "عيد الختان"
     },
     {
       "id": "epiphany",
@@ -148,7 +174,10 @@
       "en": "The Epiphany of the Lord",
       "ar": "عيد الظهور الإلهي — الدنح",
       "noteEn": "In the East this is the baptism of Christ in the Jordan and the day water is blessed; in the West it is the coming of the Magi. One feast, two halves of the same revelation.",
-      "noteAr": "في الشرق هو عيد عماد المسيح في نهر الأردن، ويوم تبريك المياه؛ وفي الغرب هو مجيء المجوس. عيد واحد وجهان لظهور واحد."
+      "noteAr": "في الشرق هو عيد عماد المسيح في نهر الأردن، ويوم تبريك المياه؛ وفي الغرب هو مجيء المجوس. عيد واحد وجهان لظهور واحد.",
+      "wikiTitle": "Epiphany (holiday)",
+      "wiki": "Epiphany (holiday)",
+      "wikiAr": "عيد الظهور الإلهي"
     },
     {
       "id": "anthony-great",
@@ -157,7 +186,9 @@
       "colour": "white",
       "en": "St Anthony the Great, abbot",
       "ar": "القديس أنطونيوس الكبير",
-      "romcal": "anthony_of_egypt_abbot"
+      "romcal": "anthony_of_egypt_abbot",
+      "wiki": "Anthony the Great",
+      "wikiAr": "أنطونيوس الكبير"
     },
     {
       "id": "agnes",
@@ -169,7 +200,10 @@
       "colour": "red",
       "en": "St Agnes, virgin and martyr",
       "ar": "القديسة أغنيس، عذراء وشهيدة",
-      "romcal": "agnes_of_rome_virgin"
+      "romcal": "agnes_of_rome_virgin",
+      "wikiTitle": "Agnes of Rome",
+      "wiki": "Agnes of Rome",
+      "wikiAr": "أغنيس الرومانية"
     },
     {
       "id": "conversion-paul",
@@ -178,7 +212,10 @@
       "colour": "white",
       "en": "The Conversion of St Paul the Apostle",
       "ar": "عيد اهتداء القديس بولس الرسول",
-      "romcal": "conversion_of_saint_paul_the_apostle"
+      "romcal": "conversion_of_saint_paul_the_apostle",
+      "wikiTitle": "Conversion of Paul the Apostle",
+      "wiki": "Conversion of Paul the Apostle",
+      "wikiAr": "تحول بولس إلى المسيحية"
     },
     {
       "id": "thomas-aquinas",
@@ -190,7 +227,9 @@
       "colour": "white",
       "en": "St Thomas Aquinas",
       "ar": "القديس توما الأكويني",
-      "romcal": "thomas_aquinas_priest"
+      "romcal": "thomas_aquinas_priest",
+      "wiki": "Thomas Aquinas",
+      "wikiAr": "توما الأكويني"
     },
     {
       "id": "john-bosco",
@@ -202,7 +241,9 @@
       "colour": "white",
       "en": "St John Bosco",
       "ar": "القديس يوحنا بوسكو",
-      "romcal": "john_bosco_priest"
+      "romcal": "john_bosco_priest",
+      "wiki": "John Bosco",
+      "wikiAr": "دون بوسكو"
     },
     {
       "id": "presentation",
@@ -211,7 +252,8 @@
       "colour": "white",
       "en": "The Presentation of the Lord",
       "ar": "عيد دخول الرب إلى الهيكل",
-      "romcal": "presentation_of_the_lord"
+      "romcal": "presentation_of_the_lord",
+      "wiki": "Presentation of Jesus"
     },
     {
       "id": "maron",
@@ -224,7 +266,10 @@
       "en": "St Maron, father of the Maronite Church",
       "ar": "عيد مار مارون، أبي الكنيسة المارونية",
       "noteEn": "A fourth-century Syrian hermit who lived in the open air near Cyrrhus. The community that grew around him took his name and eventually his whole church did. This is the patronal feast of the year.",
-      "noteAr": "ناسك سرياني من القرن الرابع عاش في العراء قرب قورش. حملت الجماعة التي نشأت حوله اسمه، ثم حملته الكنيسة كلها. وهو عيد شفيع السنة المارونية."
+      "noteAr": "ناسك سرياني من القرن الرابع عاش في العراء قرب قورش. حملت الجماعة التي نشأت حوله اسمه، ثم حملته الكنيسة كلها. وهو عيد شفيع السنة المارونية.",
+      "wiki": "Maron",
+      "wikiAr": "مارون",
+      "wikiTitle": "Maron"
     },
     {
       "id": "lourdes",
@@ -236,7 +281,8 @@
       "colour": "white",
       "en": "Our Lady of Lourdes",
       "ar": "سيدة لورد",
-      "romcal": "our_lady_of_lourdes"
+      "romcal": "our_lady_of_lourdes",
+      "wiki": "Our Lady of Lourdes"
     },
     {
       "id": "cyril-methodius",
@@ -248,7 +294,9 @@
       "colour": "white",
       "en": "Sts Cyril and Methodius",
       "ar": "القديسان كيرلس ومثوديوس",
-      "romcal": "cyril_the_philosopher_monk_and_methodius_of_thessaloniki_bishop"
+      "romcal": "cyril_the_philosopher_monk_and_methodius_of_thessaloniki_bishop",
+      "wiki": "Cyril and Methodius",
+      "wikiAr": "كيرلس وميثوديوس"
     },
     {
       "id": "chair-of-peter",
@@ -260,7 +308,10 @@
       "colour": "white",
       "en": "The Chair of St Peter the Apostle",
       "ar": "عيد كرسي القديس بطرس",
-      "romcal": "chair_of_saint_peter_the_apostle"
+      "romcal": "chair_of_saint_peter_the_apostle",
+      "wikiTitle": "Chair of Saint Peter",
+      "wiki": "Chair of Saint Peter",
+      "wikiAr": "كرسي القديس بطرس"
     },
     {
       "id": "john-maron",
@@ -271,7 +322,10 @@
       "rank": "feast",
       "colour": "white",
       "en": "St John Maron, first Maronite patriarch",
-      "ar": "القديس يوحنا مارون، أول بطريرك ماروني"
+      "ar": "القديس يوحنا مارون، أول بطريرك ماروني",
+      "wiki": "John Maron",
+      "wikiAr": "يوحنا مارون",
+      "wikiTitle": "John Maron"
     },
     {
       "id": "joseph",
@@ -280,7 +334,10 @@
       "colour": "white",
       "en": "St Joseph, spouse of the Blessed Virgin Mary",
       "ar": "عيد القديس يوسف، خطّيب العذراء مريم",
-      "romcal": "joseph_spouse_of_mary"
+      "romcal": "joseph_spouse_of_mary",
+      "wikiTitle": "Saint Joseph",
+      "wiki": "Saint Joseph",
+      "wikiAr": "يوسف النجار"
     },
     {
       "id": "rafqa",
@@ -291,7 +348,10 @@
       "rank": "memorial",
       "colour": "white",
       "en": "St Rafqa, Lebanese Maronite nun",
-      "ar": "القديسة رفقا، الراهبة اللبنانية المارونية"
+      "ar": "القديسة رفقا، الراهبة اللبنانية المارونية",
+      "wikiTitle": "Rafqa Pietra Choboq Ar-Rayès",
+      "wiki": "Rafqa Pietra Choboq Ar-Rayès",
+      "wikiAr": "رفقا"
     },
     {
       "id": "annunciation",
@@ -302,7 +362,10 @@
       "ar": "عيد بشارة السيدة العذراء",
       "noteEn": "Nine months before Christmas to the day. In Lebanon it is a national holiday kept by Christians and Muslims together — the only one of its kind anywhere.",
       "noteAr": "قبل الميلاد بتسعة أشهر بالتمام. وهو في لبنان عيد وطني يشترك في إحيائه المسيحيون والمسلمون معًا، وهو الوحيد من نوعه في العالم.",
-      "romcal": "annunciation"
+      "romcal": "annunciation",
+      "wikiTitle": "Annunciation",
+      "wiki": "Annunciation",
+      "wikiAr": "البشارة"
     },
     {
       "id": "george",
@@ -313,7 +376,10 @@
       "ar": "عيد مار جرجس، الشهيد",
       "noteEn": "One of the most kept names in the Levant. Churches, villages and half the men of a generation carry it.",
       "noteAr": "من أكثر الأسماء حضورًا في بلاد الشام. تحمله الكنائس والقرى ونصف رجال الجيل الواحد.",
-      "romcal": "george_of_lydda_martyr"
+      "romcal": "george_of_lydda_martyr",
+      "wikiTitle": "Saint George",
+      "wiki": "Saint George",
+      "wikiAr": "جرجس"
     },
     {
       "id": "mark",
@@ -322,7 +388,9 @@
       "colour": "red",
       "en": "St Mark the Evangelist",
       "ar": "عيد القديس مرقس الإنجيلي",
-      "romcal": "mark_evangelist"
+      "romcal": "mark_evangelist",
+      "wiki": "Mark the Evangelist",
+      "wikiAr": "مرقس"
     },
     {
       "id": "catherine-siena",
@@ -334,7 +402,9 @@
       "colour": "white",
       "en": "St Catherine of Siena",
       "ar": "القديسة كاترينا السيينية",
-      "romcal": "catherine_of_siena_virgin"
+      "romcal": "catherine_of_siena_virgin",
+      "wiki": "Catherine of Siena",
+      "wikiAr": "كاترينا من سيينا"
     },
     {
       "id": "our-lady-lebanon",
@@ -350,7 +420,9 @@
       "en": "Our Lady of Lebanon",
       "ar": "عيد سيدة لبنان",
       "noteEn": "Kept on the first Sunday of May at Harissa, where the statue has looked out over the bay since 1908.",
-      "noteAr": "يُحتفل به في الأحد الأول من أيار في حريصا، حيث يطل التمثال على الخليج منذ سنة ١٩٠٨."
+      "noteAr": "يُحتفل به في الأحد الأول من أيار في حريصا، حيث يطل التمثال على الخليج منذ سنة ١٩٠٨.",
+      "wiki": "Our Lady of Lebanon",
+      "wikiAr": "مزار سيدة لبنان"
     },
     {
       "id": "joseph-worker",
@@ -362,7 +434,9 @@
       "colour": "white",
       "en": "St Joseph the Worker",
       "ar": "القديس يوسف العامل",
-      "romcal": "joseph_the_worker"
+      "romcal": "joseph_the_worker",
+      "wiki": "Saint Joseph",
+      "wikiAr": "يوسف النجار"
     },
     {
       "id": "philip-james",
@@ -374,7 +448,10 @@
       "colour": "red",
       "en": "Sts Philip and James, apostles",
       "ar": "القديسان فيلبس ويعقوب، الرسولان",
-      "romcal": "philip_and_james_apostles"
+      "romcal": "philip_and_james_apostles",
+      "wikiTitle": "Philip the Apostle",
+      "wiki": "Philip the Apostle",
+      "wikiAr": "فيلبس"
     },
     {
       "id": "fatima",
@@ -386,7 +463,9 @@
       "colour": "white",
       "en": "Our Lady of Fatima",
       "ar": "سيدة فاطيما",
-      "romcal": "our_lady_of_fatima"
+      "romcal": "our_lady_of_fatima",
+      "wiki": "Our Lady of Fátima",
+      "wikiAr": "سيدة فاطمة"
     },
     {
       "id": "matthias",
@@ -398,7 +477,10 @@
       "colour": "red",
       "en": "St Matthias, apostle",
       "ar": "القديس متياس الرسول",
-      "romcal": "matthias_apostle"
+      "romcal": "matthias_apostle",
+      "wikiTitle": "Saint Matthias",
+      "wiki": "Matthias the Apostle",
+      "wikiAr": "متياس"
     },
     {
       "id": "visitation",
@@ -410,7 +492,8 @@
       "colour": "white",
       "en": "The Visitation of the Blessed Virgin Mary",
       "ar": "عيد زيارة العذراء مريم لأليصابات",
-      "romcal": "visitation_of_mary"
+      "romcal": "visitation_of_mary",
+      "wiki": "Visitation (Christianity)"
     },
     {
       "id": "barnabas",
@@ -422,7 +505,9 @@
       "colour": "red",
       "en": "St Barnabas, apostle",
       "ar": "القديس برنابا الرسول",
-      "romcal": "barnabas_apostle"
+      "romcal": "barnabas_apostle",
+      "wiki": "Barnabas",
+      "wikiAr": "برنابا"
     },
     {
       "id": "anthony-padua",
@@ -434,7 +519,9 @@
       "colour": "white",
       "en": "St Anthony of Padua",
       "ar": "القديس أنطونيوس البادواني",
-      "romcal": "anthony_of_padua_priest"
+      "romcal": "anthony_of_padua_priest",
+      "wiki": "Anthony of Padua",
+      "wikiAr": "أنطونيو اللشبوني"
     },
     {
       "id": "john-baptist-birth",
@@ -443,7 +530,9 @@
       "colour": "white",
       "en": "The Nativity of St John the Baptist",
       "ar": "عيد مولد القديس يوحنا المعمدان",
-      "romcal": "nativity_of_john_the_baptist"
+      "romcal": "nativity_of_john_the_baptist",
+      "wiki": "Nativity of John the Baptist",
+      "wikiAr": "عيد ذكرى ميلاد يوحنا المعمدان"
     },
     {
       "id": "peter-paul",
@@ -452,7 +541,9 @@
       "colour": "red",
       "en": "Sts Peter and Paul, apostles",
       "ar": "عيد القديسين بطرس وبولس، هامتي الرسل",
-      "romcal": "peter_and_paul_apostles"
+      "romcal": "peter_and_paul_apostles",
+      "wikiTitle": "Feast of Saints Peter and Paul",
+      "wiki": "Feast of Saints Peter and Paul"
     },
     {
       "id": "thomas-apostle",
@@ -461,7 +552,9 @@
       "colour": "red",
       "en": "St Thomas the Apostle",
       "ar": "عيد مار توما الرسول",
-      "romcal": "thomas_apostle"
+      "romcal": "thomas_apostle",
+      "wiki": "Thomas the Apostle",
+      "wikiAr": "توما"
     },
     {
       "id": "benedict",
@@ -473,7 +566,10 @@
       "colour": "white",
       "en": "St Benedict, abbot",
       "ar": "القديس بندكتس",
-      "romcal": "benedict_of_nursia_abbot"
+      "romcal": "benedict_of_nursia_abbot",
+      "wikiTitle": "Benedict of Nursia",
+      "wiki": "Benedict of Nursia",
+      "wikiAr": "بندكت النيرسي"
     },
     {
       "id": "mount-carmel",
@@ -482,7 +578,8 @@
       "colour": "white",
       "en": "Our Lady of Mount Carmel",
       "ar": "سيدة جبل الكرمل",
-      "romcal": "our_lady_of_mount_carmel"
+      "romcal": "our_lady_of_mount_carmel",
+      "wiki": "Our Lady of Mount Carmel"
     },
     {
       "id": "mary-magdalene",
@@ -491,7 +588,9 @@
       "colour": "white",
       "en": "St Mary Magdalene",
       "ar": "القديسة مريم المجدلية",
-      "romcal": "mary_magdalene"
+      "romcal": "mary_magdalene",
+      "wiki": "Mary Magdalene",
+      "wikiAr": "مريم المجدلية"
     },
     {
       "id": "charbel",
@@ -504,7 +603,10 @@
       "en": "St Charbel Makhlouf",
       "ar": "عيد القديس شربل مخلوف",
       "noteEn": "A hermit of Annaya who spent twenty-three years in silence and is now the most visited saint in Lebanon. In Lebanon the feast is kept on the third Sunday of July.",
-      "noteAr": "ناسك عنّايا الذي أمضى ثلاثًا وعشرين سنة في الصمت، وهو اليوم أكثر القديسين زيارة في لبنان. ويُحتفل بعيده في لبنان في الأحد الثالث من تموز."
+      "noteAr": "ناسك عنّايا الذي أمضى ثلاثًا وعشرين سنة في الصمت، وهو اليوم أكثر القديسين زيارة في لبنان. ويُحتفل بعيده في لبنان في الأحد الثالث من تموز.",
+      "wiki": "Charbel Makhlouf",
+      "wikiAr": "مار شربل",
+      "wikiTitle": "Charbel Makhlouf"
     },
     {
       "id": "james-apostle",
@@ -516,7 +618,10 @@
       "colour": "red",
       "en": "St James the Apostle",
       "ar": "القديس يعقوب الرسول",
-      "romcal": "james_apostle"
+      "romcal": "james_apostle",
+      "wikiTitle": "James the Great",
+      "wiki": "James the Great",
+      "wikiAr": "يعقوب بن زبدي"
     },
     {
       "id": "joachim-anne",
@@ -525,7 +630,10 @@
       "colour": "white",
       "en": "Sts Joachim and Anne, parents of the Virgin Mary",
       "ar": "القديسان يواكيم وحنة، والدا العذراء مريم",
-      "romcal": "joachim_and_anne_parents_of_mary"
+      "romcal": "joachim_and_anne_parents_of_mary",
+      "wikiTitle": "Saint Anne",
+      "wiki": "Saint Anne",
+      "wikiAr": "حنة (أم مريم العذراء)"
     },
     {
       "id": "martha",
@@ -537,7 +645,9 @@
       "colour": "white",
       "en": "Sts Martha, Mary and Lazarus",
       "ar": "القديسون مرتا ومريم ولعازر",
-      "romcal": "martha_of_bethany_mary_of_bethany_and_lazarus_of_bethany"
+      "romcal": "martha_of_bethany_mary_of_bethany_and_lazarus_of_bethany",
+      "wiki": "Martha",
+      "wikiAr": "مرثا"
     },
     {
       "id": "transfiguration",
@@ -546,7 +656,9 @@
       "colour": "white",
       "en": "The Transfiguration of the Lord",
       "ar": "عيد تجلي الرب",
-      "romcal": "transfiguration"
+      "romcal": "transfiguration",
+      "wiki": "Transfiguration of Jesus",
+      "wikiAr": "تجلي يسوع"
     },
     {
       "id": "assumption",
@@ -557,7 +669,9 @@
       "ar": "عيد انتقال السيدة العذراء بالنفس والجسد",
       "noteEn": "The greatest Marian feast of the year in both churches, and preceded in the Maronite calendar by a fifteen-day fast.",
       "noteAr": "أعظم أعياد العذراء في الكنيستين، ويسبقه في التقويم الماروني صوم خمسة عشر يومًا.",
-      "romcal": "assumption"
+      "romcal": "assumption",
+      "wiki": "Assumption of Mary",
+      "wikiAr": "انتقال العذراء"
     },
     {
       "id": "queenship-mary",
@@ -569,7 +683,9 @@
       "colour": "white",
       "en": "The Queenship of the Blessed Virgin Mary",
       "ar": "عيد مريم الملكة",
-      "romcal": "queenship_of_mary"
+      "romcal": "queenship_of_mary",
+      "wiki": "Queen of Heaven",
+      "wikiAr": "ملكة الجنة"
     },
     {
       "id": "bartholomew",
@@ -581,7 +697,9 @@
       "colour": "red",
       "en": "St Bartholomew, apostle",
       "ar": "القديس برتلماوس الرسول",
-      "romcal": "bartholomew_apostle"
+      "romcal": "bartholomew_apostle",
+      "wiki": "Bartholomew the Apostle",
+      "wikiAr": "برثولماوس"
     },
     {
       "id": "augustine",
@@ -593,7 +711,9 @@
       "colour": "white",
       "en": "St Augustine of Hippo",
       "ar": "القديس أوغسطينوس",
-      "romcal": "augustine_of_hippo_bishop"
+      "romcal": "augustine_of_hippo_bishop",
+      "wiki": "Augustine of Hippo",
+      "wikiAr": "أوغسطينوس"
     },
     {
       "id": "beheading-baptist",
@@ -602,7 +722,9 @@
       "colour": "red",
       "en": "The Beheading of St John the Baptist",
       "ar": "عيد قطع رأس القديس يوحنا المعمدان",
-      "romcal": "passion_of_saint_john_the_baptist"
+      "romcal": "passion_of_saint_john_the_baptist",
+      "wiki": "Beheading of John the Baptist",
+      "wikiAr": "قطع رأس يوحنا المعمدان"
     },
     {
       "id": "nativity-mary",
@@ -611,7 +733,9 @@
       "colour": "white",
       "en": "The Nativity of the Blessed Virgin Mary",
       "ar": "عيد ميلاد السيدة العذراء",
-      "romcal": "nativity_of_mary"
+      "romcal": "nativity_of_mary",
+      "wiki": "Nativity of Mary",
+      "wikiAr": "ميلاد مريم العذراء"
     },
     {
       "id": "exaltation-cross",
@@ -623,7 +747,9 @@
       "ar": "عيد ارتفاع الصليب المجيد",
       "noteEn": "In the Maronite year this is not only a feast but a hinge: the Season of the Holy Cross opens today and carries the calendar to the Announcements in November.",
       "noteAr": "ليس عيدًا فحسب في السنة المارونية بل مفصلًا: يبدأ اليوم زمن الصليب ويحمل الروزنامة حتى زمن البشارات في تشرين الثاني.",
-      "romcal": "exaltation_of_the_holy_cross"
+      "romcal": "exaltation_of_the_holy_cross",
+      "wiki": "Feast of the Cross",
+      "wikiAr": "عيد الصليب"
     },
     {
       "id": "our-lady-sorrows",
@@ -632,7 +758,9 @@
       "colour": "white",
       "en": "Our Lady of Sorrows",
       "ar": "سيدة الأحزان",
-      "romcal": "our_lady_of_sorrows"
+      "romcal": "our_lady_of_sorrows",
+      "wiki": "Our Lady of Sorrows",
+      "wikiAr": "سيدة الآلام"
     },
     {
       "id": "matthew",
@@ -641,7 +769,10 @@
       "colour": "red",
       "en": "St Matthew, apostle and evangelist",
       "ar": "القديس متى، الرسول والإنجيلي",
-      "romcal": "matthew_apostle"
+      "romcal": "matthew_apostle",
+      "wikiTitle": "Matthew the Apostle",
+      "wiki": "Matthew the Apostle",
+      "wikiAr": "متى"
     },
     {
       "id": "padre-pio",
@@ -653,7 +784,9 @@
       "colour": "white",
       "en": "St Pio of Pietrelcina",
       "ar": "القديس بيو من بييترلتشينا",
-      "romcal": "pius_of_pietrelcina_priest"
+      "romcal": "pius_of_pietrelcina_priest",
+      "wiki": "Padre Pio",
+      "wikiAr": "بادري بيو"
     },
     {
       "id": "thecla",
@@ -664,7 +797,10 @@
       "rank": "feast",
       "colour": "red",
       "en": "St Thecla, first woman martyr",
-      "ar": "القديسة تقلا، أولى الشهيدات"
+      "ar": "القديسة تقلا، أولى الشهيدات",
+      "wiki": "Thecla",
+      "wikiAr": "تقلا",
+      "wikiTitle": "Thecla"
     },
     {
       "id": "vincent-de-paul",
@@ -676,7 +812,9 @@
       "colour": "white",
       "en": "St Vincent de Paul",
       "ar": "القديس منصور دي بول",
-      "romcal": "vincent_de_paul_priest"
+      "romcal": "vincent_de_paul_priest",
+      "wiki": "Vincent de Paul",
+      "wikiAr": "منصور دي بول"
     },
     {
       "id": "archangels",
@@ -685,7 +823,10 @@
       "colour": "white",
       "en": "Sts Michael, Gabriel and Raphael, archangels",
       "ar": "عيد رؤساء الملائكة ميخائيل وجبرائيل وروفائيل",
-      "romcal": "michael_gabriel_and_raphael_archangels"
+      "romcal": "michael_gabriel_and_raphael_archangels",
+      "wikiTitle": "Michael (archangel)",
+      "wiki": "Michael (archangel)",
+      "wikiAr": "ميخائيل (ملاك)"
     },
     {
       "id": "jerome",
@@ -697,7 +838,9 @@
       "colour": "white",
       "en": "St Jerome",
       "ar": "القديس إيرونيموس",
-      "romcal": "jerome_of_stridon_priest"
+      "romcal": "jerome_of_stridon_priest",
+      "wiki": "Jerome",
+      "wikiAr": "جيروم"
     },
     {
       "id": "therese",
@@ -709,7 +852,9 @@
       "colour": "white",
       "en": "St Thérèse of the Child Jesus",
       "ar": "القديسة تريزيا الطفل يسوع",
-      "romcal": "therese_of_the_child_jesus_and_the_holy_face_of_lisieux_virgin"
+      "romcal": "therese_of_the_child_jesus_and_the_holy_face_of_lisieux_virgin",
+      "wiki": "Thérèse of Lisieux",
+      "wikiAr": "تيريز دو ليزيو"
     },
     {
       "id": "guardian-angels",
@@ -721,7 +866,9 @@
       "colour": "white",
       "en": "The Holy Guardian Angels",
       "ar": "عيد الملائكة الحارسين",
-      "romcal": "guardian_angels"
+      "romcal": "guardian_angels",
+      "wikiTitle": "Guardian angel",
+      "wiki": "Guardian angel"
     },
     {
       "id": "francis-assisi",
@@ -733,7 +880,9 @@
       "colour": "white",
       "en": "St Francis of Assisi",
       "ar": "القديس فرنسيس الأسيزي",
-      "romcal": "francis_of_assisi"
+      "romcal": "francis_of_assisi",
+      "wiki": "Francis of Assisi",
+      "wikiAr": "فرنسيس الأسيزي"
     },
     {
       "id": "rosary",
@@ -744,7 +893,8 @@
       "ar": "عيد سيدة الوردية",
       "noteEn": "The feast of the prayer this app was built around. October is kept as the month of the Rosary.",
       "noteAr": "عيد الصلاة التي بُني حولها هذا التطبيق. ويُحفظ تشرين الأول شهرًا للوردية.",
-      "romcal": "our_lady_of_the_rosary"
+      "romcal": "our_lady_of_the_rosary",
+      "wiki": "Our Lady of the Rosary"
     },
     {
       "id": "teresa-avila",
@@ -756,7 +906,9 @@
       "colour": "white",
       "en": "St Teresa of Jesus",
       "ar": "القديسة تريزيا الأفيلية",
-      "romcal": "teresa_of_jesus_of_avila_virgin"
+      "romcal": "teresa_of_jesus_of_avila_virgin",
+      "wiki": "Teresa of Ávila",
+      "wikiAr": "تيريزا الأفيلاوية"
     },
     {
       "id": "luke",
@@ -765,7 +917,9 @@
       "colour": "red",
       "en": "St Luke the Evangelist",
       "ar": "عيد القديس لوقا الإنجيلي",
-      "romcal": "luke_evangelist"
+      "romcal": "luke_evangelist",
+      "wiki": "Luke the Evangelist",
+      "wikiAr": "لوقا"
     },
     {
       "id": "simon-jude",
@@ -777,7 +931,10 @@
       "colour": "red",
       "en": "Sts Simon and Jude, apostles",
       "ar": "القديسان سمعان ويهوذا، الرسولان",
-      "romcal": "simon_and_jude_apostles"
+      "romcal": "simon_and_jude_apostles",
+      "wikiTitle": "Simon the Zealot",
+      "wiki": "Simon the Zealot",
+      "wikiAr": "سمعان القانوي"
     },
     {
       "id": "all-saints",
@@ -786,7 +943,10 @@
       "colour": "white",
       "en": "All Saints",
       "ar": "عيد جميع القديسين",
-      "romcal": "all_saints"
+      "romcal": "all_saints",
+      "wikiTitle": "All Saints' Day",
+      "wiki": "All Saints' Day",
+      "wikiAr": "عيد جميع القديسين"
     },
     {
       "id": "all-souls",
@@ -797,7 +957,10 @@
       "ar": "تذكار جميع الموتى المؤمنين",
       "noteEn": "The day the whole church prays for its dead. Graves are visited and cleaned, and in Lebanon families gather at them.",
       "noteAr": "اليوم الذي تصلي فيه الكنيسة كلها عن موتاها. تُزار القبور وتُنظّف، وتجتمع عندها العائلات في لبنان.",
-      "romcal": "all_souls"
+      "romcal": "all_souls",
+      "wiki": "All Souls' Day",
+      "wikiAr": "يوم ذكرى الأموات",
+      "wikiTitle": "All Souls' Day"
     },
     {
       "id": "lateran",
@@ -809,7 +972,8 @@
       "colour": "white",
       "en": "The Dedication of the Lateran Basilica",
       "ar": "عيد تدشين بازيليك اللاتران",
-      "romcal": "dedication_of_the_lateran_basilica"
+      "romcal": "dedication_of_the_lateran_basilica",
+      "wiki": "Dedication of the Lateran Basilica"
     },
     {
       "id": "presentation-mary",
@@ -818,7 +982,8 @@
       "colour": "white",
       "en": "The Presentation of the Blessed Virgin Mary",
       "ar": "عيد دخول السيدة العذراء إلى الهيكل",
-      "romcal": "presentation_of_mary"
+      "romcal": "presentation_of_mary",
+      "wiki": "Presentation of Mary"
     },
     {
       "id": "andrew",
@@ -827,7 +992,9 @@
       "colour": "red",
       "en": "St Andrew the Apostle",
       "ar": "عيد القديس أندراوس الرسول",
-      "romcal": "andrew_apostle"
+      "romcal": "andrew_apostle",
+      "wiki": "Andrew the Apostle",
+      "wikiAr": "أندراوس"
     },
     {
       "id": "barbara",
@@ -840,7 +1007,10 @@
       "en": "St Barbara, martyr",
       "ar": "عيد القديسة بربارة، الشهيدة",
       "noteEn": "Kept in Lebanon the way a carnival is: children go from house to house in costume, and the wheat soaked weeks earlier is eaten as burbara.",
-      "noteAr": "يُحتفل به في لبنان احتفال الكرنفال: يتنقل الأولاد بين البيوت متنكرين، ويُؤكل القمح المنقوع منذ أسابيع باسم البربارة."
+      "noteAr": "يُحتفل به في لبنان احتفال الكرنفال: يتنقل الأولاد بين البيوت متنكرين، ويُؤكل القمح المنقوع منذ أسابيع باسم البربارة.",
+      "wikiTitle": "Saint Barbara",
+      "wiki": "Saint Barbara",
+      "wikiAr": "بربارة"
     },
     {
       "id": "nicholas",
@@ -849,7 +1019,10 @@
       "colour": "white",
       "en": "St Nicholas, bishop",
       "ar": "القديس نيقولاوس الأسقف",
-      "romcal": "nicholas_of_myra_bishop"
+      "romcal": "nicholas_of_myra_bishop",
+      "wikiTitle": "Nicholas of Myra",
+      "wiki": "Saint Nicholas",
+      "wikiAr": "نقولا"
     },
     {
       "id": "immaculate-conception",
@@ -858,7 +1031,9 @@
       "colour": "white",
       "en": "The Immaculate Conception of the Blessed Virgin Mary",
       "ar": "عيد الحبل بلا دنس بالعذراء مريم",
-      "romcal": "immaculate_conception_of_mary"
+      "romcal": "immaculate_conception_of_mary",
+      "wiki": "Immaculate Conception",
+      "wikiAr": "الحبل بلا دنس"
     },
     {
       "id": "guadalupe",
@@ -870,7 +1045,9 @@
       "colour": "white",
       "en": "Our Lady of Guadalupe",
       "ar": "سيدة غوادالوبي",
-      "romcal": "our_lady_of_guadalupe"
+      "romcal": "our_lady_of_guadalupe",
+      "wiki": "Our Lady of Guadalupe",
+      "wikiAr": "السيدة غوادالوبي"
     },
     {
       "id": "hardini",
@@ -881,7 +1058,10 @@
       "rank": "memorial",
       "colour": "white",
       "en": "St Nimatullah Kassab Al-Hardini",
-      "ar": "القديس نعمة الله كسّاب الحرديني"
+      "ar": "القديس نعمة الله كسّاب الحرديني",
+      "wiki": "Nimatullah Kassab",
+      "wikiAr": "نعمة الله الحرديني",
+      "wikiTitle": "Nimatullah Kassab"
     },
     {
       "id": "lucy",
@@ -893,7 +1073,10 @@
       "colour": "red",
       "en": "St Lucy, virgin and martyr",
       "ar": "القديسة لوسيا، عذراء وشهيدة",
-      "romcal": "lucy_of_syracuse_virgin"
+      "romcal": "lucy_of_syracuse_virgin",
+      "wikiTitle": "Lucia of Syracuse",
+      "wiki": "Saint Lucy",
+      "wikiAr": "القديسة لوسي"
     },
     {
       "id": "christmas",
@@ -904,7 +1087,9 @@
       "en": "The Nativity of the Lord",
       "ar": "عيد ميلاد الرب",
       "noteEn": "The Maronite year has been walking towards this day since the Consecration of the Church in November, through seven Sundays of announcements.",
-      "noteAr": "تسير السنة المارونية نحو هذا اليوم منذ أحد تقديس البيعة في تشرين الثاني، عبر سبعة آحاد من البشارات."
+      "noteAr": "تسير السنة المارونية نحو هذا اليوم منذ أحد تقديس البيعة في تشرين الثاني، عبر سبعة آحاد من البشارات.",
+      "wiki": "Christmas",
+      "wikiAr": "عيد الميلاد"
     },
     {
       "id": "stephen",
@@ -913,7 +1098,10 @@
       "colour": "red",
       "en": "St Stephen, the first martyr",
       "ar": "عيد القديس إسطفانوس، أول الشهداء",
-      "romcal": "stephen_the_first_martyr"
+      "romcal": "stephen_the_first_martyr",
+      "wikiTitle": "Saint Stephen",
+      "wiki": "Saint Stephen",
+      "wikiAr": "إسطفانوس"
     },
     {
       "id": "john-evangelist",
@@ -922,7 +1110,10 @@
       "colour": "white",
       "en": "St John, apostle and evangelist",
       "ar": "عيد القديس يوحنا، الرسول والإنجيلي",
-      "romcal": "john_apostle"
+      "romcal": "john_apostle",
+      "wikiTitle": "John the Apostle",
+      "wiki": "John the Apostle",
+      "wikiAr": "يوحنا بن زبدي"
     },
     {
       "id": "holy-innocents",
@@ -931,7 +1122,147 @@
       "colour": "red",
       "en": "The Holy Innocents, martyrs",
       "ar": "عيد الأطفال الأبرياء، الشهداء",
-      "romcal": "holy_innocents_martyrs"
+      "romcal": "holy_innocents_martyrs",
+      "wiki": "Massacre of the Innocents",
+      "wikiAr": "مذبحة الأبرياء"
+    },
+    {
+      "id": "john-baptist-commemoration",
+      "on": "01-07",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "memorial",
+      "colour": "white",
+      "en": "Commemoration of St John the Baptist",
+      "ar": "تذكار مار يوحنا المعمدان",
+      "wikiTitle": "John the Baptist",
+      "noteEn": "The day after the Epiphany the Syriac churches turn to the one who baptised — the feast of the Forerunner follows the feast of the baptism, in that order, every year.",
+      "noteAr": "في اليوم التالي للدنح تلتفت الكنائس السريانية إلى الذي عمّد الرب. عيد السابق يلي عيد المعمودية، بهذا الترتيب، في كل سنة.",
+      "wiki": "John the Baptist",
+      "wikiAr": "يوحنا المعمدان"
+    },
+    {
+      "id": "forty-martyrs-sebaste",
+      "on": "03-09",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "memorial",
+      "colour": "red",
+      "en": "The Forty Martyrs of Sebaste",
+      "ar": "الشهداء الأربعون",
+      "wikiTitle": "Forty Martyrs of Sebaste",
+      "noteEn": "Forty soldiers of the Roman garrison at Sebaste, left overnight on a frozen lake in 320 for refusing to sacrifice. Kept across the Syriac and Byzantine East, and one of the oldest commemorations either keeps.",
+      "noteAr": "أربعون جنديًا من حامية سبسطية، تُركوا ليلًا على بحيرة متجمّدة سنة ٣٢٠ لرفضهم الذبح للأوثان. تكرّمهم الكنائس السريانية والبيزنطية، وهو من أقدم التذكارات عندها.",
+      "wiki": "Forty Martyrs of Sebaste",
+      "wikiAr": "شهداء سبسطية الأربعون"
+    },
+    {
+      "id": "ephrem-the-syrian",
+      "on": "06-09",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "feast",
+      "colour": "white",
+      "en": "St Ephrem the Syrian",
+      "ar": "مار أفرام السرياني",
+      "wikiTitle": "Ephrem the Syrian",
+      "noteEn": "Deacon, poet and Doctor of the Church, called the Harp of the Spirit. He wrote in Syriac — the language of this church's own liturgy — and taught the faith in hymns rather than treatises, because he expected them to be sung.",
+      "noteAr": "شمّاس وشاعر وملفان الكنيسة، دُعي «قيثارة الروح القدس». كتب بالسريانية، لغة ليتورجيا هذه الكنيسة، وعلّم الإيمان بالأناشيد لا بالمقالات، لأنه أرادها أن تُرتَّل.",
+      "wiki": "Ephrem the Syrian",
+      "wikiAr": "أفرام السرياني"
+    },
+    {
+      "id": "elijah-prophet",
+      "on": "07-20",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "feast",
+      "colour": "white",
+      "en": "St Elijah the Prophet",
+      "ar": "مار إلياس النبي",
+      "wikiTitle": "Elijah",
+      "noteEn": "The prophet of Carmel, taken up in the whirlwind. More churches and hilltop shrines in Lebanon carry his name than almost any other saint's.",
+      "noteAr": "نبي الكرمل، الذي صعد في العاصفة. تحمل اسمه في لبنان من الكنائس والمزارات على رؤوس التلال ما لا يحمله اسم قديس آخر تقريبًا.",
+      "wiki": "Elijah",
+      "wikiAr": "إيليا"
+    },
+    {
+      "id": "assumption-fast",
+      "on": "08-01",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "commemoration",
+      "colour": "violet",
+      "en": "The Fast of the Mother of God begins",
+      "ar": "بدء صوم السيدة العذراء",
+      "noteEn": "A fortnight of fasting that ends on the Assumption. Shorter than the Great Fast and kept more quietly, but kept.",
+      "noteAr": "أسبوعان من الصوم ينتهيان بعيد انتقال العذراء. أقصر من الصوم الكبير ويُحفَظ بهدوء أكبر، ولكنه يُحفَظ."
+    },
+    {
+      "id": "estephan-nehme",
+      "on": "08-30",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "memorial",
+      "colour": "white",
+      "en": "Blessed Estephan Nehmé",
+      "ar": "الطوباوي إسطفان نعمة",
+      "wikiTitle": "Stephen Nehmé",
+      "noteEn": "A Lebanese Maronite monk of the Order of Lebanese Maronites, beatified in 2010. A lay brother who never sought office and is remembered for the sentence he lived by: God sees me.",
+      "noteAr": "راهب ماروني لبناني من الرهبانية اللبنانية المارونية، طُوِّب سنة ٢٠١٠. أخ عَلماني لم يطلب رتبة قط، ويُذكر بالكلمة التي عاش بها: الله ينظر إليّ.",
+      "wiki": "Stephen Nehmé",
+      "wikiAr": "ستيفن نعمة"
+    },
+    {
+      "id": "simeon-stylite",
+      "on": "09-01",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "memorial",
+      "colour": "white",
+      "en": "St Simeon the Stylite",
+      "ar": "مار سمعان العمودي",
+      "wikiTitle": "Simeon Stylites",
+      "noteEn": "The Syrian ascetic who spent thirty-seven years on a pillar near Aleppo, and whose example drew a whole tradition after him. The ruins of his church still stand.",
+      "noteAr": "الناسك السرياني الذي أمضى سبعًا وثلاثين سنة على عمود قرب حلب، وجذب مثاله تقليدًا كاملًا بعده. ولا تزال أطلال كنيسته قائمة.",
+      "wiki": "Simeon Stylites",
+      "wikiAr": "سمعان العمودي"
+    },
+    {
+      "id": "sergius-and-bacchus",
+      "on": "10-07",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "memorial",
+      "colour": "red",
+      "en": "Sts Sergius and Bacchus",
+      "ar": "مار سركيس وباخوس",
+      "wikiTitle": "Sergius and Bacchus",
+      "noteEn": "Two officers of the Roman army martyred in Syria, and among the most widely venerated soldier-saints of the Christian East. A great many Lebanese village churches are theirs.",
+      "noteAr": "ضابطان في الجيش الروماني استُشهدا في سوريا، ومن أوسع القديسين الجنود إكرامًا في الشرق المسيحي. وكثير من كنائس القرى اللبنانية باسمهما.",
+      "wiki": "Sergius and Bacchus",
+      "wikiAr": "سركيس وباخوس"
+    },
+    {
+      "id": "congratulations-to-the-mother-of-god",
+      "on": "12-26",
+      "rites": [
+        "maronite"
+      ],
+      "rank": "feast",
+      "colour": "white",
+      "en": "Congratulations to the Mother of God",
+      "ar": "تهنئة والدة الله",
+      "noteEn": "The day after Christmas, the Syriac churches turn from the child to his mother and simply congratulate her. There is no Latin equivalent: it is a feast made of one gesture.",
+      "noteAr": "في اليوم التالي للميلاد تلتفت الكنائس السريانية من الطفل إلى أمّه لتهنّئها. لا مقابل لهذا العيد في الطقس اللاتيني: إنه عيد قوامه لفتة واحدة."
     }
   ]
 }

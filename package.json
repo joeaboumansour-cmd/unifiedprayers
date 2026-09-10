@@ -11,7 +11,8 @@
     "grant:admin": "node scripts/grant-admin.mjs",
     "vapid": "node scripts/generate-vapid.mjs",
     "icons": "node scripts/generate-icons.mjs",
-    "liturgy:roman": "node scripts/liturgy/build-roman.mjs"
+    "liturgy:roman": "node scripts/liturgy/build-roman.mjs",
+    "liturgy:curated": "node scripts/liturgy/link-curated.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",
