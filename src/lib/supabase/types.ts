@@ -5,6 +5,7 @@
  *   npx supabase gen types typescript --linked > src/lib/supabase/types.ts
  */
 import type { BeadStyle, Lang, MysteryKey, Palette, PrayerId } from "@/lib/content";
+import type { Rite } from "@/lib/liturgy/types";
 
 export type PrefsRow = {
   user_id: string;
@@ -224,6 +225,40 @@ export type MorningSetting = {
 export type DevotionTrack = "individual" | "couples";
 
 /**
+ * One day's readings for one church — see 0010_readings.sql.
+ *
+ * The `_ref` fields are references and are facts; the `_text` fields are a
+ * specific translation and belong to whoever made it, which is why every row
+ * also carries who that is. Anything the app displays from the text side has
+ * to show `translation` and `source` beside it.
+ */
+export type Reading = {
+  /** Which of the source's slots this came from — "text3", "gospel". */
+  kind: string;
+  /** What this reading IS, in the rite's own words. The app prints this. */
+  label: string | null;
+  /** The reference, abbreviated the way the rite abbreviates it. A fact. */
+  ref: string | null;
+  /** The translation, which belongs to whoever made it. */
+  text: string | null;
+};
+
+export type ReadingRow = {
+  /** "YYYY-MM-DD". */
+  on_date: string;
+  /** One of the app's rites, and the second half of the key. */
+  rite: Rite;
+  /** The day's title in the source's own words, for checking against ours. */
+  liturgic_title: string | null;
+  /** In the order the service reads them. Never a fixed set of roles. */
+  readings: Reading[];
+  audio_url: string | null;
+  source: string;
+  translation: string | null;
+  fetched_at: string;
+};
+
+/**
  * One page of a daily devotional, keyed by calendar day rather than by date —
  * see supabase/migrations/0008_devotions.sql. English is nullable throughout
  * because the books are Arabic on paper; the reader falls back per field.
@@ -330,6 +365,12 @@ export type Database = {
         // else has a default or is optional.
         Partial<Omit<DevotionRow, "track" | "month" | "day" | "title_ar" | "verse_ar" | "body_ar">> &
           Pick<DevotionRow, "track" | "month" | "day" | "title_ar" | "verse_ar" | "body_ar">
+      >;
+      daily_readings: Table<
+        ReadingRow,
+        // The day and the church are the key; everything else the mirror fills
+        // in, and `fetched_at` defaults.
+        Partial<Omit<ReadingRow, "on_date" | "rite">> & Pick<ReadingRow, "on_date" | "rite">
       >;
       couples: Table<CoupleRow>;
       couple_members: Table<CoupleMemberRow>;

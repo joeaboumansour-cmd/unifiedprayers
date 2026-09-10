@@ -13,9 +13,11 @@ import {
   type CalendarView,
   type Day,
   type Feast,
+  type Rite,
 } from "@/lib/liturgy";
 import { at, dayKey } from "@/lib/liturgy/computus";
 import { rememberedOn, type Remembered } from "@/lib/liturgy/martyrology";
+import { useReadings } from "@/lib/useReadings";
 import type { Liturgy } from "@/lib/useLiturgy";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
@@ -53,6 +55,9 @@ const T = {
     ar: "لا شيء في الأسابيع الستة المقبلة.",
     en: "Nothing in the next six weeks.",
   },
+  readings: { ar: "قراءات اليوم", en: "Today's readings" },
+  readingsSource: { ar: "المصدر", en: "Source" },
+  openReading: { ar: "اقرأ", en: "Read" },
   remembered: { ar: "ويُذكر في هذا اليوم أيضًا", en: "Also remembered on this day" },
   rememberedNote: {
     ar: "قدّيسون تحفظهم كنائس أخرى في هذا اليوم. اضغط على الاسم لقراءة سيرته.",
@@ -460,6 +465,7 @@ export default function Calendar({
 
           <DayDetail
             day={selected}
+            rite={liturgy.rite}
             lang={lang}
             isToday={selected.key === todayKey}
             onOpenFeast={onOpenFeast}
@@ -520,6 +526,7 @@ function Arrow({ dir, onClick }: { dir: "back" | "forward"; onClick: () => void 
 function DayDetail({
   day,
   lang,
+  rite,
   isToday,
   mysteryLabel,
   onOpenFeast,
@@ -528,6 +535,8 @@ function DayDetail({
 }: {
   day: Day;
   lang: Lang;
+  /** Whose readings to ask for — nine churches read nine different things. */
+  rite: Rite;
   isToday: boolean;
   mysteryLabel: string;
   onOpenFeast: (f: Feast, d: Day) => void;
@@ -714,8 +723,106 @@ function DayDetail({
         </div>
       )}
 
+      <Readings day={day} lang={lang} rite={rite} />
       <Remembrance day={day} lang={lang} />
     </div>
+  );
+}
+
+/**
+ * The passages appointed for the day.
+ *
+ * The one thing on this screen that comes off the network, and the one thing
+ * that is often simply absent — for a date outside the mirror's archive, for
+ * the three Orthodox rites nothing yet covers, or offline. So it renders
+ * nothing at all rather than an apology: the day still has its season, its
+ * feasts and its saints, which is what a calendar is for.
+ *
+ * The attribution is not decoration and is not optional. These are somebody's
+ * translation, made by a liturgical commission and served by evangelizo.org,
+ * and a reading shown bare is a reading a reader will assume is ours.
+ */
+function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
+  const { data } = useReadings(day.key, rite);
+  const [open, setOpen] = useState<string | null>(null);
+
+  // Collapse again when the reader moves to another day, or the second day
+  // they open inherits the first one's expanded passage.
+  useEffect(() => setOpen(null), [day.key, rite]);
+
+  if (!data?.readings.length) return null;
+
+  return (
+    <>
+      <div style={{ ...sectionLabel, marginTop: 22 }}>{T.readings[lang]}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {data.readings.map((r) => {
+          const isOpen = open === r.kind;
+          return (
+            <div
+              key={r.kind}
+              style={{
+                borderRadius: 14,
+                background: "rgb(var(--veil-rgb) / .035)",
+                border: "1px solid rgb(var(--veil-rgb) / .07)",
+                overflow: "hidden",
+              }}
+            >
+              <button
+                type="button"
+                disabled={!r.text}
+                onClick={() => setOpen(isOpen ? null : r.kind)}
+                style={{
+                  appearance: "none",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  padding: "11px 13px",
+                  background: "none",
+                  border: "none",
+                  textAlign: "start",
+                  fontFamily: "inherit",
+                  cursor: r.text ? "pointer" : "default",
+                  color: "var(--body)",
+                }}
+              >
+                <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                  {/* The label the rite itself gives this reading, never one
+                      of ours: what sits in a slot differs by church. */}
+                  {r.label ?? r.ref}
+                </span>
+                {r.text && (
+                  <span style={{ fontSize: 11, color: "var(--dim-3)", flex: "none" }}>
+                    {isOpen ? "−" : "+"}
+                  </span>
+                )}
+              </button>
+              {isOpen && r.text && (
+                <p
+                  className="selectable"
+                  style={{
+                    margin: 0,
+                    padding: "0 13px 13px",
+                    fontSize: 14.5,
+                    lineHeight: 1.9,
+                    color: "var(--body)",
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {r.text}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontSize: 11, color: "var(--dim-4)", lineHeight: 1.6, marginTop: 8 }}>
+        {data.translation ? `${data.translation} · ` : ""}
+        {T.readingsSource[lang]}: {data.source}
+      </div>
+    </>
   );
 }
 
