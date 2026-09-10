@@ -120,7 +120,7 @@ export async function describe(qids) {
 
 /** A description that reads as Christian. Anything else is a mis-hit. */
 const CHRISTIAN =
-  /saint|martyr|pope|bishop|priest|nun|monk|abbot|abbess|virgin|christian|catholic|maronite|syriac|orthodox|apostle|evangelist|theolog|mystic|missionary|hermit|friar|jesuit|franciscan|dominican|carmelite|stylite|ascetic|feast|liturg|church|deacon|archbishop|patriarch|cardinal|blessed|religious|holy|mary|jesus|angel|prophet|disciple|confessor|doctor|basilica|cross|nativity|annunciation|bibl|devotion|veneration|shrine|marian|sanctuary|pilgrimage|monastery|abbey|easter|paschal|lent|advent|epiphan|pentecost|resurrection|passion|vigil/i;
+  /saint|martyr|pope|bishop|priest|nun|monk|abbot|abbess|virgin|christian|catholic|maronite|syriac|orthodox|apostle|evangelist|theolog|mystic|missionary|hermit|friar|jesuit|franciscan|dominican|carmelite|stylite|ascetic|feast|liturg|church|deacon|archbishop|patriarch|cardinal|blessed|religious|holy|mary|jesus|angel|prophet|disciple|confessor|doctor|basilica|cross|nativity|annunciation|bibl|devotion|veneration|shrine|marian|sanctuary|pilgrimage|monastery|abbey|easter|paschal|lent|advent|epiphan|pentecost|resurrection|passion|vigil|coptic|armenian|ethiopian|maronite|byzantine|theotokos|synaxis/i;
 
 const DISAMBIG = "Q4167410";
 /** "male/female/unisex given name", "family name". */

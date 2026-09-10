@@ -24,6 +24,7 @@ import {
   monthDay,
 } from "@/lib/liturgy/computus";
 import { byzantineDayName, byzantineYear } from "@/lib/liturgy/byzantine";
+import { copticDayName, copticYear, isCopticDay } from "@/lib/liturgy/coptic";
 import { maroniteYear } from "@/lib/liturgy/maronite";
 import { romanYear } from "@/lib/liturgy/roman";
 import {
@@ -42,6 +43,8 @@ type RawFeast = {
   on?: string;
   easter?: number;
   sunday?: { month: number; nth: number };
+  /** A day of the Coptic calendar, which is not a Gregorian day at all. */
+  coptic?: { month: number; day: number };
   rites?: Rite[];
   rank: Rank;
   colour: LitColour;
@@ -123,6 +126,7 @@ const YEARS: Record<Rite, RiteYear> = {
   maronite: maroniteYear,
   roman: romanYear,
   byzantine: byzantineYear,
+  coptic: copticYear,
 };
 
 /** A celebration resolved for one reader: their language, their church. */
@@ -221,8 +225,11 @@ function wikiLink(f: RawFeast, ar: boolean): string | undefined {
  */
 function falls(f: RawFeast, d: Date, rite: Rite): boolean {
   if (f.on) return f.on === monthDay(d);
+  if (f.coptic) return isCopticDay(d, f.coptic.month, f.coptic.day);
   if (f.easter !== undefined) {
-    return f.easter === (rite === "byzantine" ? fromPascha(d) : fromEaster(d));
+    // The Coptic church keeps Pascha with the Byzantine one.
+    const eastern = rite === "byzantine" || rite === "coptic";
+    return f.easter === (eastern ? fromPascha(d) : fromEaster(d));
   }
   if (f.sunday) {
     return (
@@ -275,7 +282,12 @@ export function dayInfo(d: Date, view: CalendarView): Day {
   /* Great and Holy Friday is not a Sunday and is not in the feast table; it is
      named by where it sits against Pascha. Without this the most solemn day of
      the Byzantine year reads as "a weekday of the season". */
-  const named = view.rite === "byzantine" ? byzantineDayName(d, view.lang) : null;
+  const named =
+    view.rite === "byzantine"
+      ? byzantineDayName(d, view.lang)
+      : view.rite === "coptic"
+        ? copticDayName(d, view.lang)
+        : null;
 
   return {
     key: dayKey(d),

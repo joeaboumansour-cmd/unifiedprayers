@@ -28,6 +28,13 @@ const file = join(here, "..", "..", "src", "data", "liturgy.json");
 
 const data = JSON.parse(readFileSync(file, "utf8"));
 
+/** How a row's date reads in a log line, whichever of the four forms it uses. */
+const where = (f) =>
+  f.on ??
+  (f.coptic ? `C${f.coptic.month}-${f.coptic.day}` : null) ??
+  (f.easter !== undefined ? `E${f.easter}` : null) ??
+  (f.sunday ? `S${f.sunday.month}/${f.sunday.nth}` : "??");
+
 /**
  * "St Charbel Makhlouf" -> "Charbel Makhlouf".
  *
@@ -92,11 +99,11 @@ for (const f of data.feasts) {
   const hit = hits.get(f.id);
   if (!hit) {
     // Leave any link already there: a re-run offline should not strip the file.
-    if (!f.wiki) missing.push(`${f.on ?? "E" + f.easter}  ${f.id}`);
+    if (!f.wiki) missing.push(`${where(f)}  ${f.id}`);
     continue;
   }
   if (!trustworthy(info[hit.qid])) {
-    rejected.push(`${f.on ?? "E" + f.easter}  ${f.id}  ->  ${hit.title} (${hit.qid}) :: ${info[hit.qid]?.desc ?? "?"}`);
+    rejected.push(`${where(f)}  ${f.id}  ->  ${hit.title} (${hit.qid}) :: ${info[hit.qid]?.desc ?? "?"}`);
     delete f.wiki;
     delete f.wikiAr;
     continue;

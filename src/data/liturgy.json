@@ -1706,6 +1706,379 @@
       "wikiTitle": "Saint Stephen",
       "wiki": "Saint Stephen",
       "wikiAr": "إسطفانوس"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 1,
+        "day": 1
+      },
+      "id": "copt-nayrouz",
+      "rank": "solemnity",
+      "colour": "white",
+      "en": "Nayrouz · the Coptic New Year",
+      "ar": "عيد النيروز — رأس السنة القبطية",
+      "wikiTitle": "Nayrouz",
+      "noteEn": "The year begins, and it is counted from 284 — the accession of Diocletian, under whom more Egyptian Christians died than under any other emperor. The Coptic church dates its calendar not from a victory but from the persecution, and calls it the Era of the Martyrs.",
+      "noteAr": "تبدأ السنة، وتُحسَب من سنة ٢٨٤، سنة تولّي دقلديانوس، الذي مات في عهده من مسيحيّي مصر أكثر مما مات في عهد أي إمبراطور آخر. لا تؤرّخ الكنيسة القبطية تقويمها بنصر بل بالاضطهاد، وتسمّيه تقويم الشهداء.",
+      "wiki": "Nayrouz",
+      "wikiAr": "نوروز قبطي"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 1,
+        "day": 17
+      },
+      "id": "copt-cross-thout",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Feast of the Cross",
+      "ar": "عيد الصليب",
+      "wikiTitle": "Feast of the Cross",
+      "wiki": "Feast of the Cross",
+      "wikiAr": "عيد الصليب"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 2,
+        "day": 30
+      },
+      "id": "copt-mark",
+      "rank": "solemnity",
+      "colour": "red",
+      "en": "The Martyrdom of St Mark the Evangelist",
+      "ar": "استشهاد القديس مرقس الرسول",
+      "wikiTitle": "Mark the Evangelist",
+      "noteEn": "He brought the gospel to Alexandria and was killed there. Every Coptic patriarch since is counted from him, which makes this church's line of succession the one it is named for.",
+      "noteAr": "حمل الإنجيل إلى الإسكندرية وقُتل فيها. ويُحسَب كل بطريرك قبطي من بعده، فسلسلة الخلافة في هذه الكنيسة هي التي تُنسَب إليه.",
+      "wiki": "Mark the Evangelist",
+      "wikiAr": "مرقس"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 3,
+        "day": 16
+      },
+      "id": "copt-nativity-fast",
+      "rank": "commemoration",
+      "colour": "violet",
+      "en": "The Nativity Fast begins",
+      "ar": "بدء صوم الميلاد",
+      "wikiTitle": null,
+      "noteEn": "Forty-three days to the Nativity — the forty of Moses on the mountain, and three more added in the tenth century when a Cairo congregation fasted for the moving of the Muqattam.",
+      "noteAr": "ثلاثة وأربعون يومًا حتى الميلاد: أربعون موسى على الجبل، وثلاثة أُضيفت في القرن العاشر حين صامت جماعة من القاهرة لنقل جبل المقطّم."
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 4,
+        "day": 29
+      },
+      "id": "copt-nativity",
+      "rank": "solemnity",
+      "colour": "white",
+      "high": true,
+      "en": "The Nativity of the Lord",
+      "ar": "عيد الميلاد المجيد",
+      "wikiTitle": "Christmas",
+      "noteEn": "29 Koiak, which falls on 7 January in most years and on the 8th in the year after a Coptic leap. It is the same feast as the Western Christmas, thirteen days along, because this church never moved its calendar.",
+      "noteAr": "٢٩ كيهك، ويقع في ٧ كانون الثاني في معظم السنوات وفي الثامن في السنة التالية للكبيسة القبطية. هو عيد الميلاد نفسه بفارق ثلاثة عشر يومًا، لأن هذه الكنيسة لم تنقل تقويمها قط.",
+      "wiki": "Christmas",
+      "wikiAr": "عيد الميلاد"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 5,
+        "day": 6
+      },
+      "id": "copt-circumcision",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Circumcision of the Lord",
+      "ar": "عيد ختان الرب",
+      "wikiTitle": "Feast of the Circumcision of Christ",
+      "wiki": "Feast of the Circumcision of Christ",
+      "wikiAr": "عيد الختان"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 5,
+        "day": 11
+      },
+      "id": "copt-theophany",
+      "rank": "solemnity",
+      "colour": "white",
+      "high": true,
+      "en": "Theophany · the Baptism of the Lord",
+      "ar": "عيد الغطاس — عماد الرب",
+      "wikiTitle": "Epiphany (holiday)",
+      "wiki": "Epiphany (holiday)",
+      "wikiAr": "عيد الظهور الإلهي"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 5,
+        "day": 13
+      },
+      "id": "copt-cana",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Wedding at Cana",
+      "ar": "عيد عرس قانا الجليل",
+      "wikiTitle": "Marriage at Cana",
+      "wiki": "Wedding at Cana",
+      "wikiAr": "عرس قانا"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 5,
+        "day": 22
+      },
+      "id": "copt-anthony",
+      "rank": "feast",
+      "colour": "white",
+      "en": "St Antony the Great",
+      "ar": "القديس أنبا أنطونيوس",
+      "wikiTitle": "Anthony the Great",
+      "noteEn": "The father of all monks. He went into the Egyptian desert alone around 270 and the whole monastic tradition of every church, East and West, begins with people following him there.",
+      "noteAr": "أبو الرهبان جميعًا. دخل البرّية المصرية وحده نحو سنة ٢٧٠، ومنه يبدأ التقليد الرهباني في كل الكنائس، شرقًا وغربًا، بمن تبعوه إلى هناك.",
+      "wiki": "Anthony the Great",
+      "wikiAr": "أنطونيوس الكبير"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 6,
+        "day": 8
+      },
+      "id": "copt-presentation",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Entry of the Lord into the Temple",
+      "ar": "عيد دخول السيد المسيح إلى الهيكل",
+      "wikiTitle": "Presentation of Jesus at the Temple",
+      "wiki": "Presentation of Jesus"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 7,
+        "day": 23
+      },
+      "id": "copt-george",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Martyrdom of St George",
+      "ar": "استشهاد القديس مار جرجس",
+      "wikiTitle": "Saint George",
+      "wiki": "Saint George",
+      "wikiAr": "جرجس"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 7,
+        "day": 29
+      },
+      "id": "copt-annunciation",
+      "rank": "solemnity",
+      "colour": "white",
+      "high": true,
+      "en": "The Annunciation",
+      "ar": "عيد البشارة",
+      "wikiTitle": "Annunciation",
+      "wiki": "Annunciation",
+      "wikiAr": "البشارة"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 9,
+        "day": 1
+      },
+      "id": "copt-nativity-virgin",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Nativity of the Virgin Mary",
+      "ar": "عيد ميلاد السيدة العذراء",
+      "wikiTitle": "Nativity of Mary",
+      "wiki": "Nativity of Mary",
+      "wikiAr": "ميلاد مريم العذراء"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 9,
+        "day": 7
+      },
+      "id": "copt-athanasius",
+      "rank": "feast",
+      "colour": "white",
+      "en": "St Athanasius the Apostolic",
+      "ar": "القديس أثناسيوس الرسولي",
+      "wikiTitle": "Athanasius of Alexandria",
+      "noteEn": "Patriarch of Alexandria, exiled five times for refusing to soften the Nicene creed. The phrase the whole church still says on Sundays is largely his doing.",
+      "noteAr": "بطريرك الإسكندرية، نُفي خمس مرّات لرفضه تليين قانون الإيمان النيقاوي. والعبارة التي لا تزال الكنيسة كلها تقولها في الآحاد هي في معظمها من صنيعه.",
+      "wiki": "Athanasius of Alexandria",
+      "wikiAr": "أثناسيوس الأول"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 9,
+        "day": 24
+      },
+      "id": "copt-flight-egypt",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Entry of the Lord into the Land of Egypt",
+      "ar": "عيد دخول السيد المسيح أرض مصر",
+      "wikiTitle": "Flight into Egypt",
+      "noteEn": "Kept as a feast of the Lord, and kept by no other church as one. The family fleeing Herod came here, and the Coptic church counts that as its own beginning as much as any preaching did.",
+      "noteAr": "يُحفَظ كعيد سيّدي، ولا تحفظه كنيسة أخرى كذلك. العائلة الهاربة من هيرودس جاءت إلى هنا، وتَعُدّ الكنيسة القبطية ذلك بداية لها بقدر أي كرازة.",
+      "wiki": "Flight into Egypt",
+      "wikiAr": "الهرب إلى مصر"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 11,
+        "day": 5
+      },
+      "id": "copt-apostles",
+      "rank": "feast",
+      "colour": "red",
+      "en": "The Feast of the Apostles",
+      "ar": "عيد الرسل",
+      "wikiTitle": "Saint Peter",
+      "wiki": "Saint Peter",
+      "wikiAr": "بطرس"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 12,
+        "day": 13
+      },
+      "id": "copt-transfiguration",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Transfiguration of the Lord",
+      "ar": "عيد التجلّي",
+      "wikiTitle": "Transfiguration of Jesus",
+      "wiki": "Transfiguration of Jesus",
+      "wikiAr": "تجلي يسوع"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 12,
+        "day": 16
+      },
+      "id": "copt-dormition",
+      "rank": "feast",
+      "colour": "white",
+      "en": "The Assumption of the Body of the Virgin",
+      "ar": "عيد صعود جسد السيدة العذراء",
+      "wikiTitle": "Assumption of Mary",
+      "wiki": "Assumption of Mary",
+      "wikiAr": "انتقال العذراء"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 3,
+        "day": 15
+      },
+      "id": "copt-mina",
+      "rank": "feast",
+      "colour": "red",
+      "en": "St Mina the Wonderworker",
+      "ar": "القديس مار مينا العجايبي",
+      "wikiTitle": "Menas of Egypt",
+      "wiki": "Menas of Egypt",
+      "wikiAr": "مارمينا"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 2,
+        "day": 4
+      },
+      "id": "copt-pope-cyril",
+      "rank": "memorial",
+      "colour": "white",
+      "en": "St Cyril the Great, Pillar of the Faith",
+      "ar": "القديس كيرلس الكبير عمود الدين",
+      "wikiTitle": "Cyril of Alexandria",
+      "wiki": "Cyril of Alexandria",
+      "wikiAr": "كيرلس الأول (بابا الإسكندرية)"
+    },
+    {
+      "rites": [
+        "coptic"
+      ],
+      "coptic": {
+        "month": 9,
+        "day": 14
+      },
+      "id": "copt-pachomius",
+      "rank": "memorial",
+      "colour": "white",
+      "en": "St Pachomius, father of the communal life",
+      "ar": "القديس الأنبا باخوميوس أب الشركة",
+      "wikiTitle": "Pachomius the Great",
+      "noteEn": "Antony showed that a Christian could live alone in the desert; Pachomius worked out how they could live there together. Every monastery with a rule descends from his.",
+      "noteAr": "أظهر أنطونيوس أن المسيحي يستطيع أن يعيش وحده في البرّية، وأوجد باخوميوس كيف يعيشون فيها معًا. وكل دير له قانون ينحدر من قانونه.",
+      "wiki": "Pachomius the Great",
+      "wikiAr": "باخوم"
     }
   ]
 }

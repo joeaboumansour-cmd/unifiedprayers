@@ -4,14 +4,15 @@ import type { Lang } from "@/lib/content";
  * The churches the calendar keeps. Adding another is a season module and a
  * `rites` tag in the feast table — nothing in the UI has to change.
  */
-export type Rite = "maronite" | "roman" | "byzantine";
+export type Rite = "maronite" | "roman" | "byzantine" | "coptic";
 
-export const RITES: Rite[] = ["maronite", "roman", "byzantine"];
+export const RITES: Rite[] = ["maronite", "roman", "byzantine", "coptic"];
 
 export const RITE_LABEL: Record<Rite, Record<Lang, string>> = {
   maronite: { ar: "الكنيسة المارونية", en: "Maronite" },
   roman: { ar: "الكنيسة اللاتينية", en: "Roman Catholic" },
   byzantine: { ar: "الكنيسة الأرثوذكسية", en: "Orthodox" },
+  coptic: { ar: "الكنيسة القبطية", en: "Coptic Orthodox" },
 };
 
 export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
@@ -29,6 +30,12 @@ export const RITE_HINT: Record<Rite, Record<Lang, string>> = {
     // Lebanon is most likely to be keeping.
     ar: "السنة الطقسية البيزنطية — الفصح بالحساب القديم",
     en: "The Byzantine year, with Pascha on the older reckoning",
+  },
+  coptic: {
+    // Its feasts are not on the ordinary calendar at all — they are on the
+    // Coptic one, and the app converts.
+    ar: "التقويم القبطي — تقويم الشهداء",
+    en: "The Coptic calendar, the Era of the Martyrs",
   },
 };
 
