@@ -13,6 +13,7 @@
  */
 
 import table from "@/data/liturgy.json";
+import generated from "@/data/liturgy/roman.json";
 import type { Lang } from "@/lib/content";
 import {
   addDays,
@@ -47,9 +48,74 @@ type RawFeast = {
   ar: string;
   noteEn?: string;
   noteAr?: string;
+  /** English Wikipedia article title — the reader's way to the whole story. */
+  wiki?: string;
+  /** The Arabic article, where one exists. */
+  wikiAr?: string;
+  /** Which row of the generated Roman table this one supersedes, if any. */
+  romcal?: string;
 };
 
-const FEASTS = (table as { feasts: RawFeast[] }).feasts;
+/** One row of the generated General Roman Calendar. */
+type GeneratedFeast = {
+  id: string;
+  on?: string;
+  easter?: number;
+  rank: Rank;
+  colour: LitColour;
+  en: string;
+  /** The Arabic Wikipedia article title, which doubles as the Arabic name. */
+  ar?: string;
+  wiki?: string;
+  died?: number;
+};
+
+/*
+ * Two tables, and the seam between them is deliberate.
+ *
+ * `liturgy.json` is written by hand: every row has an Arabic name somebody
+ * chose and, where it earns one, a paragraph of context. It is small, and it
+ * covers both churches — including everything Maronite, which no library
+ * ships.
+ *
+ * `liturgy/roman.json` is generated from romcal (see scripts/liturgy). It is
+ * the whole General Roman Calendar, which is far more than anyone would type
+ * out, but it knows nothing about Arabic beyond an article title and has no
+ * notes at all.
+ *
+ * So the hand-written table wins wherever the two meet. A curated row says
+ * which generated row it supersedes with `romcal`, and that row is then
+ * dropped — matching on the date instead would be wrong, because a single day
+ * can carry two unrelated memorials.
+ */
+const CURATED = (table as { feasts: RawFeast[] }).feasts;
+const GENERATED = (generated as { feasts: GeneratedFeast[] }).feasts;
+
+const SUPERSEDED = new Set(
+  CURATED.map((f) => f.romcal).filter((x): x is string => Boolean(x)),
+);
+
+const FEASTS: RawFeast[] = [
+  ...CURATED,
+  ...GENERATED.filter((g) => !SUPERSEDED.has(g.id)).map(
+    (g): RawFeast => ({
+      id: g.id,
+      on: g.on,
+      easter: g.easter,
+      // Generated rows are the Latin calendar and only ever that.
+      rites: ["roman"],
+      rank: g.rank,
+      colour: g.colour,
+      en: g.en,
+      // No hand-written Arabic for these. The Arabic article title is a real
+      // name rather than a translation, and it is better than showing an
+      // English line to somebody reading the app in Arabic.
+      ar: g.ar ?? g.en,
+      wiki: g.wiki,
+      wikiAr: g.ar,
+    }),
+  ),
+];
 
 const YEARS: Record<Rite, RiteYear> = {
   maronite: maroniteYear,
@@ -72,6 +138,11 @@ export type Feast = {
   borrowed: boolean;
   high: boolean;
   note?: string;
+  /**
+   * Where to read the whole story, in the reader's language where there is
+   * one. A name on a calendar is a name; this is the person behind it.
+   */
+  link?: string;
 };
 
 export type Day = {
@@ -105,6 +176,24 @@ export type CalendarView = {
 /* ------------------------------ resolution ------------------------------ */
 
 const rawRites = (f: RawFeast): Rite[] => f.rites ?? RITES;
+
+/**
+ * The reference link for a feast, in the reader's language where there is one.
+ *
+ * Arabic Wikipedia is a good deal smaller than English, so an Arabic reader
+ * falls back to the English article rather than to nothing: a story they can
+ * read in their second language beats a name they cannot follow up at all.
+ *
+ * The title is encoded but its spaces are turned into underscores first —
+ * `encodeURIComponent` would otherwise render them as %20, which works but
+ * makes an ugly thing of a URL somebody may well copy out and share.
+ */
+function wikiLink(f: RawFeast, ar: boolean): string | undefined {
+  const title = ar ? (f.wikiAr ?? f.wiki) : f.wiki;
+  if (!title) return undefined;
+  const host = ar && f.wikiAr ? "ar" : "en";
+  return `https://${host}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+}
 
 /** Whether a row falls on this date, in whichever of the three forms it uses. */
 function falls(f: RawFeast, d: Date): boolean {
@@ -142,6 +231,7 @@ function feastsOn(d: Date, view: CalendarView): Feast[] {
       borrowed: !own,
       high: Boolean(f.high) || f.rank === "solemnity",
       note: (ar ? f.noteAr : f.noteEn) || undefined,
+      link: wikiLink(f, ar),
     });
   }
 

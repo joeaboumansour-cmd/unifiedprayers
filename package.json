@@ -10,7 +10,8 @@
     "seed:content": "node scripts/seed-content.mjs",
     "grant:admin": "node scripts/grant-admin.mjs",
     "vapid": "node scripts/generate-vapid.mjs",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "liturgy:roman": "node scripts/liturgy/build-roman.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",
@@ -23,10 +24,12 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@romcal/calendar.general-roman": "^3.0.0-alpha.0",
     "@types/node": "22.18.1",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "@types/web-push": "^3.6.4",
+    "romcal": "^3.0.0",
     "sharp": "^0.34.5",
     "typescript": "5.9.2"
   }

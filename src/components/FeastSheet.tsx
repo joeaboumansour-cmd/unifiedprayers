@@ -37,6 +37,11 @@ export default function FeastSheet({
 }) {
   const ar = lang === "ar";
   const drag = useSheetDrag(open, onClose);
+  // Neutral on purpose: the same line has to sit under a woman, a man, and the
+  // Exaltation of the Cross, so it cannot say "his life".
+  const s = ar
+    ? { read: "اقرأ المزيد على ويكيبيديا" }
+    : { read: "Read more on Wikipedia" };
 
   const dateLine =
     day &&
@@ -173,6 +178,55 @@ export default function FeastSheet({
               >
                 {feast.note}
               </p>
+            )}
+
+            {/* The way out to the whole story. Most of the calendar is names —
+                a reader who wants to know who Perpetua was should not have to
+                go and type it somewhere else. New tab, because leaving the app
+                to read a life and coming back to a lost place in a prayer is
+                not a trade anyone would choose. */}
+            {feast.link && (
+              <a
+                href={feast.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  margin: "18px 0 0",
+                  padding: "9px 15px",
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  color: "var(--accent-ink)",
+                  background: "rgb(var(--accent-rgb) / .1)",
+                  border: "1px solid rgb(var(--accent-rgb) / .25)",
+                }}
+              >
+                {s.read}
+                <svg
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                  style={{
+                    width: 12,
+                    height: 12,
+                    flex: "none",
+                    // The arrow points the way the reader's script runs.
+                    transform: ar ? "scaleX(-1)" : undefined,
+                  }}
+                >
+                  <path
+                    d="M6 3.5 L10.5 8 L6 12.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
             )}
           </>
         )}
