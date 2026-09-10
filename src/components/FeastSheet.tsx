@@ -77,7 +77,13 @@ export default function FeastSheet({
           borderRadius: "28px 28px 0 0",
           background: "var(--surface)",
           borderTop: "1px solid rgb(var(--veil-rgb) / .1)",
-          padding: "14px 18px max(24px, var(--safe-b))",
+          /* A feast with a long note is taller than a phone. Capped, with the
+             body scrolling under a grab bar that stays put — the same shape as
+             the church picker, for the same reason. */
+          maxHeight: "80%",
+          display: "flex",
+          flexDirection: "column",
+          padding: 0,
           boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
           ...sheetMotion(open, drag, "105%", EASE),
           pointerEvents: open ? "auto" : "none",
@@ -86,11 +92,14 @@ export default function FeastSheet({
         <div
           {...drag.handlers}
           style={{
+            // Never squeezed by the scrolling body beside it in the column.
+            flex: "none",
             display: "flex",
             justifyContent: "center",
-            padding: "4px 0 16px",
-            margin: "-4px 0 0",
+            padding: "14px 0 16px",
             cursor: "grab",
+            // The sheet drags from here and only here: the body scrolls, and
+            // one finger cannot mean both.
             touchAction: "none",
           }}
         >
@@ -104,6 +113,18 @@ export default function FeastSheet({
           />
         </div>
 
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            // A flick past the end of a long note must not scroll the calendar
+            // still sitting behind the sheet.
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
+            padding: "0 18px max(24px, var(--safe-b))",
+          }}
+        >
         {/* Held mounted while the sheet slides away, so the text does not blink
             out before the panel has left the screen. */}
         {feast && (
@@ -230,6 +251,7 @@ export default function FeastSheet({
             )}
           </>
         )}
+        </div>
       </div>
     </>
   );

@@ -72,7 +72,14 @@ export default function RiteSheet({
           borderRadius: "28px 28px 0 0",
           background: "var(--surface)",
           borderTop: "1px solid rgb(var(--veil-rgb) / .1)",
-          padding: "14px 18px max(22px, var(--safe-b))",
+          /* Nine churches is more than fits. The sheet is capped and its body
+             scrolls; the padding moves onto the two halves below so the
+             scrolling half can run under the rounded top edge rather than
+             stopping short of it. */
+          maxHeight: "80%",
+          display: "flex",
+          flexDirection: "column",
+          padding: 0,
           boxShadow: "0 -20px 60px rgb(var(--shadow-rgb) / var(--shadow-a))",
           ...sheetMotion(open, drag, "105%", EASE),
           pointerEvents: open ? "auto" : "none",
@@ -85,11 +92,13 @@ export default function RiteSheet({
         <div
           {...drag.handlers}
           style={{
+            flex: "none",
             display: "flex",
             justifyContent: "center",
-            padding: "4px 0 16px",
-            margin: "-4px 0 0",
+            padding: "14px 0 16px",
             cursor: "grab",
+            // The sheet drags from here and only here: the body scrolls, and
+            // one finger cannot mean both.
             touchAction: "none",
           }}
         >
@@ -103,6 +112,18 @@ export default function RiteSheet({
           />
         </div>
 
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            // A flick that reaches the end of this list must not then scroll
+            // the calendar behind the sheet.
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
+            padding: "0 18px max(22px, var(--safe-b))",
+          }}
+        >
         <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>
           {T.title[lang]}
         </div>
@@ -253,6 +274,7 @@ export default function RiteSheet({
             </span>
           </button>
         )}
+        </div>
       </div>
     </>
   );
