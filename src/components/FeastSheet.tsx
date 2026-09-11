@@ -1,6 +1,7 @@
 "use client";
 
 import type { Lang } from "@/lib/content";
+import { intlLocale } from "@/lib/locale";
 import {
   COLOUR_LABEL,
   RANK_LABEL,
@@ -45,7 +46,7 @@ export default function FeastSheet({
 
   const dateLine =
     day &&
-    new Intl.DateTimeFormat(ar ? "ar" : "en", {
+    new Intl.DateTimeFormat(intlLocale(lang), {
       weekday: "long",
       day: "numeric",
       month: "long",

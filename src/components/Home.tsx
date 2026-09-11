@@ -25,6 +25,7 @@ import {
   ui,
 } from "@/lib/content";
 import type { Day, Feast } from "@/lib/liturgy";
+import { formatNum, intlLocale } from "@/lib/locale";
 import type { Stats } from "@/lib/sessions";
 import type { AnnouncementRow, DevotionTrack } from "@/lib/supabase/types";
 import type { Auth } from "@/lib/useAuth";
@@ -65,7 +66,7 @@ function streakLine(n: number, ar: boolean): string {
     if (n === 0) return "Start your streak today";
     return n === 1 ? "1 day of prayer in a row" : `${n} days of prayer in a row`;
   }
-  const d = new Intl.NumberFormat("ar").format(n);
+  const d = formatNum(n, "ar");
   if (n === 0) return "ابدأ سلسلتك اليوم";
   if (n === 1) return "يوم واحد متتالٍ من الصلاة";
   if (n === 2) return "يومان متتاليان من الصلاة";
@@ -350,9 +351,9 @@ export default function Home({
   const anyResumable = started || halfRead.length > 0;
 
   // Arabic-Indic digits beside the Arabic date line, Latin ones beside English.
-  const num = new Intl.NumberFormat(ar ? "ar" : "en");
+  const num = new Intl.NumberFormat(intlLocale(lang));
 
-  const dateLine = new Intl.DateTimeFormat(ar ? "ar" : "en", {
+  const dateLine = new Intl.DateTimeFormat(intlLocale(lang), {
     weekday: "long",
     day: "numeric",
     month: "long",

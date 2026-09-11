@@ -18,6 +18,7 @@
  */
 
 import type { Lang } from "@/lib/content";
+import { formatNum } from "@/lib/locale";
 import {
   addDays,
   daysBetween,
@@ -74,7 +75,9 @@ const MONTHS: Record<Lang, string[]> = {
 export function copticDateLine(date: Date, lang: Lang): string {
   const [y, m, d] = copticOf(date);
   const month = MONTHS[lang][m - 1];
-  return lang === "ar" ? `${d} ${month} ${y} للشهداء` : `${d} ${month} ${y} AM`;
+  return lang === "ar"
+    ? `${formatNum(d, lang)} ${month} ${formatNum(y, lang)} للشهداء`
+    : `${d} ${month} ${y} AM`;
 }
 
 /* -------------------------------- the year ------------------------------- */

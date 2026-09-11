@@ -30,6 +30,7 @@ import {
   writeLocal,
 } from "@/lib/state";
 import type { Day, Feast } from "@/lib/liturgy";
+import { intlLocale } from "@/lib/locale";
 import type { DevotionTrack } from "@/lib/supabase/types";
 import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
@@ -419,10 +420,11 @@ export default function Page() {
     setPrefs((v) => ({ ...v, ...p, updatedAt: Date.now() }));
 
   const t = ui(prefs.lang);
-  const devotionDate = new Intl.DateTimeFormat(
-    prefs.lang === "ar" ? "ar" : "en",
-    { weekday: "long", day: "numeric", month: "long" },
-  ).format(new Date());
+  const devotionDate = new Intl.DateTimeFormat(intlLocale(prefs.lang), {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
   const activeName = prayer === "mary" ? t.maryName : t.spiritName;
   const isPlayer = screen === "player";
 

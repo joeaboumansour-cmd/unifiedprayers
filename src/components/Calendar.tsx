@@ -16,6 +16,7 @@ import {
   type Rite,
 } from "@/lib/liturgy";
 import { at, dayKey } from "@/lib/liturgy/computus";
+import { intlLocale } from "@/lib/locale";
 import { rememberedOn, type Remembered } from "@/lib/liturgy/martyrology";
 import { readingScript, useReadings } from "@/lib/useReadings";
 import type { Liturgy } from "@/lib/useLiturgy";
@@ -126,15 +127,15 @@ export default function Calendar({
     [agenda, liturgy.rite, liturgy.alsoRoman, lang, todayKey],
   );
 
-  const monthName = new Intl.DateTimeFormat(ar ? "ar" : "en", { month: "long" })
+  const monthName = new Intl.DateTimeFormat(intlLocale(lang), { month: "long" })
     .format(at(cursor.y, cursor.m, 1));
-  const yearLabel = new Intl.NumberFormat(ar ? "ar" : "en", { useGrouping: false })
+  const yearLabel = new Intl.NumberFormat(intlLocale(lang), { useGrouping: false })
     .format(cursor.y);
-  const num = new Intl.NumberFormat(ar ? "ar" : "en");
+  const num = new Intl.NumberFormat(intlLocale(lang));
 
   /** S M T W T F S, starting Sunday, in the reader's language. */
   const dowInitials = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(ar ? "ar" : "en", { weekday: "narrow" });
+    const fmt = new Intl.DateTimeFormat(intlLocale(lang), { weekday: "narrow" });
     // 4 January 1970 was a Sunday, so this walks a week from Sunday.
     return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(1970, 0, 4 + i)));
   }, [ar]);
@@ -162,8 +163,14 @@ export default function Calendar({
 
   return (
     <div>
-      {/* ---------------- month nav ---------------- */}
+      {/* ---------------- month nav ----------------
+          Left to right in both languages: the left arrow is always the month
+          before and the right arrow the month after, the way a wall calendar
+          and every phone's date picker work in Arabic too. Mirroring the row
+          with the shell put "next" on the left, which is not where an Arabic
+          reader reaches for October. */}
       <div
+        dir="ltr"
         style={{
           display: "flex",
           alignItems: "center",
@@ -171,8 +178,8 @@ export default function Calendar({
           gap: 8,
         }}
       >
-        <Arrow dir="back" rtl={ar} label={T.prevMonth[lang]} onClick={() => step(-1)} />
-        <div style={{ textAlign: "center", lineHeight: 1.15 }}>
+        <Arrow dir="back" label={T.prevMonth[lang]} onClick={() => step(-1)} />
+        <div dir={ar ? "rtl" : "ltr"} style={{ textAlign: "center", lineHeight: 1.15 }}>
           <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: "-.01em" }}>
             {monthName}
           </div>
@@ -187,7 +194,7 @@ export default function Calendar({
             {yearLabel}
           </div>
         </div>
-        <Arrow dir="forward" rtl={ar} label={T.nextMonth[lang]} onClick={() => step(1)} />
+        <Arrow dir="forward" label={T.nextMonth[lang]} onClick={() => step(1)} />
       </div>
 
       {/* ---------------- rite chip + view switch ---------------- */}
@@ -369,7 +376,7 @@ export default function Calendar({
                   key={c.key}
                   type="button"
                   onClick={() => pick(c)}
-                  aria-label={new Intl.DateTimeFormat(ar ? "ar" : "en", {
+                  aria-label={new Intl.DateTimeFormat(intlLocale(lang), {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
@@ -477,20 +484,16 @@ export default function Calendar({
 
 function Arrow({
   dir,
-  rtl,
   label,
   onClick,
 }: {
   dir: "back" | "forward";
-  rtl: boolean;
   label: string;
   onClick: () => void;
 }) {
-  /* The row is laid out by the shell's direction, so in Arabic "back" sits on
-     the right. The glyph has to turn with it and point outwards, away from the
-     month name — a transform does not follow `dir` on its own, which is why
-     both arrows used to point inwards at the title in Arabic. */
-  const pointsRight = (dir === "forward") !== rtl;
+  // The row is pinned left to right (see the month nav), so back is always
+  // the left arrow pointing left and forward the right one pointing right.
+  const pointsRight = dir === "forward";
   return (
     <button
       type="button"
@@ -548,7 +551,7 @@ function DayDetail({
   onHaptic: (ms?: number) => void;
 }) {
   const ar = lang === "ar";
-  const dateLine = new Intl.DateTimeFormat(ar ? "ar" : "en", {
+  const dateLine = new Intl.DateTimeFormat(intlLocale(lang), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -957,8 +960,8 @@ function AgendaList({
   onOpenFeast: (f: Feast, d: Day) => void;
 }) {
   const ar = lang === "ar";
-  const num = new Intl.NumberFormat(ar ? "ar" : "en");
-  const dow = new Intl.DateTimeFormat(ar ? "ar" : "en", { weekday: "short" });
+  const num = new Intl.NumberFormat(intlLocale(lang));
+  const dow = new Intl.DateTimeFormat(intlLocale(lang), { weekday: "short" });
 
   if (days.length === 0) {
     return (
