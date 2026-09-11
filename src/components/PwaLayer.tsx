@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import IosInstallGuide, {
+  IOS_FLOWS,
+  POINTER,
+  detectIosFlow,
+  type IosFlow,
+} from "@/components/IosInstallGuide";
 import { isAppBusy, subscribeAppBusy } from "@/lib/appBusy";
 import { onForeground } from "@/lib/live";
 import { sheetMotion, useSheetDrag } from "@/lib/useSheetDrag";
@@ -33,10 +39,31 @@ const EASE = "cubic-bezier(.22,1,.36,1)";
 const C = {
   title: "Add the rosary to your home screen",
   blurb: "Pray offline, full screen, from an icon on your device.",
+  iosBlurb: "A few taps, and it opens like an app — full screen and offline.",
+  inAppTitle: "Open this page in Safari",
+  inAppBlurb: "Apps like Instagram can't add it to your home screen. Safari can.",
   install: "Install app",
   later: "Later",
   got: "Got it",
 };
+
+/**
+ * `?install` opens the iOS guide on demand — a link that can be sent to
+ * somebody who dismissed it, or who is being walked through it on the phone.
+ * `?install=safari` (or any flow name) shows that route on any device, which
+ * is also the only way to look at the iPhone routes from a desktop.
+ */
+function installParam(): { force: boolean; flow: IosFlow | null } {
+  const value = new URLSearchParams(window.location.search).get("install");
+  if (value === null) return { force: false, flow: null };
+  const flow = (IOS_FLOWS as readonly string[]).includes(value) ? (value as IosFlow) : null;
+  // Out of the address bar, so a refresh — or the page saved to the home
+  // screen from here — does not carry it.
+  const url = new URL(window.location.href);
+  url.searchParams.delete("install");
+  window.history.replaceState(window.history.state, "", url);
+  return { force: true, flow };
+}
 
 function isStandalone() {
   return (
@@ -64,6 +91,7 @@ function recentlyDismissed() {
 
 export default function PwaLayer() {
   const [sheet, setSheet] = useState<null | "prompt" | "ios">(null);
+  const [flow, setFlow] = useState<IosFlow>("safari");
   const deferred = useRef<BeforeInstallPromptEvent | null>(null);
   const reloading = useRef(false);
 
@@ -156,7 +184,13 @@ export default function PwaLayer() {
 
   /* ---------------- install sheet ---------------- */
   useEffect(() => {
-    if (isStandalone() || recentlyDismissed()) return;
+    const asked = installParam();
+    if (asked.flow) {
+      setFlow(asked.flow);
+      const t = window.setTimeout(() => setSheet("ios"), SHOW_DELAY_MS);
+      return () => window.clearTimeout(t);
+    }
+    if (isStandalone() || (recentlyDismissed() && !asked.force)) return;
 
     const timers: number[] = [];
 
@@ -180,6 +214,16 @@ export default function PwaLayer() {
 
     // Safari never fires beforeinstallprompt, so iOS gets the manual route.
     if (isIOS()) {
+      const detected = detectIosFlow();
+      setFlow(detected);
+      /* Inside Instagram and the like, "Open in Safari" opens whatever is in
+         the address bar. Putting ?install there means Safari lands on the
+         rest of the guide, even for somebody who once tapped "Got it" in it. */
+      if (detected === "inapp") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("install", "");
+        window.history.replaceState(window.history.state, "", url);
+      }
       timers.push(window.setTimeout(() => setSheet("ios"), SHOW_DELAY_MS));
     } else {
       // Some Chromium builds hold the event back; stop waiting after a beat.
@@ -221,7 +265,8 @@ export default function PwaLayer() {
 
   const open = sheet !== null;
   const drag = useSheetDrag(open, dismiss);
-
+  const pointer = sheet === "ios" ? POINTER[flow] : null;
+  const pointsDown = pointer === "bottom-right" || pointer === "bottom-center";
 
   return (
     <>
@@ -244,6 +289,45 @@ export default function PwaLayer() {
         }}
         onClick={dismiss}
       >
+        {/* Where the real button is — off the page, in Safari's own bar —
+            so the reader's eye has somewhere to go when they look up from
+            the sketch. */}
+        {pointer && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              ...(pointsDown
+                ? { bottom: "max(4px, var(--safe-b))" }
+                : { top: "max(10px, env(safe-area-inset-top, 0px))" }),
+              ...(pointer === "bottom-center"
+                ? { left: "50%", marginLeft: -17 }
+                : { right: 18 }),
+              width: 34,
+              display: "flex",
+              flexDirection: pointsDown ? "column" : "column-reverse",
+              alignItems: "center",
+              gap: 2,
+              color: "var(--accent)",
+              filter: "drop-shadow(0 2px 6px rgb(0 0 0 / .45))",
+              pointerEvents: "none",
+            }}
+          >
+            <svg
+              className={pointsDown ? "ig-pointer-down" : "ig-pointer-up"}
+              viewBox="0 0 24 24"
+              width={30}
+              height={30}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d={pointsDown ? "M12 3v17M5 13l7 7 7-7" : "M12 21V4M5 11l7-7 7 7"} />
+            </svg>
+          </div>
+        )}
         <div
           role="dialog"
           dir="ltr"
@@ -253,7 +337,12 @@ export default function PwaLayer() {
           style={{
             width: "100%",
             maxWidth: 460,
-            margin: "0 10px max(10px, var(--safe-b))",
+            // Room under the sheet for the arrow at Safari's bottom bar.
+            margin: pointsDown
+              ? "0 10px calc(max(4px, var(--safe-b)) + 40px)"
+              : "0 10px max(10px, var(--safe-b))",
+            maxHeight: "calc(100% - 20px)",
+            overflowY: "auto",
             borderRadius: "28px 28px 22px 22px",
             background: "var(--surface)",
             border: "1px solid rgb(var(--veil-rgb) / .1)",
@@ -311,31 +400,17 @@ export default function PwaLayer() {
                 id="install-title"
                 style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}
               >
-                {C.title}
+                {sheet === "ios" && flow === "inapp" ? C.inAppTitle : C.title}
               </div>
               <div style={{ fontSize: 12.5, color: "var(--dim)", lineHeight: 1.5 }}>
-                {C.blurb}
+                {sheet !== "ios" ? C.blurb : flow === "inapp" ? C.inAppBlurb : C.iosBlurb}
               </div>
             </div>
           </div>
 
           {sheet === "ios" ? (
             <>
-              <div
-                style={{
-                  fontSize: 13.5,
-                  lineHeight: 1.9,
-                  color: "var(--body)",
-                  padding: "12px 14px",
-                  borderRadius: 14,
-                  background: "rgb(var(--veil-rgb) / .04)",
-                  border: "1px solid rgb(var(--veil-rgb) / .07)",
-                  marginBottom: 12,
-                }}
-              >
-                Tap the Share button in Safari&apos;s bottom bar, then choose{" "}
-                <strong style={{ color: "var(--accent-ink)" }}>Add to Home Screen</strong>.
-              </div>
+              <IosInstallGuide flow={flow} open={open} />
               <button
                 type="button"
                 onClick={dismiss}
