@@ -275,8 +275,7 @@ export default function PwaLayer() {
         aria-hidden={!open}
         style={{
           position: "fixed",
-          // To the real bottom edge on an iOS home-screen app; 0 everywhere else.
-          inset: "0 0 calc(-1 * var(--ios-gap, 0px)) 0",
+          inset: 0,
           zIndex: 1300,
           display: "flex",
           alignItems: "flex-end",

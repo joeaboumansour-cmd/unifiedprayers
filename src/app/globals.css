@@ -41,22 +41,6 @@ html[data-ios] {
   :root {
     --safe-b: env(safe-area-inset-bottom, 0px);
   }
-
-  /* An installed iPhone app. The bar now reaches the real bottom edge (see
-     --ios-gap below), so its labels sit just above the home indicator, as a
-     native tab bar's do, instead of under it. */
-  html[data-ios] {
-    --tab-pad-b: max(0px, calc(var(--safe-b) - 6px));
-    --tab-clear: calc(78px + var(--safe-b));
-    --toast-b: calc(66px + var(--safe-b));
-  }
-}
-
-/* iOS home-screen apps: give back the strip iOS can leave at the bottom.
-   --ios-gap is measured by the script at the top of <body> in layout.tsx and
-   is 0 everywhere else, so on every other device this is the plain 100%. */
-html[data-ios] body {
-  height: calc(100% + var(--ios-gap, 0px));
 }
 
 * {
