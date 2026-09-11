@@ -17,7 +17,7 @@ import {
 } from "@/lib/liturgy";
 import { at, dayKey } from "@/lib/liturgy/computus";
 import { rememberedOn, type Remembered } from "@/lib/liturgy/martyrology";
-import { useReadings } from "@/lib/useReadings";
+import { readingScript, useReadings } from "@/lib/useReadings";
 import type { Liturgy } from "@/lib/useLiturgy";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
@@ -36,6 +36,8 @@ const T = {
   month: { ar: "الشهر", en: "Month" },
   agenda: { ar: "اللائحة", en: "Agenda" },
   today: { ar: "اليوم", en: "Today" },
+  prevMonth: { ar: "الشهر السابق", en: "Previous month" },
+  nextMonth: { ar: "الشهر التالي", en: "Next month" },
   week: { ar: "الأسبوع", en: "Week" },
   sundayTitle: { ar: "إنّه يوم الأحد. إلى القداس.", en: "It's Sunday. Go to Mass." },
   sundayBody: {
@@ -169,7 +171,7 @@ export default function Calendar({
           gap: 8,
         }}
       >
-        <Arrow dir="back" onClick={() => step(-1)} />
+        <Arrow dir="back" rtl={ar} label={T.prevMonth[lang]} onClick={() => step(-1)} />
         <div style={{ textAlign: "center", lineHeight: 1.15 }}>
           <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: "-.01em" }}>
             {monthName}
@@ -185,7 +187,7 @@ export default function Calendar({
             {yearLabel}
           </div>
         </div>
-        <Arrow dir="forward" onClick={() => step(1)} />
+        <Arrow dir="forward" rtl={ar} label={T.nextMonth[lang]} onClick={() => step(1)} />
       </div>
 
       {/* ---------------- rite chip + view switch ---------------- */}
@@ -473,12 +475,27 @@ export default function Calendar({
 
 /* --------------------------------- pieces -------------------------------- */
 
-function Arrow({ dir, onClick }: { dir: "back" | "forward"; onClick: () => void }) {
+function Arrow({
+  dir,
+  rtl,
+  label,
+  onClick,
+}: {
+  dir: "back" | "forward";
+  rtl: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  /* The row is laid out by the shell's direction, so in Arabic "back" sits on
+     the right. The glyph has to turn with it and point outwards, away from the
+     month name — a transform does not follow `dir` on its own, which is why
+     both arrows used to point inwards at the title in Arabic. */
+  const pointsRight = (dir === "forward") !== rtl;
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={dir}
+      aria-label={label}
       style={{
         width: 34,
         height: 34,
@@ -498,8 +515,7 @@ function Arrow({ dir, onClick }: { dir: "back" | "forward"; onClick: () => void 
         strokeWidth={1.7}
         strokeLinecap="round"
         strokeLinejoin="round"
-        // Mirrors with the shell, so "back" is always towards the start edge.
-        style={{ transform: dir === "forward" ? "scaleX(1)" : "scaleX(-1)" }}
+        style={{ transform: pointsRight ? "none" : "scaleX(-1)" }}
       >
         <path d="M9 5l7 7-7 7" />
       </svg>
@@ -658,16 +674,19 @@ function DayDetail({
  *
  * The one thing on this screen that comes off the network, and the one thing
  * that is often simply absent — for a date outside the mirror's archive, for
- * the three Orthodox rites nothing yet covers, or offline. So it renders
- * nothing at all rather than an apology: the day still has its season, its
- * feasts and its saints, which is what a calendar is for.
+ * the Orthodox rites nothing yet covers, or offline. So it renders nothing at
+ * all rather than an apology: the day still has its season, its feasts and its
+ * saints, which is what a calendar is for.
  *
  * The attribution is not decoration and is not optional. These are somebody's
  * translation, made by a liturgical commission and served by evangelizo.org,
  * and a reading shown bare is a reading a reader will assume is ours.
+ *
+ * In the reader's language where the mirror has the day in it; otherwise in
+ * whichever it does, set in that language's direction.
  */
 function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
-  const { data } = useReadings(day.key, rite);
+  const { data } = useReadings(day.key, rite, lang);
   const [open, setOpen] = useState<string | null>(null);
 
   // Collapse again when the reader moves to another day, or the second day
@@ -682,6 +701,7 @@ function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {data.readings.map((r) => {
           const isOpen = open === r.kind;
+          const script = readingScript(r, data);
           return (
             <div
               key={r.kind}
@@ -712,7 +732,7 @@ function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
                   color: "var(--body)",
                 }}
               >
-                <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                <span lang={script.lang} dir={script.dir} style={{ fontSize: 13.5, lineHeight: 1.5 }}>
                   {/* The label the rite itself gives this reading, never one
                       of ours: what sits in a slot differs by church. */}
                   {r.label ?? r.ref}
@@ -726,6 +746,8 @@ function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
               {isOpen && r.text && (
                 <p
                   className="selectable"
+                  lang={script.lang}
+                  dir={script.dir}
                   style={{
                     margin: 0,
                     padding: "0 13px 13px",

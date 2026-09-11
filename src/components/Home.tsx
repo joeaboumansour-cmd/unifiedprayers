@@ -557,13 +557,16 @@ export default function Home({
                 >
                   {/* The travelling light. Square and larger than the card's
                       diagonal, so a corner is never briefly uncovered as it
-                      turns. */}
+                      turns. Placed by the physical `left`, not the logical
+                      start: the keyframes centre it with translate(-50%),
+                      which is physical too, and in Arabic a logical start
+                      put it off the card entirely. */}
                   <div
                     aria-hidden="true"
                     style={{
                       position: "absolute",
                       top: "50%",
-                      insetInlineStart: "50%",
+                      left: "50%",
                       width: "180%",
                       aspectRatio: "1",
                       background:
@@ -604,14 +607,15 @@ export default function Home({
                     }}
                   />
                   {/* The sheen. Staggered per card so a stack of two does not
-                      flash in unison. */}
+                      flash in unison. Physical `left` for the same reason as
+                      the light above: its keyframes move it in physical px. */}
                   <div
                     aria-hidden="true"
                     style={{
                       position: "absolute",
                       top: 0,
                       bottom: 0,
-                      insetInlineStart: 0,
+                      left: 0,
                       width: "45%",
                       background:
                         "linear-gradient(90deg,transparent,rgb(var(--veil-rgb) / .16),transparent)",
@@ -714,6 +718,7 @@ export default function Home({
                 readings={readings.data.readings}
                 progress={readingProgress}
                 lang={lang}
+                textLang={readings.data.lang}
                 translation={readings.data.translation}
                 source={readings.data.source}
               />
@@ -856,6 +861,7 @@ export default function Home({
                 readings={readings.data.readings}
                 progress={readingProgress}
                 lang={lang}
+                textLang={readings.data.lang}
                 translation={readings.data.translation}
                 source={readings.data.source}
               />

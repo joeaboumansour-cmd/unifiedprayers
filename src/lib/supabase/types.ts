@@ -241,13 +241,23 @@ export type Reading = {
   ref: string | null;
   /** The translation, which belongs to whoever made it. */
   text: string | null;
+  /**
+   * Set only on a reading that is not in its row's language: an Arabic
+   * Orthodox day whose Wisdom reading has no Van Dyck text keeps the English.
+   */
+  lang?: "en";
 };
 
 export type ReadingRow = {
   /** "YYYY-MM-DD". */
   on_date: string;
-  /** One of the app's rites, and the second half of the key. */
+  /** One of the app's rites, and the second part of the key. */
   rite: Rite;
+  /**
+   * What the text is in, and the third part of the key (0012). Absent on a
+   * database that has not had that migration yet.
+   */
+  lang?: "ar" | "en" | "hy";
   /** The day's title in the source's own words, for checking against ours. */
   liturgic_title: string | null;
   /** In the order the service reads them. Never a fixed set of roles. */

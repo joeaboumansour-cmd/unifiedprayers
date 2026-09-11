@@ -121,7 +121,7 @@ export default function Page() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }, []);
-  const readings = useReadings(todayKey, liturgy.rite);
+  const readings = useReadings(todayKey, liturgy.rite, prefs.lang);
   const readingProgress = useReadingProgress(
     todayKey,
     liturgy.rite,

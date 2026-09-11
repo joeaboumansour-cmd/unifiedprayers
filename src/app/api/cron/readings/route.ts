@@ -1,11 +1,12 @@
 import { timingSafeEqual } from "node:crypto";
 
 import { denied, json, serviceClient, unconfigured } from "@/lib/server/supabase";
+import { arabicReading } from "@/lib/server/vanDyck";
 import type { Rite } from "@/lib/liturgy/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-/** Nine days across six calendars, fetched politely one at a time. */
+/** Nine days across seven feeds and orthocal, fetched politely one at a time. */
 export const maxDuration = 300;
 
 /**
@@ -20,18 +21,24 @@ export const maxDuration = 300;
  *
  * Two sources, because no one of them covers these churches.
  *
- *   evangelizo.org  the six Catholic calendars, in Arabic. Its feed refuses
- *                   any date more than thirty days from today, so this half
- *                   can only ever be grown forwards, a week at a time, night
- *                   after night. The archive is the point: after a year of
- *                   running the app shows the readings for a date somebody
- *                   scrolled to and not only for today, which is the whole
- *                   difference between a calendar and a homepage.
+ *   evangelizo.org  the six Catholic calendars, in Arabic — and the Maronite
+ *                   one in English as well. Its feed refuses any date more
+ *                   than thirty days from today, so this half can only ever be
+ *                   grown forwards, a week at a time, night after night. The
+ *                   archive is the point: after a year of running the app
+ *                   shows the readings for a date somebody scrolled to and not
+ *                   only for today, which is the whole difference between a
+ *                   calendar and a homepage.
  *
  *   orthocal.info   the Byzantine Orthodox calendar, in English. It computes
  *                   rather than looks up, so it has no window at all and a
  *                   whole year can be seeded in one run — see `?from=&to=`
- *                   below. Its scripture is the King James Version.
+ *                   below. Its scripture is the King James Version; the same
+ *                   verses are also looked up in the Arabic Van Dyck Bible so
+ *                   the Orthodox calendar has an Arabic row too.
+ *
+ * Each row is one language (migration 0012), and the app shows the one in the
+ * reader's language where it exists and whichever does where it does not.
  *
  * ON THE RIGHTS, which differ by source and so are not one rule.
  *
@@ -44,7 +51,8 @@ export const maxDuration = 300;
  * bare is a reading a reader will take for ours.
  *
  * The orthocal texts are the King James Version and are public domain, so that
- * half carries no permission question at all.
+ * half carries no permission question at all. Nor does its Arabic: Van Dyck
+ * (1865) is public domain too.
  *
  * Neither source's editorial writing is mirrored — evangelizo's daily
  * commentary and orthocal's saints' lives are both left where they are.
@@ -71,14 +79,28 @@ function authorised(req: Request): boolean {
  * Catholic calendar under an Orthodox name, which is exactly the kind of quiet
  * wrongness this file should not introduce — the Orthodox three are left with
  * no readings until there is a source that is actually theirs.
+ *
+ * A rite can have more than one feed, one per language. Only the Maronite does
+ * so far: evangelizo's `MAE` is the Maronite calendar in English. It is missing
+ * from the feed's own list of codes but answers, and it is the same lectionary
+ * as `MAA` — same day title, same passages — in the NRSV. It numbers its slots
+ * differently (the Arabic puts a weekday epistle in slot three, the English in
+ * slot two), which the client evens out; see `useReadings`.
  */
-const SOURCES: Partial<Record<Rite, { lang: string; translation: string }>> = {
-  roman: { lang: "AR", translation: "الترجمة العربية المشتركة" },
-  maronite: { lang: "MAA", translation: "الترجمة الليتُرجيّة المارونيّة (2007)" },
-  melkite: { lang: "BYA", translation: "الترجمة الليتُرجيّة البيزنطيّة" },
-  "syriac-catholic": { lang: "SYA", translation: "الترجمة الليتُرجيّة السريانيّة" },
-  "coptic-catholic": { lang: "COA", translation: "الترجمة الليتُرجيّة القبطيّة" },
-  armenian: { lang: "ARM", translation: "Armenian liturgical translation" },
+type Lang = "ar" | "en" | "hy";
+
+type Feed = { code: string; lang: Lang; translation: string };
+
+const SOURCES: Partial<Record<Rite, Feed[]>> = {
+  roman: [{ code: "AR", lang: "ar", translation: "الترجمة العربية المشتركة" }],
+  maronite: [
+    { code: "MAA", lang: "ar", translation: "الترجمة الليتُرجيّة المارونيّة (2007)" },
+    { code: "MAE", lang: "en", translation: "New Revised Standard Version" },
+  ],
+  melkite: [{ code: "BYA", lang: "ar", translation: "الترجمة الليتُرجيّة البيزنطيّة" }],
+  "syriac-catholic": [{ code: "SYA", lang: "ar", translation: "الترجمة الليتُرجيّة السريانيّة" }],
+  "coptic-catholic": [{ code: "COA", lang: "ar", translation: "الترجمة الليتُرجيّة القبطيّة" }],
+  armenian: [{ code: "ARM", lang: "hy", translation: "Armenian liturgical translation" }],
 };
 
 /**
@@ -123,6 +145,8 @@ type Reading = {
   ref: string | null;
   /** The translation. See the rights note above and in migration 0010. */
   text: string | null;
+  /** Only where one reading is not in its row's language — see vanDyck.ts. */
+  lang?: "en";
 };
 
 /**
@@ -147,6 +171,8 @@ function range(from: string, to: string): { iso: string; compact: string }[] {
 type Row = {
   on_date: string;
   rite: Rite;
+  /** What the text is in. The third part of the key since migration 0012. */
+  lang: Lang;
   liturgic_title: string | null;
   readings: Reading[];
   audio_url: string | null;
@@ -168,11 +194,9 @@ type Row = {
  */
 const SLOTS = ["text1", "text2", "text3", "gospel"] as const;
 
-/** One day of one calendar. */
-async function fetchDay(rite: Rite, compact: string, iso: string): Promise<Row | null> {
-  const src = SOURCES[rite];
-  if (!src) return null;
-  const url = `${FEED}?date=${compact}&type=xml&lang=${src.lang}`;
+/** One day of one calendar in one language. */
+async function fetchDay(rite: Rite, src: Feed, compact: string, iso: string): Promise<Row | null> {
+  const url = `${FEED}?date=${compact}&type=xml&lang=${src.code}`;
 
   const res = await fetch(url, {
     headers: { "User-Agent": "UnifiedPrayers/1.0 (liturgical calendar; joeaboumansour@gmail.com)" },
@@ -194,6 +218,7 @@ async function fetchDay(rite: Rite, compact: string, iso: string): Promise<Row |
   const row: Row = {
     on_date: iso,
     rite,
+    lang: src.lang,
     // The feed's own spelling of the tag, missing its 'r'. Not a typo here.
     liturgic_title: tag(xml, "litugic_t"),
     readings,
@@ -229,10 +254,11 @@ async function fetchDay(rite: Rite, compact: string, iso: string): Promise<Row |
  * these texts at all. Its saints' lives are another matter and are not
  * mirrored, on the same principle as evangelizo's commentary.
  *
- * The one real cost is language: orthocal is English only, so an Arabic reader
- * gets these readings in English where the six Catholic calendars give them
- * Arabic. Fixing that means rendering the passage from a public-domain Arabic
- * Bible against the reference — Van Dyck — rather than finding another feed.
+ * orthocal is English only. The Arabic row beside each English one is not a
+ * translation of it: every orthocal reading arrives as its verses, numbered,
+ * and those same verses are looked up in the Van Dyck Bible. Where Van Dyck
+ * has no text — Wisdom, Baruch, orthocal's composites — that one reading keeps
+ * its English and is marked so. See src/lib/server/vanDyck.ts.
  */
 const ORTHOCAL: Partial<Record<Rite, string>> = {
   // Gregorian fixed dates with the Julian Pascha, which is this app's
@@ -245,35 +271,40 @@ type OrthocalReading = {
   source?: string;
   display?: string;
   short_display?: string;
-  passage?: { content?: string }[];
+  passage?: { content?: string; book?: string; chapter?: number; verse?: number }[];
 };
 
-async function fetchOrthocal(rite: Rite, iso: string): Promise<Row | null> {
+/** One day of the Orthodox calendar: the English row, and its Arabic twin. */
+async function fetchOrthocal(rite: Rite, iso: string): Promise<Row[]> {
   const calendar = ORTHOCAL[rite];
-  if (!calendar) return null;
+  if (!calendar) return [];
   const [y, m, d] = iso.split("-").map(Number);
 
   const res = await fetch(`https://orthocal.info/api/${calendar}/${y}/${m}/${d}/`, {
     headers: { "User-Agent": "UnifiedPrayers/1.0 (liturgical calendar; joeaboumansour@gmail.com)" },
     cache: "no-store",
   });
-  if (!res.ok) return null;
+  if (!res.ok) return [];
   const day = (await res.json()) as {
     titles?: string[];
     readings?: OrthocalReading[];
   };
 
   const readings: Reading[] = [];
+  const arabic: Reading[] = [];
   (day.readings ?? []).forEach((r, i) => {
     const text = (r.passage ?? [])
       .map((v) => v.content?.trim())
       .filter(Boolean)
       .join("\n");
     if (!text && !r.display) return;
+    /* Unique per row because it keys the list in the UI, and a day can carry
+       two readings from the same office — two at Matins is ordinary. The Arabic
+       twin shares it, so a reading ticked off in one language is ticked off in
+       the other. */
+    const kind = `${(r.source ?? "reading").toLowerCase().replace(/\s+/g, "-")}-${i}`;
     readings.push({
-      /* Unique per row because it keys the list in the UI, and a day can carry
-         two readings from the same office — two at Matins is ordinary. */
-      kind: `${(r.source ?? "reading").toLowerCase().replace(/\s+/g, "-")}-${i}`,
+      kind,
       /* "Mark 6.30-45" names the book, which is what the reader wants to see;
          the office it belongs to rides in front of it where there is one, so a
          Matins gospel does not read as the Liturgy's. */
@@ -281,19 +312,34 @@ async function fetchOrthocal(rite: Rite, iso: string): Promise<Row | null> {
       ref: r.short_display ?? r.display ?? null,
       text: text || null,
     });
+    arabic.push({ kind, ...arabicReading({ ...r, english: text || null }) });
   });
 
-  if (!day.titles?.length && readings.length === 0) return null;
+  if (!day.titles?.length && readings.length === 0) return [];
 
-  return {
+  const english: Row = {
     on_date: iso,
     rite,
+    lang: "en",
     liturgic_title: day.titles?.[0] ?? null,
     readings,
     audio_url: null,
     source: "orthocal.info",
     translation: "King James Version",
   };
+
+  // Said plainly on the row when some of it could not be given in Arabic.
+  const mixed = arabic.some((r) => r.lang === "en");
+  return [
+    english,
+    {
+      ...english,
+      lang: "ar",
+      readings: arabic,
+      source: "orthocal.info · eBible.org",
+      translation: mixed ? "ترجمة فان دايك · King James Version" : "ترجمة فان دايك",
+    },
+  ];
 }
 
 export async function GET(req: Request) {
@@ -325,19 +371,21 @@ export async function GET(req: Request) {
   const orthocalRites = Object.keys(ORTHOCAL) as Rite[];
 
   for (const rite of evangelizoRites) {
-    for (const { iso, compact } of window) {
-      asked++;
-      try {
-        const row = await fetchDay(rite, compact, iso);
-        if (row) rows.push(row);
-        else missing++;
-      } catch {
-        failed.push(`${rite} ${iso}`);
+    for (const feed of SOURCES[rite] ?? []) {
+      for (const { iso, compact } of window) {
+        asked++;
+        try {
+          const row = await fetchDay(rite, feed, compact, iso);
+          if (row) rows.push(row);
+          else missing++;
+        } catch {
+          failed.push(`${rite}/${feed.lang} ${iso}`);
+        }
+        // One request at a time with a pause between. This is somebody else's
+        // small service and the job has all night; there is no reason to be
+        // anything but slow with it.
+        await sleep(350);
       }
-      // One request at a time with a pause between. This is somebody else's
-      // small service and the job has all night; there is no reason to be
-      // anything but slow with it.
-      await sleep(350);
     }
   }
 
@@ -345,8 +393,8 @@ export async function GET(req: Request) {
     for (const { iso } of window) {
       asked++;
       try {
-        const row = await fetchOrthocal(rite, iso);
-        if (row) rows.push(row);
+        const got = await fetchOrthocal(rite, iso);
+        if (got.length) rows.push(...got);
         else missing++;
       } catch {
         failed.push(`${rite} ${iso}`);
@@ -361,7 +409,7 @@ export async function GET(req: Request) {
     // than failing. Cron delivery is at-least-once and a retry must be a no-op.
     const { error, count } = await supabase
       .from("daily_readings")
-      .upsert(rows, { onConflict: "on_date,rite", count: "exact" });
+      .upsert(rows, { onConflict: "on_date,rite,lang", count: "exact" });
     if (error) return json({ ok: false, error: error.message, asked, fetched: rows.length }, 500);
     written = count ?? rows.length;
   }

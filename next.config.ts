@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // The Van Dyck Bible is read from disk by the readings cron, not imported, so
+  // the tracer cannot see it; without this it is missing from the deployed
+  // function and every Orthodox day loses its Arabic row.
+  outputFileTracingIncludes: {
+    "/api/cron/readings": ["./src/data/bible/**/*"],
+  },
   async headers() {
     return [
       {

@@ -78,12 +78,13 @@ function Tick({ fresh }: { fresh: boolean }) {
 function ReadingRow({
   reading,
   read,
-  lang,
+  script,
   onOpen,
 }: {
   reading: Reading;
   read: boolean;
-  lang: Lang;
+  /** What the words are in, which is not always the app's language. */
+  script: { lang: string; dir: "rtl" | "ltr" };
   onOpen: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -150,7 +151,11 @@ function ReadingRow({
             }}
           />
         )}
-        <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.5 }}>
+        <span
+          lang={script.lang}
+          dir={script.dir}
+          style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.5 }}
+        >
           {/* The label the rite itself gives this reading, not one of ours:
               what sits in a slot differs from church to church. */}
           {reading.label ?? reading.ref}
@@ -184,6 +189,8 @@ function ReadingRow({
           <div ref={body}>
             <p
               className="selectable rd-words"
+              lang={script.lang}
+              dir={script.dir}
               style={{
                 margin: 0,
                 padding: "2px 14px 14px",
@@ -217,12 +224,15 @@ export default function ReadingCards({
   readings,
   progress,
   lang,
+  textLang,
   translation,
   source,
 }: {
   readings: Reading[];
   progress: ReadingProgress;
   lang: Lang;
+  /** What the day's text is in. The app's language where the mirror has it. */
+  textLang: string;
   translation: string | null;
   source: string | null;
   /** The rite is already reflected in `readings`; kept out of here on purpose. */
@@ -243,15 +253,18 @@ export default function ReadingCards({
         animation: progress.justCompleted ? "rdComplete 1.1s var(--ease)" : undefined,
       }}
     >
-      {readings.map((r) => (
-        <ReadingRow
-          key={r.kind}
-          reading={r}
-          read={progress.isRead(r.kind)}
-          lang={lang}
-          onOpen={() => progress.open(r.kind)}
-        />
-      ))}
+      {readings.map((r) => {
+        const textIn = r.lang ?? textLang;
+        return (
+          <ReadingRow
+            key={r.kind}
+            reading={r}
+            read={progress.isRead(r.kind)}
+            script={{ lang: textIn, dir: textIn === "ar" ? "rtl" : "ltr" }}
+            onOpen={() => progress.open(r.kind)}
+          />
+        );
+      })}
 
       <div
         style={{
