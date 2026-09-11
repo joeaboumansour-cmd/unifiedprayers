@@ -14,7 +14,6 @@ export type Prefs = {
   palette: Palette;
   size: number;
   dim: boolean;
-  haptics: boolean;
   audio: boolean;
   awake: boolean;
   /**
@@ -39,7 +38,6 @@ export const DEFAULT_PREFS: Prefs = {
   palette: "midnight",
   size: 1,
   dim: false,
-  haptics: true,
   audio: false,
   awake: true,
   updatedAt: 0,
@@ -99,7 +97,6 @@ export const prefsToRow = (p: Prefs, userId: string): PrefsRow => ({
   palette: p.palette,
   size: p.size,
   dim: p.dim,
-  haptics: p.haptics,
   audio: p.audio,
   awake: p.awake,
   updated_at: new Date(p.updatedAt || Date.now()).toISOString(),
@@ -111,7 +108,6 @@ export const rowToPrefs = (r: PrefsRow): Prefs => ({
   palette: knownPalette(r.palette),
   size: r.size,
   dim: r.dim,
-  haptics: r.haptics,
   audio: r.audio,
   awake: r.awake,
   updatedAt: Date.parse(r.updated_at),

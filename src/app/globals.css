@@ -471,6 +471,111 @@ button {
   }
 }
 
+/* ---------------------------------------------------------------
+   The launch splash (LaunchSplash.tsx).
+
+   Everything here starts from rest, so the splash's first frame is the
+   still iOS launch image it replaces; the motion fades in over it.
+   --------------------------------------------------------------- */
+
+.ls-rays {
+  transform: translate(-50%, -50%);
+  animation: lsTurn 48s linear infinite, lsIn 1.2s ease 0.15s both;
+}
+
+@keyframes lsTurn {
+  from {
+    transform: translate(-50%, -50%) rotate(0turn);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(1turn);
+  }
+}
+
+@keyframes lsIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ls-glow {
+  animation: lsBreathe 3.4s ease-in-out infinite, lsIn 1s ease 0.1s both;
+}
+
+@keyframes lsBreathe {
+  0%,
+  100% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.ls-dove {
+  animation: lsFloat 4.2s ease-in-out 0.3s infinite;
+}
+
+@keyframes lsFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.ls-beads {
+  animation: lsIn 0.6s ease 0.35s both;
+}
+
+.ls-bead {
+  opacity: 0.22;
+  animation: lsBead 1.8s ease-in-out infinite;
+}
+
+@keyframes lsBead {
+  0%,
+  100% {
+    opacity: 0.22;
+    box-shadow: 0 0 0 0 rgb(232 199 126 / 0);
+  }
+  30% {
+    opacity: 1;
+    box-shadow: 0 0 10px 2px rgb(232 199 126 / 0.55);
+  }
+  60% {
+    opacity: 0.22;
+    box-shadow: 0 0 0 0 rgb(232 199 126 / 0);
+  }
+}
+
+/* Lifting away: the ground fades while the dove rises toward the reader. */
+.ls-leave {
+  animation: lsLeave 0.56s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.ls-leave .ls-dove {
+  animation: lsLift 0.56s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes lsLeave {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes lsLift {
+  to {
+    transform: translateY(-10px) scale(1.08);
+    filter: blur(2px);
+  }
+}
+
 /* The daily verse, arriving from its notification: one slow glow so the eye
    lands on it, then an ordinary card again. */
 .dv-arrive {
@@ -600,6 +705,10 @@ button {
   .rd-streak,
   .rd-complete,
   .dv-arrive,
+  .ls-rays,
+  .ls-glow,
+  .ls-dove,
+  .ls-bead,
   .ig-scroll,
   .ig-pointer-down,
   .ig-pointer-up {
@@ -612,6 +721,10 @@ button {
   }
   .ig-tap {
     display: none;
+  }
+  /* The splash's beads, lit and still rather than dimmed and waiting. */
+  .ls-bead {
+    opacity: 0.7;
   }
   .rd-unroll {
     height: auto !important;

@@ -212,7 +212,6 @@ export type DevotionReaderProps = {
   startAt?: number;
   /** Mirrors the player: a page turn is heard only if ambience is on. */
   audio: boolean;
-  onHaptic: (ms: number | number[]) => void;
   /** Every reveal, so closing the reader never loses the place. */
   onProgress: (shown: number, total: number) => void;
   /** Called once, when the last block has been tapped past. */
@@ -240,7 +239,6 @@ export default function DevotionReader({
   trackLabel,
   startAt = 1,
   audio,
-  onHaptic,
   onProgress,
   onComplete,
   onClose,
@@ -298,13 +296,10 @@ export default function DevotionReader({
   const advance = () => {
     if (done) return;
     if (atEnd) {
-      // The same pattern the last bead of a rosary fires.
-      onHaptic([14, 70, 20, 60, 30]);
       setDone(true);
       onComplete();
       return;
     }
-    onHaptic(14);
     if (audio) playPageTurn();
     const next = shown + 1;
     setShown(next);
@@ -419,7 +414,6 @@ export default function DevotionReader({
           onPointerUp={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
-            onHaptic(8);
             onClose();
           }}
           style={{

@@ -82,13 +82,11 @@ export default function Calendar({
   liturgy,
   onOpenRites,
   onOpenFeast,
-  onHaptic,
 }: {
   lang: Lang;
   liturgy: Liturgy;
   onOpenRites: () => void;
   onOpenFeast: (feast: Feast, day: Day) => void;
-  onHaptic: (ms?: number) => void;
 }) {
   const ar = lang === "ar";
   const today = useMemo(() => at(
@@ -141,19 +139,16 @@ export default function Calendar({
   }, [ar]);
 
   const step = (n: number) => {
-    onHaptic(6);
     const d = at(cursor.y, cursor.m + n, 1);
     setCursor({ y: d.getFullYear(), m: d.getMonth() });
   };
 
   const goToday = () => {
-    onHaptic(8);
     setCursor({ y: today.getFullYear(), m: today.getMonth() });
     setSelectedKey(todayKey);
   };
 
   const pick = (cell: (typeof cells)[number]) => {
-    onHaptic(5);
     setSelectedKey(cell.key);
     // Tapping a spilled-in date is how a thumb moves to the next month.
     if (cell.outside) setCursor({ y: cell.date.getFullYear(), m: cell.date.getMonth() });
@@ -210,7 +205,6 @@ export default function Calendar({
         <button
           type="button"
           onClick={() => {
-            onHaptic(8);
             onOpenRites();
           }}
           style={{
@@ -279,7 +273,6 @@ export default function Calendar({
                 type="button"
                 aria-pressed={on}
                 onClick={() => {
-                  onHaptic(5);
                   setAgenda(isAgenda);
                 }}
                 style={{
@@ -472,7 +465,6 @@ export default function Calendar({
             lang={lang}
             isToday={selected.key === todayKey}
             onOpenFeast={onOpenFeast}
-            onHaptic={onHaptic}
           />
         </>
       )}
@@ -540,7 +532,6 @@ function DayDetail({
   rite,
   isToday,
   onOpenFeast,
-  onHaptic,
 }: {
   day: Day;
   lang: Lang;
@@ -548,7 +539,6 @@ function DayDetail({
   rite: Rite;
   isToday: boolean;
   onOpenFeast: (f: Feast, d: Day) => void;
-  onHaptic: (ms?: number) => void;
 }) {
   const ar = lang === "ar";
   const dateLine = new Intl.DateTimeFormat(intlLocale(lang), {
@@ -658,7 +648,6 @@ function DayDetail({
               lang={lang}
               last={i === day.feasts.length - 1}
               onClick={() => {
-                onHaptic(8);
                 onOpenFeast(f, day);
               }}
             />

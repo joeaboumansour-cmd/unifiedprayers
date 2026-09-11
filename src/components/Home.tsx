@@ -60,6 +60,18 @@ const EASE = "cubic-bezier(.22,1,.36,1)";
 const GOLD = "var(--accent)";
 
 /**
+ * Which of the content document's `toggles` rows Settings draws, by their
+ * place in that list: [night mode, haptics, ambient sound, keep awake].
+ *
+ * Night mode is not here because it belongs to the prayer — it has its own
+ * button in the player, where somebody praying in the dark actually is — and
+ * haptics is gone altogether: iOS offers a web page no reliable way to buzz.
+ * The labels stay in the content document untouched, since the live copy of
+ * it is edited in Supabase and not in this bundle.
+ */
+const SETTINGS_TOGGLES = [2, 3] as const;
+
+/**
  * Arabic counts in more than two shapes, so a bare `${n} days` is wrong for
  * most numbers. Zero is not a streak at all and reads as an invitation.
  */
@@ -235,6 +247,7 @@ export type HomeProps = {
   beadStyle: BeadStyle;
   palette: Palette;
   size: number;
+  /** On/off for each row in SETTINGS_TOGGLES, in that order. */
   toggles: boolean[];
   auth: Auth;
   syncStatus: SyncStatus;
@@ -267,11 +280,6 @@ export type HomeProps = {
   onOpenRites: () => void;
   /** Opens one feast from the calendar. */
   onOpenFeast: (feast: Feast, day: Day) => void;
-  /**
-   * The app's own haptic, already gated on the setting. Passed down rather
-   * than re-derived so the calendar's taps feel like every other tap.
-   */
-  onHaptic: (ms?: number) => void;
   /** The locked couples card was tapped. Opens the pairing sheet. */
   onOpenCouple: () => void;
   onSetStyle: (s: BeadStyle) => void;
@@ -314,7 +322,6 @@ export default function Home({
   onOpenDevotion,
   onOpenRites,
   onOpenFeast,
-  onHaptic,
   onOpenCouple,
   onSetStyle,
   onSetPalette,
@@ -1031,7 +1038,6 @@ export default function Home({
           liturgy={liturgy}
           onOpenRites={onOpenRites}
           onOpenFeast={onOpenFeast}
-          onHaptic={onHaptic}
         />
       )}
 
@@ -1213,7 +1219,7 @@ export default function Home({
               </div>
             </div>
 
-            {tEn.toggles.map(([name, hint], i) => (
+            {SETTINGS_TOGGLES.map((row) => tEn.toggles[row]).map(([name, hint], i) => (
               <Row
                 key={name}
                 onClick={() => onToggle(i)}

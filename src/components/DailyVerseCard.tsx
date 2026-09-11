@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { whenRevealed } from "@/components/LaunchSplash";
 import type { Lang } from "@/lib/content";
 import type { DailyVerseState } from "@/lib/useDailyVerse";
 
@@ -23,16 +24,23 @@ const T = {
 export default function DailyVerseCard({ lang, daily }: { lang: Lang; daily: DailyVerseState }) {
   const ref = useRef<HTMLDivElement>(null);
   const { verse, arrived, settle } = daily;
+  const [glowing, setGlowing] = useState(false);
 
   useEffect(() => {
-    if (!arrived || !verse || !ref.current) return;
-    // A frame for the tab to paint, then bring the card up under the thumb.
-    const id = window.requestAnimationFrame(() => {
+    if (!arrived || !verse) return;
+    let done = 0;
+    // Not under the launch splash: the arrival is the point, so it waits until
+    // there is something to see it against.
+    const stop = whenRevealed(() => {
       ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setGlowing(true);
+      done = window.setTimeout(() => {
+        setGlowing(false);
+        settle();
+      }, 2600);
     });
-    const done = window.setTimeout(settle, 2600);
     return () => {
-      window.cancelAnimationFrame(id);
+      stop();
       window.clearTimeout(done);
     };
   }, [arrived, verse, settle]);
@@ -47,7 +55,7 @@ export default function DailyVerseCard({ lang, daily }: { lang: Lang; daily: Dai
   return (
     <div
       ref={ref}
-      className={arrived ? "dv-arrive" : undefined}
+      className={glowing ? "dv-arrive" : undefined}
       style={{
         position: "relative",
         overflow: "hidden",

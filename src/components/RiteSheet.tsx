@@ -32,13 +32,11 @@ export default function RiteSheet({
   lang,
   liturgy,
   onClose,
-  onHaptic,
 }: {
   open: boolean;
   lang: Lang;
   liturgy: Liturgy;
   onClose: () => void;
-  onHaptic: (ms?: number) => void;
 }) {
   const drag = useSheetDrag(open, onClose);
   const ar = lang === "ar";
@@ -153,7 +151,6 @@ export default function RiteSheet({
                 aria-checked={on}
                 className="tap"
                 onClick={() => {
-                  onHaptic(6);
                   liturgy.setRite(r);
                 }}
                 style={{
@@ -215,7 +212,6 @@ export default function RiteSheet({
             role="switch"
             aria-checked={liturgy.alsoRoman}
             onClick={() => {
-              onHaptic(6);
               liturgy.setAlsoRoman(!liturgy.alsoRoman);
             }}
             style={{

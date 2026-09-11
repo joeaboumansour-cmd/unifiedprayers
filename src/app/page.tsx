@@ -6,6 +6,7 @@ import Home from "@/components/Home";
 import CoupleSheet from "@/components/CoupleSheet";
 import DevotionReader from "@/components/DevotionReader";
 import FeastSheet from "@/components/FeastSheet";
+import LaunchSplash from "@/components/LaunchSplash";
 import MysterySheet from "@/components/MysterySheet";
 import NotificationsPrompt from "@/components/NotificationsPrompt";
 import Player from "@/components/Player";
@@ -36,7 +37,6 @@ import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
 import { playChime } from "@/lib/chime";
 import { playPageTurn, preloadSfx } from "@/lib/sfx";
-import { haptic as fireHaptic, watchHapticTouch } from "@/lib/haptics";
 import { buildSteps } from "@/lib/steps";
 import { useAdmin } from "@/lib/useAdmin";
 import { useAmbience } from "@/lib/useAmbience";
@@ -203,10 +203,6 @@ export default function Page() {
   // for a download is not a page turn.
   useEffect(() => preloadSfx(), []);
 
-  // Every touch gets a small haptic, whether or not the thing under it has one
-  // of its own.
-  useEffect(() => watchHapticTouch(prefs.haptics), [prefs.haptics]);
-
   /* ---------------- restore ---------------- */
   useEffect(() => {
     const storedPrefs = readPrefs();
@@ -273,14 +269,6 @@ export default function Page() {
   }, [hydrated, prayer, mysterySet, step, spiritStep, maryStep]);
 
   /* ---------------- navigation ---------------- */
-  const haptic = useCallback(
-    (ms: number | number[] = 8) => {
-      if (!prefs.haptics) return;
-      fireHaptic(ms);
-    },
-    [prefs.haptics],
-  );
-
   // Two frames of opacity 0 give the crossfade something to animate from.
   const fadeTimer = useRef<number | undefined>(undefined);
   const crossfade = useCallback((next: number) => {
@@ -314,9 +302,8 @@ export default function Page() {
       prayer === "mary" ? mysterySet : null,
       openedAt.current ? (Date.now() - openedAt.current) / 1000 : 0,
     );
-    haptic([14, 70, 20, 60, 30]);
     if (prefs.audio) playChime();
-  }, [done, haptic, prefs.audio, record, prayer, mysterySet]);
+  }, [done, prefs.audio, record, prayer, mysterySet]);
 
   // A finished prayer starts again from the beginning, so the home screen
   // offers a fresh one instead of resuming a closing prayer.
@@ -341,22 +328,16 @@ export default function Page() {
 
   const advance = useCallback(() => {
     if (step >= total - 1) return complete();
-    // Stronger than the small haptic every touch already gets, so a bead that
-    // moves feels different from a tap that does nothing. The two arrive back
-    // to back and vibrate overrides rather than queues, so this is what is
-    // felt.
-    haptic(16);
     if (prefs.audio) playPageTurn();
     crossfade(step + 1);
-  }, [step, total, haptic, crossfade, complete]);
+  }, [step, total, crossfade, complete]);
 
   const back = useCallback(() => {
     if (step === 0 || done) return;
-    // A shorter one going back, the same way the sound is softer that way.
-    haptic(12);
+    // Softer going back.
     if (prefs.audio) playPageTurn(true);
     crossfade(step - 1);
-  }, [step, done, haptic, crossfade]);
+  }, [step, done, crossfade]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -388,31 +369,26 @@ export default function Page() {
 
   /* ---------------- transitions between screens ---------------- */
   const openSpirit = () => {
-    haptic(10);
     setPrayer("spirit");
     setStep(spiritStep);
     setScreen("player");
   };
   const startMary = () => {
-    haptic(12);
     setPrayer("mary");
     setStep(0);
     setSheet(false);
     setScreen("player");
   };
   const startToday = () => {
-    haptic(12);
     setPrayer("mary");
     setMysterySet(setForDay(new Date().getDay()));
     setStep(0);
     setScreen("player");
   };
   const openDevotion = (track: DevotionTrack) => {
-    haptic(12);
     setDevotionTrack(track);
   };
   const closeDevotion = () => {
-    haptic(8);
     setDevotionTrack(null);
   };
   const closePlayer = () => {
@@ -453,7 +429,7 @@ export default function Page() {
         beadStyle={prefs.beadStyle}
         palette={prefs.palette}
         size={prefs.size}
-        toggles={[prefs.dim, prefs.haptics, prefs.audio, prefs.awake]}
+        toggles={[prefs.audio, prefs.awake]}
         auth={auth}
         syncStatus={syncStatus}
         isAdmin={isAdmin}
@@ -472,48 +448,34 @@ export default function Page() {
         }
         onSetLang={(lang) => patch({ lang })}
         onResume={() => {
-          haptic(10);
           setScreen("player");
         }}
         onOpenSpirit={openSpirit}
         onOpenSheet={() => {
-          haptic(10);
           setSheet(true);
         }}
         onStartToday={startToday}
         onOpenDevotion={openDevotion}
         onOpenRites={() => {
-          haptic(10);
           setRiteSheet(true);
         }}
         onOpenFeast={(f, d) => {
           setFeast({ feast: f, day: d });
           setFeastOpen(true);
         }}
-        onHaptic={haptic}
         onOpenCouple={() => {
-          haptic(10);
           setCoupleSheet(true);
         }}
         onSetStyle={(beadStyle) => {
-          haptic(6);
           patch({ beadStyle });
         }}
         onSetPalette={(palette) => {
-          haptic(8);
           patch({ palette });
         }}
         onSetSize={(size) => patch({ size })}
         onToggle={(i) => {
-          haptic(6);
-          patch(
-            [
-              { dim: !prefs.dim },
-              { haptics: !prefs.haptics },
-              { audio: !prefs.audio },
-              { awake: !prefs.awake },
-            ][i],
-          );
+          // In the order Home draws them — see SETTINGS_TOGGLES there.
+          patch([{ audio: !prefs.audio }, { awake: !prefs.awake }][i]);
         }}
       />
 
@@ -522,7 +484,6 @@ export default function Page() {
         hidden={isPlayer}
         isAdmin={isAdmin}
         onSelect={(i) => {
-          haptic(5);
           setTab(i);
         }}
       />
@@ -545,7 +506,6 @@ export default function Page() {
         audio={prefs.audio}
         onToggleDim={() => patch({ dim: !prefs.dim })}
         onToggleAudio={() => {
-          haptic(6);
           patch({ audio: !prefs.audio });
         }}
         onFinish={finish}
@@ -568,7 +528,6 @@ export default function Page() {
             : 1
         }
         audio={prefs.audio}
-        onHaptic={haptic}
         onProgress={(shown, total) =>
           devotionTrack && devotions.saveProgress(devotionTrack, shown, total)
         }
@@ -599,7 +558,6 @@ export default function Page() {
         lang={prefs.lang}
         liturgy={liturgy}
         onClose={() => setRiteSheet(false)}
-        onHaptic={haptic}
       />
 
       <MysterySheet
@@ -607,7 +565,6 @@ export default function Page() {
         lang={prefs.lang}
         selected={mysterySet}
         onPick={(k) => {
-          haptic(6);
           setMysterySet(k);
         }}
         onStart={startMary}
@@ -647,6 +604,17 @@ export default function Page() {
           feastOpen ||
           Boolean(modal) ||
           devotionTrack !== null
+        }
+      />
+
+      {/* Over everything until the app has its reader's preferences: this
+          device's at once, and an account's once the first pull has answered
+          either way. Lifted on its own after a few seconds regardless. */}
+      <LaunchSplash
+        ready={
+          hydrated &&
+          auth.status !== "loading" &&
+          (auth.status !== "signed-in" || syncStatus === "synced" || syncStatus === "offline")
         }
       />
     </main>

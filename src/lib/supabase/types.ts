@@ -14,7 +14,11 @@ export type PrefsRow = {
   palette: Palette;
   size: number;
   dim: boolean;
-  haptics: boolean;
+  /**
+   * Still a column (0001, default true), no longer read or written: the app
+   * dropped haptics, since iOS gives a web page no dependable way to buzz.
+   */
+  haptics?: boolean;
   audio: boolean;
   awake: boolean;
   updated_at: string;
