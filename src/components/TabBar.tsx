@@ -2,11 +2,15 @@
 
 import type { ReactNode } from "react";
 
-import { ui } from "@/lib/content";
-
 const EASE = "cubic-bezier(.22,1,.36,1)";
 
-/** Named here rather than in design.json — see the note in Home.tsx. */
+/**
+ * The tab names, in English whatever the app's language, like the Settings and
+ * Admin screens two of them lead to. Named here rather than read from the
+ * content document: they are chrome, not prayer text, and a list an admin can
+ * edit could grow a fifth name with no tab behind it.
+ */
+const LABELS = ["Home", "Today", "Calendar", "Settings"];
 const ADMIN_LABEL = "Admin";
 
 /**
@@ -23,7 +27,7 @@ const STROKE = {
   strokeLinejoin: "round" as const,
 };
 
-/** Prayers: a rosary — a loop of beads, and the cross it ends in. */
+/** Home, where the prayers are: a rosary — a loop of beads, and the cross it ends in. */
 function Rosary({ on }: { on: boolean }) {
   return (
     <>
@@ -99,13 +103,7 @@ export default function TabBar({
   isAdmin: boolean;
   onSelect: (i: number) => void;
 }) {
-  // English whatever the app language is, like the Settings and Admin tabs it
-  // leads to.
-  const t = ui("en");
-  // The four names come from the content document, which an admin can edit; a
-  // fifth entry added there would appear here with no tab body behind it, so
-  // the list is cut to the panels that exist before the admin one is added.
-  const labels = [...t.tabs.slice(0, 4), ...(isAdmin ? [ADMIN_LABEL] : [])];
+  const labels = [...LABELS, ...(isAdmin ? [ADMIN_LABEL] : [])];
   return (
     <nav
       // Left to right in both languages. The labels are English either way,
