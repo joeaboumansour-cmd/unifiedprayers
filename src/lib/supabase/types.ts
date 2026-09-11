@@ -84,21 +84,6 @@ export type AdminRow = {
   granted_at: string;
 };
 
-/** `show_on` pins a verse to a date; null leaves it in the rotation pool. */
-export type VerseRow = {
-  id: string;
-  text_ar: string;
-  text_en: string;
-  ref_ar: string | null;
-  ref_en: string | null;
-  show_on: string | null;
-  active: boolean;
-  sort: number;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
 export type AnnouncementKind = "banner" | "modal";
 export type Audience = "all" | "signed_in" | "signed_out";
 
@@ -371,12 +356,6 @@ export type Database = {
         }
       >;
       app_admins: Table<AdminRow>;
-      verses: Table<
-        VerseRow,
-        // Everything but the text has a default, so a new verse is two fields.
-        Partial<Omit<VerseRow, "text_ar" | "text_en">> &
-          Pick<VerseRow, "text_ar" | "text_en">
-      >;
       daily_devotions: Table<
         DevotionRow,
         // The day, the book and the Arabic are the transcription; everything
