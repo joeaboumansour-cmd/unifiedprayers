@@ -798,98 +798,6 @@ export default function Home({
       {/* ---------- TODAY ---------- */}
       {tab === 1 && (
         <div>
-          {/* First, because it is the one thing on this tab chosen for this
-              reader — and where the morning notification lands. */}
-          <DailyVerseCard lang={lang} daily={dailyVerse} />
-
-          <Row
-            onClick={onStartToday}
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: 24,
-              padding: "22px 20px",
-              marginBottom: 18,
-              background:
-                "linear-gradient(150deg,rgb(var(--accent-rgb) / .16),var(--resume-b))",
-              border: "1px solid rgb(var(--accent-rgb) / .2)",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: -80,
-                insetInlineEnd: -50,
-                width: 200,
-                height: 200,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle,rgb(var(--accent-soft-rgb) / .28),rgb(var(--accent-rgb) / 0) 70%)",
-                pointerEvents: "none",
-              }}
-            />
-            <div
-              style={{
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 500,
-                  letterSpacing: ".12em",
-                  textTransform: "uppercase",
-                  color: "var(--accent-ink)",
-                }}
-              >
-                {t.todayKicker}
-              </div>
-              <div style={{ fontSize: 22, fontWeight: 600, lineHeight: 1.3 }}>
-                {setLabel(lang, todaySet)}
-              </div>
-              <div style={{ fontSize: 13, color: "var(--soft-2)", lineHeight: 1.7 }}>
-                {t.todaySetHint}
-              </div>
-            </div>
-          </Row>
-
-          <div style={sectionLabel}>{t.devotion.label}</div>
-          <div style={{ marginBottom: 26 }}>
-            <DevotionCards
-              lang={lang}
-              devotions={devotions}
-              paired={paired}
-              onOpen={onOpenDevotion}
-              onLocked={onOpenCouple}
-            />
-          </div>
-
-          <div style={sectionLabel}>{readingsLabel(lang)}</div>
-          <div style={{ marginBottom: 26 }}>
-            {readings.data?.readings.length ? (
-              <ReadingCards
-                readings={readings.data.readings}
-                progress={readingProgress}
-                lang={lang}
-                textLang={readings.data.lang}
-                translation={readings.data.translation}
-                source={readings.data.source}
-              />
-            ) : (
-              /* Nothing yet for this day in this church — the mirror has not
-                 reached it, or no source covers that rite. Said plainly rather
-                 than left as a gap, because the section heading is already
-                 promising something. */
-              <div style={{ fontSize: 13, color: "var(--dim-3)", lineHeight: 1.7 }}>
-                {readingsEmpty(lang)}
-              </div>
-            )}
-          </div>
-
-
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             {[stats.streak, stats.monthPrayers, stats.monthMinutes].map((n, i) => (
               <div
@@ -996,6 +904,97 @@ export default function Home({
               })}
             </div>
           </div>
+
+          {/* The one thing on this tab chosen for this reader, and where the
+              morning notification lands — it scrolls here on arrival. */}
+          <DailyVerseCard lang={lang} daily={dailyVerse} />
+
+          <div style={sectionLabel}>{readingsLabel(lang)}</div>
+          <div style={{ marginBottom: 26 }}>
+            {readings.data?.readings.length ? (
+              <ReadingCards
+                readings={readings.data.readings}
+                progress={readingProgress}
+                lang={lang}
+                textLang={readings.data.lang}
+                translation={readings.data.translation}
+                source={readings.data.source}
+              />
+            ) : (
+              /* Nothing yet for this day in this church — the mirror has not
+                 reached it, or no source covers that rite. Said plainly rather
+                 than left as a gap, because the section heading is already
+                 promising something. */
+              <div style={{ fontSize: 13, color: "var(--dim-3)", lineHeight: 1.7 }}>
+                {readingsEmpty(lang)}
+              </div>
+            )}
+          </div>
+
+          <div style={sectionLabel}>{t.devotion.label}</div>
+          <div style={{ marginBottom: 26 }}>
+            <DevotionCards
+              lang={lang}
+              devotions={devotions}
+              paired={paired}
+              onOpen={onOpenDevotion}
+              onLocked={onOpenCouple}
+            />
+          </div>
+
+          <Row
+            onClick={onStartToday}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 24,
+              padding: "22px 20px",
+              marginBottom: 18,
+              background:
+                "linear-gradient(150deg,rgb(var(--accent-rgb) / .16),var(--resume-b))",
+              border: "1px solid rgb(var(--accent-rgb) / .2)",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: -80,
+                insetInlineEnd: -50,
+                width: 200,
+                height: 200,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle,rgb(var(--accent-soft-rgb) / .28),rgb(var(--accent-rgb) / 0) 70%)",
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                  color: "var(--accent-ink)",
+                }}
+              >
+                {t.todayKicker}
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 600, lineHeight: 1.3 }}>
+                {setLabel(lang, todaySet)}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--soft-2)", lineHeight: 1.7 }}>
+                {t.todaySetHint}
+              </div>
+            </div>
+          </Row>
         </div>
       )}
 
