@@ -53,7 +53,6 @@ import { useDailyVerse } from "@/lib/useDailyVerse";
 import { useReadings } from "@/lib/useReadings";
 import { useReadingProgress } from "@/lib/useReadingProgress";
 import { TRACKS, useDevotions } from "@/lib/useDevotions";
-import { useVerse } from "@/lib/useVerse";
 import { useWakeLock } from "@/lib/useWakeLock";
 
 const DEFAULT_PROGRESS: Progress = {
@@ -104,7 +103,6 @@ export default function Page() {
   // tab in and out on every launch. Only true unlocks it.
   const isAdmin = useAdmin(auth.user?.id ?? null) === true;
   const push = usePush(prefs.lang);
-  const verse = useVerse(prefs.lang);
   const dailyVerse = useDailyVerse(push.endpoint);
   // Opened from the morning notification: straight to the Today tab, where
   // the whole verse is waiting at the top.
@@ -434,7 +432,6 @@ export default function Page() {
         syncStatus={syncStatus}
         isAdmin={isAdmin}
         push={push}
-        verse={verse}
         devotions={devotions}
         liturgy={liturgy}
         readings={readings}

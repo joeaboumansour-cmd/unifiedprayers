@@ -31,9 +31,10 @@ export const maxDuration = 300;
  *                   calendar and a homepage.
  *
  *   orthocal.info   the Byzantine Orthodox calendar, in English. It computes
- *                   rather than looks up, so it has no window at all and a
- *                   whole year can be seeded in one run — see `?from=&to=`
- *                   below. Its scripture is the King James Version; the same
+ *                   rather than looks up, so it has no window at all: every
+ *                   night keeps it a full year ahead of today, indefinitely —
+ *                   see HORIZON_DAYS — and `?from=&to=` below can fill any
+ *                   range at once. Its scripture is the King James Version; the same
  *                   verses are also looked up in the Arabic Van Dyck Bible so
  *                   the Orthodox calendar has an Arabic row too.
  *
@@ -113,6 +114,21 @@ const SOURCES: Partial<Record<Rite, Feed[]>> = {
 const BACK = 2;
 const FORWARD = 6;
 
+/**
+ * How far ahead the orthocal rites are kept, and how much further one night
+ * may reach towards it.
+ *
+ * The evangelizo half can only ever be a week ahead — its feed refuses dates
+ * past thirty days. Orthocal computes any date, so its rites are held a whole
+ * year ahead of today, indefinitely, without anybody running a seed: each night
+ * looks at the furthest day already mirrored and adds the days after it, up to
+ * the horizon. Once caught up that is one new day a night; after a gap — a
+ * fresh database, a week the cron did not run — it catches up a slice a night,
+ * sized to stay far inside the function's time limit and gentle on orthocal.
+ */
+const HORIZON_DAYS = 365;
+const EXTEND_PER_NIGHT = 40;
+
 const FEED = "http://feed.evangelizo.org/v2/reader.php";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -122,6 +138,12 @@ function tag(xml: string, name: string): string | null {
   const m = xml.match(new RegExp(`<${name}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${name}>`));
   const v = m?.[1]?.trim();
   return v ? v : null;
+}
+
+/** "YYYY-MM-DD" `n` days after another, counted on the calendar — no clock, so no DST. */
+function addDays(iso: string, n: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
 }
 
 /** "YYYY-MM-DD" and the "YYYYMMDD" the feed wants. */
@@ -389,8 +411,35 @@ export async function GET(req: Request) {
     }
   }
 
+  /* The nightly run also walks each orthocal rite's horizon forwards — see
+     HORIZON_DAYS. A seeding run is already an explicit range and does not. */
+  const horizon: Record<string, { added: number; through: string | null }> = {};
+  const orthocalDays = new Map<Rite, string[]>();
   for (const rite of orthocalRites) {
-    for (const { iso } of window) {
+    const near = window.map((d) => d.iso);
+    if (seeding) {
+      orthocalDays.set(rite, near);
+      continue;
+    }
+    const today = near[BACK];
+    const { data: furthest } = await supabase
+      .from("daily_readings")
+      .select("on_date")
+      .eq("rite", rite)
+      .order("on_date", { ascending: false })
+      .limit(1)
+      .maybeSingle<{ on_date: string }>();
+    const end = addDays(today, HORIZON_DAYS);
+    // After whichever is later: the furthest day mirrored, or the near window.
+    const after = furthest?.on_date && furthest.on_date > near[near.length - 1] ? furthest.on_date : near[near.length - 1];
+    const ahead: string[] = [];
+    for (let d = addDays(after, 1); d <= end && ahead.length < EXTEND_PER_NIGHT; d = addDays(d, 1)) ahead.push(d);
+    horizon[rite] = { added: ahead.length, through: ahead[ahead.length - 1] ?? furthest?.on_date ?? null };
+    orthocalDays.set(rite, [...near, ...ahead]);
+  }
+
+  for (const rite of orthocalRites) {
+    for (const iso of orthocalDays.get(rite) ?? []) {
       asked++;
       try {
         const got = await fetchOrthocal(rite, iso);
@@ -422,6 +471,7 @@ export async function GET(req: Request) {
     missing,
     failed,
     window: { from: window[0]?.iso ?? null, to: window[window.length - 1]?.iso ?? null },
+    horizon,
     seeding,
     rites: [...evangelizoRites, ...orthocalRites],
   });

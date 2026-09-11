@@ -33,9 +33,9 @@ import type { DevotionRow, DevotionTrack } from "@/lib/supabase/types";
  *     English page may never be typed, and a form that shows twelve fields
  *     when eight are wanted is a form that gets abandoned halfway.
  *
- * Reads and writes go straight to PostgREST, like the verses panel and for the
- * same reason: `daily_devotions` has real policies, so a route handler here
- * would only be re-implementing what the database already enforces.
+ * Reads and writes go straight to PostgREST: `daily_devotions` has real
+ * policies, so a route handler here would only be re-implementing what the
+ * database already enforces.
  */
 
 const S = {
@@ -563,8 +563,8 @@ export default function DevotionsPanel({ lang }: { lang: Lang }) {
             <Button tone="quiet" onClick={() => open(toDraft(r))}>
               {s.edit}
             </Button>
-            {/* Two taps, like the verses panel. This is a page somebody typed
-                out of a book by hand and there is no undo behind it. */}
+            {/* Two taps. This is a page somebody typed out of a book by hand
+                and there is no undo behind it. */}
             <Button
               tone="danger"
               onClick={() =>

@@ -6,7 +6,6 @@ import AnnouncementsPanel from "@/components/admin/AnnouncementsPanel";
 import ContentPanel from "@/components/admin/ContentPanel";
 import DevotionsPanel from "@/components/admin/DevotionsPanel";
 import NotifyPanel from "@/components/admin/NotifyPanel";
-import VersesPanel from "@/components/admin/VersesPanel";
 import type { Lang } from "@/lib/content";
 
 /**
@@ -22,18 +21,16 @@ import type { Lang } from "@/lib/content";
  * server-side check in the /api/admin routes.
  */
 
-type Section = "verses" | "devotions" | "messages" | "notify" | "content";
+type Section = "devotions" | "messages" | "notify" | "content";
 
 const S = {
   ar: {
-    verses: "الآيات",
     devotions: "التأمّلات",
     messages: "الرسائل",
     notify: "الإشعارات",
     content: "النصوص",
   },
   en: {
-    verses: "Verses",
     devotions: "Devotions",
     messages: "Messages",
     notify: "Notifications",
@@ -41,10 +38,10 @@ const S = {
   },
 } as const;
 
-const ORDER: Section[] = ["verses", "devotions", "messages", "notify", "content"];
+const ORDER: Section[] = ["devotions", "messages", "notify", "content"];
 
 export default function AdminTab({ lang }: { lang: Lang }) {
-  const [section, setSection] = useState<Section>("verses");
+  const [section, setSection] = useState<Section>("devotions");
   const s = S[lang];
 
   return (
@@ -99,7 +96,6 @@ export default function AdminTab({ lang }: { lang: Lang }) {
 
       {/* Unmounted rather than hidden, so switching away drops a half-typed
           draft's listeners and a panel always opens on fresh data. */}
-      {section === "verses" && <VersesPanel lang={lang} />}
       {section === "devotions" && <DevotionsPanel lang={lang} />}
       {section === "messages" && <AnnouncementsPanel lang={lang} />}
       {section === "notify" && <NotifyPanel lang={lang} />}

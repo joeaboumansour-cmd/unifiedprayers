@@ -37,7 +37,6 @@ import type { DailyVerseState } from "@/lib/useDailyVerse";
 import type { ReadingsState } from "@/lib/useReadings";
 import type { ReadingProgress } from "@/lib/useReadingProgress";
 import type { Push } from "@/lib/usePush";
-import type { Verse } from "@/lib/useVerse";
 
 /** The admin tab's own name. Chrome, not prayer text — so not in design.json. */
 const ADMIN_LABEL = { ar: "الإدارة", en: "Admin" } as const;
@@ -254,8 +253,6 @@ export type HomeProps = {
   /** Adds the fifth tab. Every button in it is checked again server-side. */
   isAdmin: boolean;
   push: Push;
-  /** Today's verse from the database, or null to use the bundled one. */
-  verse: Verse | null;
   /** Today's page from each devotional book, and what has been read. */
   devotions: Devotions;
   /** Which church's year the Calendar tab keeps, and the setters for it. */
@@ -304,7 +301,6 @@ export default function Home({
   syncStatus,
   isAdmin,
   push,
-  verse,
   devotions,
   liturgy,
   readings,
@@ -998,34 +994,6 @@ export default function Home({
                   </div>
                 );
               })}
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: 18,
-              borderRadius: 20,
-              background: "rgb(var(--veil-rgb) / .035)",
-              border: "1px solid rgb(var(--veil-rgb) / .06)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}
-          >
-            <div style={{ ...sectionLabel, letterSpacing: ".08em", marginBottom: 0 }}>
-              {t.verseLabel}
-            </div>
-            <div
-              className="selectable"
-              style={{ fontSize: 16, lineHeight: 1.9, color: "var(--body)" }}
-            >
-              {/* The bundled verse is the fallback, not the default: it is what
-                  shows before anyone has added one, and offline on a device
-                  that has never fetched the list. */}
-              {verse?.text ?? t.verse}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--dim)" }}>
-              {verse ? verse.ref : t.verseRef}
             </div>
           </div>
         </div>
