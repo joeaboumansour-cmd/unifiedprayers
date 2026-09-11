@@ -6,6 +6,7 @@ import AccountCard from "@/components/AccountCard";
 import Calendar from "@/components/Calendar";
 import DailyVerseCard from "@/components/DailyVerseCard";
 import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
+import { AboutRow } from "@/components/LayoutProbe";
 import ReadingCards, { readingsEmpty, readingsLabel } from "@/components/ReadingCards";
 import RosaryIcon, { IconPlate } from "@/components/RosaryIcon";
 import { AnnouncementBanner } from "@/components/Announcements";
@@ -1256,21 +1257,8 @@ export default function Home({
             <NotificationsCard lang="en" push={push} />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "15px 16px",
-              borderRadius: 18,
-              background: "rgb(var(--veil-rgb) / .03)",
-              border: "1px solid rgb(var(--veil-rgb) / .06)",
-              marginTop: 26,
-            }}
-          >
-            <div style={{ fontSize: 13.5, color: "var(--soft)" }}>{tEn.about}</div>
-            <div style={{ fontSize: 12, color: "var(--dim-3)" }}>{tEn.version}</div>
-          </div>
+          {/* Five taps open the layout diagnostics — see LayoutProbe. */}
+          <AboutRow about={tEn.about} version={tEn.version} />
         </div>
       )}
 
