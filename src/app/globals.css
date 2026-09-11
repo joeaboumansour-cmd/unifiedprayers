@@ -41,18 +41,27 @@ html[data-ios] {
   :root {
     --safe-b: env(safe-area-inset-bottom, 0px);
   }
+
+  /* Every installed iPhone app: the tab bar is solid ground colour below its
+     soft top edge. Where iOS leaves a strip under the page (below) that is
+     what makes the strip read as the bar's lower half; where it does not,
+     a solid bar is simply a solid bar. Keyed on the platform rather than on
+     the strip being measured, so a launch that measures it late cannot leave
+     the bar translucent. */
+  html[data-ios] {
+    --tab-bg: linear-gradient(rgb(var(--bg-base-rgb) / 0), rgb(var(--bg-base-rgb)) 38%);
+  }
 }
 
 /* An installed iPhone app that iOS has handed a viewport short of the screen
    (see data-ios-gap in layout.tsx). The strip below the page is outside it —
    nothing can be drawn there — and iOS paints it the page's ground colour.
-   So the tab bar is that colour, solid, below its soft top edge — translucent
+   The installed-iPhone rule above makes the bar that colour, solid — translucent
    it shows the darker app behind it and meets the strip with a visible step —
-   and the strip reads as the bar's own lower half. The labels get a few points
-   of air above the seam rather than sitting on it. */
+   so the strip reads as the bar's own lower half. Here the labels get a few
+   points of air above the seam rather than sitting on it. */
 html[data-ios-gap] {
   --tab-pad-b: 8px;
-  --tab-bg: linear-gradient(rgb(var(--bg-base-rgb) / 0), rgb(var(--bg-base-rgb)) 38%);
   --tab-clear: 86px;
   --toast-b: 74px;
 }

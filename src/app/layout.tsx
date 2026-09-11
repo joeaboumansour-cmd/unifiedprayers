@@ -81,11 +81,12 @@ export default function RootLayout({
               "(n.platform==='MacIntel'&&n.maxTouchPoints>1)){d.dataset.ios='';" +
               "var gap=function(){var s=n.standalone===true||matchMedia('(display-mode: standalone)').matches;" +
               "var g=Math.max(screen.width,screen.height)-innerHeight;" +
-              "if(s&&innerHeight>innerWidth&&g>=20&&g<=80)d.dataset.iosGap='';else delete d.dataset.iosGap;};" +
-              // The launch splash's red, from the first frame (LaunchSplash
-              // takes it back when it lifts).
-              "gap();if('iosGap' in d.dataset)d.style.backgroundColor='#4f0305';" +
-              "addEventListener('resize',gap);}}catch(e){}",
+              // Only ever set, never cleared: while iOS settles a launch it
+              // can report the full height for a moment and then keep the
+              // short one, and clearing the mark on that moment left the bar
+              // unblended for the rest of the session.
+              "if(s&&innerHeight>innerWidth&&g>=20&&g<=80)d.dataset.iosGap='';};" +
+              "gap();addEventListener('resize',gap);addEventListener('pageshow',gap);}}catch(e){}",
           }}
         />
       </head>
