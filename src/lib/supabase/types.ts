@@ -187,6 +187,8 @@ export type PushSubscriptionRow = {
   morning_hour: number | null;
   /** The device's own date on the morning it was last greeted. */
   last_morning: string | null;
+  /** Daily verse topics (0013); null for all of them. */
+  verse_topics?: string[] | null;
   enabled: boolean;
   failures: number;
   last_seen_at: string;
@@ -195,12 +197,10 @@ export type PushSubscriptionRow = {
 };
 
 /**
- * A device due its morning message, with the streak the copy should speak to.
+ * A device due its daily verse, with the topics to choose it from.
  *
  * Not a `PushSubscriptionRow`: `due_morning_messages` returns only what the
- * sender needs plus two computed columns, rather than every column of the
- * table. `streak` is 0 and `last_prayed` null for a device that never signed
- * in — there is no account to count sessions against.
+ * sender needs rather than every column of the table.
  */
 export type MorningDueRow = {
   id: string;
@@ -209,8 +209,12 @@ export type MorningDueRow = {
   auth: string;
   tz: string;
   user_id: string | null;
-  streak: number;
-  last_prayed: string | null;
+  /**
+   * The topics this device wants verses about (0013); null for all. Absent
+   * while the database still has 0006's version of the function, which is
+   * read as all.
+   */
+  verse_topics?: string[] | null;
 };
 
 /** The morning message's switch and destination, under key `morning_message`. */

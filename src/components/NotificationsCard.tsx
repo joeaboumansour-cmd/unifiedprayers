@@ -2,8 +2,16 @@
 
 import type { CSSProperties } from "react";
 
+import topicsDoc from "@/data/verses/topics.json";
 import type { Lang } from "@/lib/content";
 import type { Push } from "@/lib/usePush";
+
+type Group = { id: string; en: string; ar: string };
+type Topic = { id: string; group: string; en: string; ar: string };
+
+const GROUPS = (topicsDoc as { groups: Group[] }).groups;
+const TOPICS = (topicsDoc as { topics: Topic[] }).topics;
+const ALL = TOPICS.map((t) => t.id);
 
 /**
  * The notifications row in Settings.
@@ -17,7 +25,7 @@ import type { Push } from "@/lib/usePush";
 const S = {
   ar: {
     title: "الإشعارات",
-    blurb: "رسالة في الصباح، تذكير يومي، ورسائل نادرة من التطبيق.",
+    blurb: "آية كل صباح، تذكير يومي، ورسائل نادرة من التطبيق.",
     enable: "تفعيل الإشعارات",
     enabled: "الإشعارات مفعّلة",
     disable: "إيقاف",
@@ -32,13 +40,20 @@ const S = {
     reminder: "تذكير يومي",
     reminderOff: "بدون تذكير",
     reminderHint: "بتوقيت جهازك.",
-    morning: "رسالة الصباح",
-    morningOff: "بدون رسالة",
-    morningHint: "كلمة تشجيع كل صباح، وذكرٌ لسلسلة أيامك إن كانت لديك.",
+    morning: "آية اليوم",
+    morningOff: "بدون آية",
+    morningHint: "آية من الكتاب المقدس كل صباح، بلغة التطبيق، من المواضيع التي تختارها أدناه.",
+    topics: "مواضيع الآيات",
+    topicsAll: "كل المواضيع",
+    topicsSome: (n: number, of: number) => `${n} من ${of}`,
+    selectAll: "اختر الكل",
+    clear: "امسح",
+    topicsHint: "تتناوب الآيات بين المواضيع التي تختارها، موضوع كل يوم.",
+    topicsNone: "لم تختر أي موضوع، لذا ستأتي الآيات من كل المواضيع.",
   },
   en: {
     title: "Notifications",
-    blurb: "A morning message, a daily reminder, and the occasional word from the app.",
+    blurb: "A verse each morning, a daily reminder, and the occasional word from the app.",
     enable: "Turn on notifications",
     enabled: "Notifications are on",
     disable: "Turn off",
@@ -53,11 +68,150 @@ const S = {
     reminder: "Daily reminder",
     reminderOff: "No reminder",
     reminderHint: "In your device's own time.",
-    morning: "Morning message",
-    morningOff: "No message",
-    morningHint: "A word of encouragement each morning, and your streak when you have one.",
+    morning: "Daily verse",
+    morningOff: "No verse",
+    morningHint: "A verse of scripture each morning, in the app's language, from the topics you pick below.",
+    topics: "Verse topics",
+    topicsAll: "All topics",
+    topicsSome: (n: number, of: number) => `${n} of ${of}`,
+    selectAll: "Select all",
+    clear: "Clear",
+    topicsHint: "The verses take turns between the topics you pick — one topic a day.",
+    topicsNone: "Nothing picked, so the verses will come from every topic.",
   },
 } as const;
+
+/** A small tick for a chosen topic. */
+function Check() {
+  return (
+    <svg viewBox="0 0 16 16" width={11} height={11} aria-hidden="true" style={{ flex: "none" }}>
+      <path d="M3.5 8.4 6.6 11.3 12.5 4.8" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/**
+ * What the daily verse is chosen from.
+ *
+ * Checkboxes, not a single choice: somebody can be fighting envy and grieving
+ * at once, and the verses take turns between whatever is ticked. Grouped by
+ * the three questions the list really asks — what you struggle with, what you
+ * want to grow in, where you are — so forty topics read as three short lists.
+ *
+ * Null from the server means all, and draws as everything ticked.
+ */
+function TopicPicker({
+  lang,
+  value,
+  onChange,
+}: {
+  lang: Lang;
+  value: string[] | null;
+  onChange: (topics: string[] | null) => void;
+}) {
+  const s = S[lang];
+  const chosen = new Set(value ?? ALL);
+  const count = chosen.size;
+
+  const toggle = (id: string) => {
+    const next = new Set(chosen);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    // Every topic ticked is stored as null — "all" — so topics added to the
+    // list later reach this reader too, instead of a frozen list of today's.
+    onChange(next.size === ALL.length ? null : ALL.filter((t) => next.has(t)));
+  };
+
+  const small: CSSProperties = {
+    appearance: "none",
+    border: "none",
+    background: "none",
+    padding: "2px 0",
+    fontSize: 12.5,
+    fontFamily: "inherit",
+    color: "var(--accent-ink)",
+    cursor: "pointer",
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 13, color: "var(--soft)" }}>{s.topics}</div>
+          <div style={{ fontSize: 11.5, color: "var(--dim-3)", marginTop: 2 }}>
+            {count === ALL.length ? s.topicsAll : s.topicsSome(count, ALL.length)}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 14 }}>
+          <button type="button" style={small} onClick={() => onChange(null)} disabled={count === ALL.length}>
+            {s.selectAll}
+          </button>
+          <button type="button" style={{ ...small, color: "var(--dim)" }} onClick={() => onChange([])} disabled={count === 0}>
+            {s.clear}
+          </button>
+        </div>
+      </div>
+
+      {GROUPS.map((g) => (
+        <fieldset key={g.id} style={{ border: "none", margin: 0, padding: 0, minWidth: 0 }}>
+          <legend
+            style={{
+              padding: 0,
+              marginBottom: 8,
+              fontSize: 10.5,
+              fontWeight: 500,
+              letterSpacing: ".1em",
+              textTransform: "uppercase",
+              color: "var(--dim-2)",
+            }}
+          >
+            {g[lang]}
+          </legend>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+            {TOPICS.filter((t) => t.group === g.id).map((t) => {
+              const on = chosen.has(t.id);
+              return (
+                <label
+                  key={t.id}
+                  className="tap"
+                  style={{
+                    position: "relative",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 12px",
+                    borderRadius: 999,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    color: on ? "var(--accent-ink)" : "var(--dim)",
+                    background: on ? "rgb(var(--accent-rgb) / .13)" : "rgb(var(--veil-rgb) / .04)",
+                    border: `1px solid ${on ? "rgb(var(--accent-rgb) / .38)" : "rgb(var(--veil-rgb) / .1)"}`,
+                    transition: "background .2s ease, border-color .2s ease, color .2s ease",
+                  }}
+                >
+                  {/* The real checkbox, for keyboards and screen readers; the
+                      pill around it is only how it looks. */}
+                  <input
+                    type="checkbox"
+                    checked={on}
+                    onChange={() => toggle(t.id)}
+                    style={{ position: "absolute", opacity: 0, width: 1, height: 1, margin: 0 }}
+                  />
+                  {on && <Check />}
+                  {t[lang]}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      ))}
+
+      <span style={{ fontSize: 11.5, color: "var(--dim-3)", lineHeight: 1.6 }}>
+        {count === 0 ? s.topicsNone : s.topicsHint}
+      </span>
+    </div>
+  );
+}
 
 const card: CSSProperties = {
   borderRadius: 18,
@@ -233,6 +387,11 @@ export default function NotificationsCard({
             value={push.morningHour}
             onChange={push.setMorningHour}
           />
+
+          {/* Only while there is a verse to choose topics for. */}
+          {push.morningHour !== null && (
+            <TopicPicker lang={lang} value={push.verseTopics} onChange={push.setVerseTopics} />
+          )}
 
           <HourPicker
             id="reminder-hour"

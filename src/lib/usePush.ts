@@ -44,6 +44,14 @@ export type Push = {
    * second it takes to ask the server would be a lie in the other direction.
    */
   morningHour: number | null;
+  /**
+   * Which topics the daily verse is chosen from — ids from
+   * src/data/verses/topics.json. Null means all of them, which is where every
+   * device starts.
+   */
+  verseTopics: string[] | null;
+  /** This device's push endpoint once subscribed; it is how the server knows it. */
+  endpoint: string | null;
   busy: boolean;
   /**
    * Why the last attempt to turn them on failed, in the reader's language.
@@ -59,7 +67,12 @@ export type Push = {
   disable: () => Promise<void>;
   setReminderHour: (hour: number | null) => Promise<void>;
   setMorningHour: (hour: number | null) => Promise<void>;
+  /** Saves the topics. Taps in quick succession are sent as one request. */
+  setVerseTopics: (topics: string[] | null) => void;
 };
+
+/** How long a run of taps on the topic list waits before it is saved. */
+const TOPICS_SAVE_MS = 700;
 
 /** Matches the column default in 0006. Changing one means changing both. */
 export const MORNING_DEFAULT = 8;
@@ -146,9 +159,19 @@ export function usePush(lang: "ar" | "en"): Push {
   const [state, setState] = useState<PushState>("checking");
   const [reminderHour, setHour] = useState<number | null>(null);
   const [morningHour, setMorning] = useState<number | null>(MORNING_DEFAULT);
+  const [verseTopics, setTopics] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endpoint = useRef<string | null>(null);
+  const [endpointState, setEndpointState] = useState<string | null>(null);
+  /*
+   * Whether `verseTopics` is the server's answer or only the starting null.
+   * Until it is known it is not sent: registering for some other reason — a
+   * new reminder hour set in the first second — would otherwise save "all
+   * topics" over whatever the reader had actually chosen.
+   */
+  const topicsKnown = useRef(false);
+  const topicsTimer = useRef<number | null>(null);
 
   /* ------------------------------ discovery ------------------------------ */
 
@@ -191,6 +214,7 @@ export function usePush(lang: "ar" | "en"): Push {
       }
 
       endpoint.current = sub.endpoint;
+      setEndpointState(sub.endpoint);
       setState("on");
 
       // The hour lives on the server, not here: a reinstall keeps the push
@@ -206,12 +230,15 @@ export function usePush(lang: "ar" | "en"): Push {
           found?: boolean;
           reminderHour?: number | null;
           morningHour?: number | null;
+          verseTopics?: string[] | null;
         };
         if (live && data.found) {
           setHour(data.reminderHour ?? null);
           // `?? MORNING_DEFAULT` would be wrong here: null is a real answer
           // meaning someone turned it off, not a missing one.
           setMorning(data.morningHour === undefined ? MORNING_DEFAULT : data.morningHour);
+          setTopics(Array.isArray(data.verseTopics) ? data.verseTopics : null);
+          topicsKnown.current = true;
         }
       } catch {
         /* offline — the toggle still shows as on, the hour just reads null */
@@ -242,7 +269,11 @@ export function usePush(lang: "ar" | "en"): Push {
   /* ------------------------------- register ------------------------------ */
 
   const register = useCallback(
-    async (hour: number | null, morning: number | null): Promise<boolean> => {
+    async (
+      hour: number | null,
+      morning: number | null,
+      topics?: string[] | null,
+    ): Promise<boolean> => {
       const reg = await navigator.serviceWorker.ready;
       let sub = await reg.pushManager.getSubscription();
 
@@ -256,6 +287,7 @@ export function usePush(lang: "ar" | "en"): Push {
       }
 
       endpoint.current = sub.endpoint;
+      setEndpointState(sub.endpoint);
 
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
@@ -265,6 +297,8 @@ export function usePush(lang: "ar" | "en"): Push {
           tz: timezone(),
           reminderHour: hour,
           morningHour: morning,
+          // Left out, not nulled, unless it is known — see topicsKnown.
+          ...(topics !== undefined ? { verseTopics: topics } : {}),
           platform: platform(),
         }),
       });
@@ -272,6 +306,9 @@ export function usePush(lang: "ar" | "en"): Push {
     },
     [],
   );
+
+  /** The topics to send with a registration, or undefined to leave them be. */
+  const knownTopics = (t: string[] | null) => (topicsKnown.current ? t : undefined);
 
   const enable = useCallback(async (): Promise<boolean> => {
     if (busy || !VAPID) return false;
@@ -290,7 +327,7 @@ export function usePush(lang: "ar" | "en"): Push {
         return false;
       }
 
-      const ok = await register(reminderHour, morningHour);
+      const ok = await register(reminderHour, morningHour, knownTopics(verseTopics));
       setState(ok ? "on" : "off");
       // Permission granted but the server would not take the subscription --
       // offline, or the deployment has no VAPID private key. Distinguished
@@ -304,7 +341,8 @@ export function usePush(lang: "ar" | "en"): Push {
     } finally {
       setBusy(false);
     }
-  }, [busy, register, reminderHour, morningHour, lang]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- knownTopics reads a ref
+  }, [busy, register, reminderHour, morningHour, verseTopics, lang]);
 
   const disable = useCallback(async (): Promise<void> => {
     if (busy) return;
@@ -326,7 +364,11 @@ export function usePush(lang: "ar" | "en"): Push {
         await sub.unsubscribe().catch(() => {});
       }
       endpoint.current = null;
+      setEndpointState(null);
       setHour(null);
+      // The row, and the topics on it, are gone.
+      setTopics(null);
+      topicsKnown.current = false;
       // Back to the default, not to null: the row is gone, and turning
       // notifications on again creates a fresh one with the morning message on.
       setMorning(MORNING_DEFAULT);
@@ -342,33 +384,54 @@ export function usePush(lang: "ar" | "en"): Push {
       // Setting an hour is also how someone turns reminders on for the first
       // time, so this registers rather than assuming a subscription exists.
       if (state === "on" || Notification.permission === "granted") {
-        await register(hour, morningHour).catch(() => {});
+        await register(hour, morningHour, knownTopics(verseTopics)).catch(() => {});
         setState("on");
       }
     },
-    [register, state, morningHour],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- knownTopics reads a ref
+    [register, state, morningHour, verseTopics],
   );
 
   const setMorningHour = useCallback(
     async (hour: number | null): Promise<void> => {
       setMorning(hour);
       if (state === "on" || Notification.permission === "granted") {
-        await register(reminderHour, hour).catch(() => {});
+        await register(reminderHour, hour, knownTopics(verseTopics)).catch(() => {});
         setState("on");
       }
     },
-    [register, state, reminderHour],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- knownTopics reads a ref
+    [register, state, reminderHour, verseTopics],
+  );
+
+  /* Shown at once, saved a moment later. Somebody ticking eight topics in a
+     row is making one decision, and eight round trips racing each other could
+     land out of order and save the fourth tap last. */
+  const setVerseTopics = useCallback(
+    (topics: string[] | null): void => {
+      setTopics(topics);
+      topicsKnown.current = true;
+      if (topicsTimer.current) window.clearTimeout(topicsTimer.current);
+      topicsTimer.current = window.setTimeout(() => {
+        topicsTimer.current = null;
+        if (state === "on") void register(reminderHour, morningHour, topics).catch(() => {});
+      }, TOPICS_SAVE_MS);
+    },
+    [register, state, reminderHour, morningHour],
   );
 
   return {
     state,
     reminderHour,
     morningHour,
+    verseTopics,
+    endpoint: endpointState,
     busy,
     error,
     enable,
     disable,
     setReminderHour,
     setMorningHour,
+    setVerseTopics,
   };
 }

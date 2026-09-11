@@ -471,6 +471,27 @@ button {
   }
 }
 
+/* The daily verse, arriving from its notification: one slow glow so the eye
+   lands on it, then an ordinary card again. */
+.dv-arrive {
+  animation: dvArrive 2.4s var(--ease) both;
+}
+
+@keyframes dvArrive {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / 0);
+    transform: translateY(8px);
+  }
+  25% {
+    box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 0.55), 0 0 36px rgb(var(--accent-rgb) / 0.35);
+    transform: translateY(0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / 0);
+    transform: translateY(0);
+  }
+}
+
 /* ---------------------------------------------------------------
    The iOS install guide.
 
@@ -578,6 +599,7 @@ button {
   .rd-words,
   .rd-streak,
   .rd-complete,
+  .dv-arrive,
   .ig-scroll,
   .ig-pointer-down,
   .ig-pointer-up {

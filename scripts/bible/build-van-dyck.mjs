@@ -30,15 +30,16 @@
  * orthocal's English for those readings rather than inventing an Arabic.
  */
 
-import { gzipSync, inflateRawSync } from "node:zlib";
+import { gzipSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
+import { fetchEdition } from "./ebible.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT = join(here, "..", "..", "src", "data", "bible", "arb-vd.json.gz");
 
-const ZIP = "https://ebible.org/Scriptures/arb-vd_vpl.zip";
 const INDEX = "https://ebible.org/arb-vd/index.htm";
 
 /** Van Dyck splits these; the KJV (and so orthocal) does not. */
@@ -47,63 +48,18 @@ const JOIN_TO_KJV = [
   { book: "3JN", chapter: 1, from: 15, into: 14 },
 ];
 
-/** One named entry out of a zip, without a dependency for it. */
-function unzipEntry(buf, name) {
-  // The end-of-central-directory record sits in the last 64 KiB.
-  let eocd = -1;
-  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 65557); i--) {
-    if (buf.readUInt32LE(i) === 0x06054b50) {
-      eocd = i;
-      break;
-    }
-  }
-  if (eocd < 0) throw new Error("not a zip file");
-  const count = buf.readUInt16LE(eocd + 10);
-  let p = buf.readUInt32LE(eocd + 16);
-  for (let n = 0; n < count; n++) {
-    const method = buf.readUInt16LE(p + 10);
-    const size = buf.readUInt32LE(p + 20);
-    const nameLen = buf.readUInt16LE(p + 28);
-    const extraLen = buf.readUInt16LE(p + 30);
-    const commentLen = buf.readUInt16LE(p + 32);
-    const local = buf.readUInt32LE(p + 42);
-    const entry = buf.toString("utf8", p + 46, p + 46 + nameLen);
-    if (entry === name) {
-      const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
-      const data = buf.subarray(start, start + size);
-      if (method === 0) return data;
-      if (method === 8) return inflateRawSync(data);
-      throw new Error(`unsupported zip method ${method}`);
-    }
-    p += 46 + nameLen + extraLen + commentLen;
-  }
-  throw new Error(`${name} not in the archive`);
-}
-
 /** Harakat off a *name* for a label. The verses themselves keep every mark. */
 const bare = (s) => s.replace(/[ً-ٰٟ]/g, "").replace(/ٱ/g, "ا");
 /** "١ كورنثوس" → "1 كورنثوس", to sit beside the Western digits of a reference. */
 const westernDigits = (s) => s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
 
 async function main() {
-  const zip = Buffer.from(await (await fetch(ZIP)).arrayBuffer());
-  const xml = unzipEntry(zip, "arb-vd_vpl.xml").toString("utf8");
+  const { url, verses, total } = await fetchEdition("arb-vd");
   const index = await (await fetch(INDEX)).text();
 
   const books = {};
   for (const m of index.matchAll(/href='([0-9A-Z]{3})\d+\.htm'>([^<]+)</g)) {
     books[m[1]] = westernDigits(bare(m[2].trim()));
-  }
-
-  /** verses[BOOK][chapter - 1][verse - 1] */
-  const verses = {};
-  let total = 0;
-  for (const m of xml.matchAll(/<v b="([0-9A-Z]{3})" c="(\d+)" v="(\d+)">([^<]*)<\/v>/g)) {
-    const [, b, c, v, text] = m;
-    const chapters = (verses[b] ??= []);
-    const chapter = (chapters[Number(c) - 1] ??= []);
-    chapter[Number(v) - 1] = text.trim();
-    total++;
   }
 
   for (const { book, chapter, from, into } of JOIN_TO_KJV) {
@@ -124,7 +80,7 @@ async function main() {
     title: "الكتاب المقدس باللغة العربية، فان دايك",
     licence: "Public Domain",
     source: "eBible.org",
-    url: ZIP,
+    url,
     versification: "KJV",
     fetched: new Date().toISOString().slice(0, 10),
     books,

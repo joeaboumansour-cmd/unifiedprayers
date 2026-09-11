@@ -49,6 +49,7 @@ import { useStats } from "@/lib/useStats";
 import { useStrayAuthToken } from "@/lib/useStrayAuthToken";
 import { useCouple } from "@/lib/useCouple";
 import { useLiturgy } from "@/lib/useLiturgy";
+import { useDailyVerse } from "@/lib/useDailyVerse";
 import { useReadings } from "@/lib/useReadings";
 import { useReadingProgress } from "@/lib/useReadingProgress";
 import { TRACKS, useDevotions } from "@/lib/useDevotions";
@@ -104,6 +105,12 @@ export default function Page() {
   const isAdmin = useAdmin(auth.user?.id ?? null) === true;
   const push = usePush(prefs.lang);
   const verse = useVerse(prefs.lang);
+  const dailyVerse = useDailyVerse(push.endpoint);
+  // Opened from the morning notification: straight to the Today tab, where
+  // the whole verse is waiting at the top.
+  useEffect(() => {
+    if (dailyVerse.arrived) setTab(1);
+  }, [dailyVerse.arrived]);
   // Whether the couples devotion is unlocked. The read policy in 0009 enforces
   // this independently; here it only decides how the card is drawn.
   //
@@ -456,6 +463,7 @@ export default function Page() {
         liturgy={liturgy}
         readings={readings}
         readingProgress={readingProgress}
+        dailyVerse={dailyVerse}
         paired={couple.paired}
         banner={banner}
         onDismissBanner={() => banner && dismiss(banner.id)}

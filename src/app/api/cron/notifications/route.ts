@@ -7,7 +7,7 @@ import {
   sendToSubscriptions,
   subscriptionsFor,
 } from "@/lib/server/push";
-import { morningMessage } from "@/lib/server/morningCopy";
+import { notificationFor, pickVerse, verseUrl } from "@/lib/server/dailyVerse";
 import type {
   DailyReminderSetting,
   MorningDueRow,
@@ -26,8 +26,8 @@ export const maxDuration = 60;
  *   1. scheduled messages — an admin picked a time, it has passed, send it.
  *   2. the nightly reminder — each device asked for an hour in its own
  *      timezone, and somewhere in the world it is now that hour.
- *   3. the morning message — the same idea, at a separate hour, with the copy
- *      chosen against the streak the account actually has.
+ *   3. the daily verse — the same idea, at a separate hour, with a verse
+ *      chosen from the topics that device picked in Settings.
  *
  * All three are idempotent, which matters more than it sounds: cron delivery is
  * at-least-once, and a retry after a timeout must not send everything twice.
@@ -195,16 +195,17 @@ async function runReminders(): Promise<{ due: number; sent: number }> {
 }
 
 /**
- * The morning message.
+ * The daily verse.
  *
  * Shaped like the reminder sweep above and different in one way that changes
- * the plumbing: every device gets its own text. The streak comes back with the
- * row, the copy is picked from the pool against it, and the send is per-device
- * rather than one payload fanned out.
+ * the plumbing: every device gets its own text. The topics come back with the
+ * row, the verse is picked against them and the device's own date, and the
+ * send is per-device rather than one payload fanned out.
  *
- * The switch in app_settings is a real one. This pushes to every subscriber
- * every day, which is the kind of thing that should be stoppable without a
- * deploy; a missing row means on, so a fresh database behaves like the seed.
+ * The switch in app_settings (still keyed `morning_message`, which is what the
+ * admin panel and every existing database call it) is a real one. This pushes
+ * to every subscriber every day, which is the kind of thing that should be
+ * stoppable without a deploy; a missing row means on.
  */
 async function runMorning(): Promise<{ due: number; sent: number }> {
   const supabase = serviceClient();
@@ -218,7 +219,6 @@ async function runMorning(): Promise<{ due: number; sent: number }> {
 
   const config = (setting?.value as Partial<MorningSetting> | null) ?? {};
   if (config.enabled === false) return { due: 0, sent: 0 };
-  const url = typeof config.url === "string" && config.url ? config.url : "/";
 
   const { data: due, error } = await supabase.rpc("due_morning_messages");
   if (error || !due?.length) return { due: 0, sent: 0 };
@@ -227,25 +227,16 @@ async function runMorning(): Promise<{ due: number; sent: number }> {
   const now = new Date();
 
   const items = rows.map((row) => {
-    const date = localDate(row.tz, now);
-    const copy = morningMessage({
-      seed: row.id,
-      date,
-      streak: row.streak,
-      // The row is read at the top of the morning hour, so this is usually
-      // false — but a device in a timezone the sweep reaches late, or someone
-      // who prays before eight, should not be told to go and pray.
-      prayedToday: row.last_prayed === date,
-      everPrayed: row.last_prayed !== null,
-    });
-
+    const verse = pickVerse(row.id, row.verse_topics, localDate(row.tz, now));
     return {
       sub: row,
       payload: {
-        ...copy,
-        url,
+        ...notificationFor(verse),
+        // Tapping opens the Today tab on the whole verse; the notification
+        // may have had to cut it short.
+        url: verseUrl(verse),
         // One tag for the morning message, as the reminder has one: a phone
-        // left untouched for three days shows today's greeting, not three.
+        // left untouched for three days shows today's verse, not three.
         tag: "up-morning",
       },
     };

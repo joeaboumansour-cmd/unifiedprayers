@@ -15,6 +15,7 @@
     "liturgy:curated": "node scripts/liturgy/link-curated.mjs",
     "liturgy:martyrology": "node scripts/liturgy/build-martyrology.mjs",
     "bible:van-dyck": "node scripts/bible/build-van-dyck.mjs",
+    "bible:verses": "node scripts/bible/build-verses.mjs",
     "liturgy:deps": "npm i --no-save --legacy-peer-deps romcal@3.0.0 @romcal/calendar.general-roman@3.0.0-alpha.0"
   },
   "dependencies": {

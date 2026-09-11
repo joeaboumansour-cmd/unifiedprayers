@@ -60,9 +60,9 @@ const S = {
       "النص الذي يصل كل مساء لمن فعّل التذكير. التوقيت يختاره كل شخص من إعداداته.",
     saveReminder: "حفظ النص",
     saved: "تم الحفظ.",
-    morning: "رسالة الصباح",
+    morning: "آية اليوم",
     morningHint:
-      "رسالة تشجيع تُختار تلقائيًا لكل شخص حسب سلسلة أيامه، وتصل كل صباح بتوقيت جهازه. النصوص في التطبيق نفسه؛ هنا يمكن إيقافها للجميع.",
+      "آية من الكتاب المقدس تُختار لكل شخص من المواضيع التي اختارها في إعداداته، وتصل كل صباح بتوقيت جهازه. الآيات في التطبيق نفسه؛ هنا يمكن إيقافها للجميع.",
     morningOn: "مفعّلة",
     morningOff: "موقوفة",
     status: {
@@ -112,9 +112,9 @@ const S = {
       "What goes out each evening to everyone who switched reminders on. Each person picks their own hour in Settings.",
     saveReminder: "Save text",
     saved: "Saved.",
-    morning: "Morning message",
+    morning: "Daily verse",
     morningHint:
-      "An encouragement chosen automatically for each person from their streak, sent each morning in their device's own time. The wording lives in the app; this turns it off for everyone.",
+      "A verse of scripture chosen for each person from the topics they picked in Settings, sent each morning in their device's own time. The verses live in the app; this turns it off for everyone.",
     morningOn: "On",
     morningOff: "Off",
     status: {

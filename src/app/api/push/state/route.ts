@@ -26,9 +26,12 @@ export async function POST(req: Request): Promise<Response> {
   }
   if (typeof endpoint !== "string" || !endpoint) return badRequest("bad-endpoint");
 
+  /* `*` rather than a column list naming verse_topics: until 0013 is applied
+     that column does not exist, and naming it would fail the query and make
+     every device read as unsubscribed. */
   const { data, error } = await supabase
     .from("push_subscriptions")
-    .select("reminder_hour, morning_hour, tz, enabled")
+    .select("*")
     .eq("endpoint", endpoint)
     .maybeSingle();
 
@@ -40,6 +43,8 @@ export async function POST(req: Request): Promise<Response> {
     found: true,
     reminderHour: data.reminder_hour,
     morningHour: data.morning_hour,
+    // Null means all topics; so does a database that predates the column.
+    verseTopics: data.verse_topics ?? null,
     tz: data.tz,
     enabled: data.enabled,
   });

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
 import Calendar from "@/components/Calendar";
+import DailyVerseCard from "@/components/DailyVerseCard";
 import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
 import ReadingCards, { readingsEmpty, readingsLabel } from "@/components/ReadingCards";
 import RosaryIcon, { IconPlate } from "@/components/RosaryIcon";
@@ -32,6 +33,7 @@ import type { Auth } from "@/lib/useAuth";
 import { TRACKS, type Devotions } from "@/lib/useDevotions";
 import type { SyncStatus } from "@/lib/useCloudSync";
 import type { Liturgy } from "@/lib/useLiturgy";
+import type { DailyVerseState } from "@/lib/useDailyVerse";
 import type { ReadingsState } from "@/lib/useReadings";
 import type { ReadingProgress } from "@/lib/useReadingProgress";
 import type { Push } from "@/lib/usePush";
@@ -248,6 +250,8 @@ export type HomeProps = {
   /** Today's readings for the reader's own church, and how far through them. */
   readings: ReadingsState;
   readingProgress: ReadingProgress;
+  /** This device's daily verse, and whether the app was opened from it. */
+  dailyVerse: DailyVerseState;
   /** Half of a couple. Draws the couples devotion card unlocked. */
   paired: boolean;
   banner: AnnouncementRow | null;
@@ -297,6 +301,7 @@ export default function Home({
   liturgy,
   readings,
   readingProgress,
+  dailyVerse,
   paired,
   banner,
   onDismissBanner,
@@ -790,6 +795,10 @@ export default function Home({
       {/* ---------- TODAY ---------- */}
       {tab === 1 && (
         <div>
+          {/* First, because it is the one thing on this tab chosen for this
+              reader — and where the morning notification lands. */}
+          <DailyVerseCard lang={lang} daily={dailyVerse} />
+
           <Row
             onClick={onStartToday}
             style={{
