@@ -117,8 +117,11 @@ export default function TabBar({
         padding: "8px 14px var(--tab-pad-b)",
         display: "flex",
         gap: 4,
+        // --tab-bg is set only where iOS leaves a strip under the page
+        // (globals.css); everywhere else the bar is the translucent gradient
+        // it always was.
         background:
-          "linear-gradient(rgb(var(--bg-base-rgb) / 0),rgb(var(--bg-base-rgb) / .86) 40%,rgb(var(--bg-base-rgb) / .97))",
+          "var(--tab-bg, linear-gradient(rgb(var(--bg-base-rgb) / 0),rgb(var(--bg-base-rgb) / .86) 40%,rgb(var(--bg-base-rgb) / .97)))",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
         borderTop: "1px solid rgb(var(--veil-rgb) / .06)",

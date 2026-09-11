@@ -52,6 +52,21 @@ export default function LaunchSplash({ ready }: { ready: boolean }) {
   const [minPassed, setMinPassed] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
 
+  /* Where iOS leaves a strip under the page (data-ios-gap, layout.tsx), it
+     paints it the page's ground colour — navy, under a red splash. The ground
+     takes the splash's colour while it shows, so the launch is one colour to
+     the bottom edge, and gets its own back when the splash lifts. Nowhere else
+     is that ground ever visible. */
+  const showing = phase !== "gone";
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!showing || !("iosGap" in root.dataset)) return;
+    root.style.backgroundColor = GROUND;
+    return () => {
+      root.style.removeProperty("background-color");
+    };
+  }, [showing]);
+
   useEffect(() => {
     const min = window.setTimeout(() => setMinPassed(true), MIN_MS);
     const max = window.setTimeout(() => setTimedOut(true), MAX_MS);

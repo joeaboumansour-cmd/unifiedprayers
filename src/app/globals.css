@@ -43,6 +43,20 @@ html[data-ios] {
   }
 }
 
+/* An installed iPhone app that iOS has handed a viewport short of the screen
+   (see data-ios-gap in layout.tsx). The strip below the page is outside it —
+   nothing can be drawn there — and iOS paints it the page's ground colour.
+   So the tab bar is that colour, solid, below its soft top edge — translucent
+   it shows the darker app behind it and meets the strip with a visible step —
+   and the strip reads as the bar's own lower half. The labels get a few points
+   of air above the seam rather than sitting on it. */
+html[data-ios-gap] {
+  --tab-pad-b: 8px;
+  --tab-bg: linear-gradient(rgb(var(--bg-base-rgb) / 0), rgb(var(--bg-base-rgb)) 38%);
+  --tab-clear: 86px;
+  --toast-b: 74px;
+}
+
 * {
   margin: 0;
   padding: 0;

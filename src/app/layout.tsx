@@ -66,12 +66,26 @@ export default function RootLayout({
             navigation there and would cover it. The flag has to land
             before the first paint, so it is a blocking script rather than
             an effect. */}
+        {/* data-ios-gap: an installed iPhone app that iOS has handed a
+            viewport shorter than the screen. Measured on an iPhone 13 with
+            iOS 26: screen 844, viewport 797 — short by exactly the status
+            bar — and the missing 47 points under it are not part of the page
+            at all: nothing drawn there shows, so stretching into it only
+            pushed the tab labels out of sight. iOS fills that strip with the
+            page's ground colour, so globals.css ends the tab bar in the same
+            colour and the strip reads as the bar's own lower half. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var n=navigator;if(/iphone|ipad|ipod/i.test(n.userAgent)||" +
-              "(n.platform==='MacIntel'&&n.maxTouchPoints>1))" +
-              "document.documentElement.dataset.ios='';}catch(e){}",
+              "try{var n=navigator,d=document.documentElement;if(/iphone|ipad|ipod/i.test(n.userAgent)||" +
+              "(n.platform==='MacIntel'&&n.maxTouchPoints>1)){d.dataset.ios='';" +
+              "var gap=function(){var s=n.standalone===true||matchMedia('(display-mode: standalone)').matches;" +
+              "var g=Math.max(screen.width,screen.height)-innerHeight;" +
+              "if(s&&innerHeight>innerWidth&&g>=20&&g<=80)d.dataset.iosGap='';else delete d.dataset.iosGap;};" +
+              // The launch splash's red, from the first frame (LaunchSplash
+              // takes it back when it lifts).
+              "gap();if('iosGap' in d.dataset)d.style.backgroundColor='#4f0305';" +
+              "addEventListener('resize',gap);}}catch(e){}",
           }}
         />
       </head>
