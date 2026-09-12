@@ -19,6 +19,8 @@ import { at, dayKey } from "@/lib/liturgy/computus";
 import { intlLocale } from "@/lib/locale";
 import { rememberedOn, type Remembered } from "@/lib/liturgy/martyrology";
 import { readingScript, useReadings } from "@/lib/useReadings";
+import { useReadingProgress } from "@/lib/useReadingProgress";
+import { ReadingMark } from "@/components/ReadingCards";
 import type { Liturgy } from "@/lib/useLiturgy";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
@@ -655,7 +657,7 @@ function DayDetail({
         </div>
       )}
 
-      <Readings day={day} lang={lang} rite={rite} />
+      <Readings day={day} lang={lang} rite={rite} isToday={isToday} />
       <Remembrance day={day} lang={lang} />
     </div>
   );
@@ -676,14 +678,39 @@ function DayDetail({
  *
  * In the reader's language where the mirror has the day in it; otherwise in
  * whichever it does, set in that language's direction.
+ *
+ * On today, and only on today, these are the same readings the home and Today
+ * screens are keeping score of, so they carry the same ticks and reading one
+ * here counts there. Other days are left unticked deliberately: the log is
+ * what the streak is counted from, and a tap on last Tuesday is a reader
+ * looking a day up, not a reader having read it.
  */
-function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
+function Readings({
+  day,
+  lang,
+  rite,
+  isToday,
+}: {
+  day: Day;
+  lang: Lang;
+  rite: Rite;
+  isToday: boolean;
+}) {
   const { data } = useReadings(day.key, rite, lang);
   const [open, setOpen] = useState<string | null>(null);
+  // Which tick to draw itself: the one for the reading opened by this tap,
+  // never the ones that were already done when the day was opened.
+  const [fresh, setFresh] = useState<string | null>(null);
+
+  const kinds = useMemo(() => (data?.readings ?? []).map((r) => r.kind), [data]);
+  const progress = useReadingProgress(day.key, rite, kinds);
 
   // Collapse again when the reader moves to another day, or the second day
   // they open inherits the first one's expanded passage.
-  useEffect(() => setOpen(null), [day.key, rite]);
+  useEffect(() => {
+    setOpen(null);
+    setFresh(null);
+  }, [day.key, rite]);
 
   if (!data?.readings.length) return null;
 
@@ -694,25 +721,37 @@ function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
         {data.readings.map((r) => {
           const isOpen = open === r.kind;
           const script = readingScript(r, data);
+          const read = isToday && progress.isRead(r.kind);
           return (
             <div
               key={r.kind}
               style={{
                 borderRadius: 14,
-                background: "rgb(var(--veil-rgb) / .035)",
-                border: "1px solid rgb(var(--veil-rgb) / .07)",
+                background: read
+                  ? "rgb(var(--accent-rgb) / .055)"
+                  : "rgb(var(--veil-rgb) / .035)",
+                border: `1px solid ${read ? "rgb(var(--accent-rgb) / .18)" : "rgb(var(--veil-rgb) / .07)"}`,
                 overflow: "hidden",
+                transition: "background .5s var(--ease), border-color .5s var(--ease)",
               }}
             >
               <button
                 type="button"
                 disabled={!r.text}
-                onClick={() => setOpen(isOpen ? null : r.kind)}
+                onClick={() => {
+                  setOpen(isOpen ? null : r.kind);
+                  // Opening it is the whole of reading it, here as on the home
+                  // screen; closing it again does not un-read it.
+                  if (!isOpen && isToday && !progress.isRead(r.kind)) {
+                    setFresh(r.kind);
+                    progress.open(r.kind);
+                  }
+                }}
                 style={{
                   appearance: "none",
                   width: "100%",
                   display: "flex",
-                  alignItems: "baseline",
+                  alignItems: "center",
                   justifyContent: "space-between",
                   gap: 10,
                   padding: "11px 13px",
@@ -724,7 +763,12 @@ function Readings({ day, lang, rite }: { day: Day; lang: Lang; rite: Rite }) {
                   color: "var(--body)",
                 }}
               >
-                <span lang={script.lang} dir={script.dir} style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                {isToday && <ReadingMark read={read} fresh={fresh === r.kind} />}
+                <span
+                  lang={script.lang}
+                  dir={script.dir}
+                  style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.5 }}
+                >
                   {/* The label the rite itself gives this reading, never one
                       of ours: what sits in a slot differs by church. */}
                   {r.label ?? r.ref}

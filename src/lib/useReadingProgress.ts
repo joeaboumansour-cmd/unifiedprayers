@@ -57,6 +57,33 @@ function read(): Log {
 /** "2026-09-10|maronite". */
 const keyFor = (day: string, rite: string) => `${day}|${rite}`;
 
+/*
+ * One log for the whole app, not one per caller.
+ *
+ * Two screens draw today's readings — the home/Today pair and the calendar's
+ * entry for today — and each calls this hook. Left to their own `useState`
+ * they would each hold the copy of localStorage they read at mount, so a
+ * reading ticked on one would stay untouched on the other until a reload. So
+ * the log lives here and the hook subscribes to it.
+ */
+let store: Log | null = null;
+const listeners = new Set<(log: Log) => void>();
+
+function load(): Log {
+  if (store === null) store = read();
+  return store;
+}
+
+function publish(next: Log) {
+  store = next;
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    /* private mode — the place simply does not survive a reload */
+  }
+  for (const l of listeners) l(next);
+}
+
 /** The day `n` days before `from`, on the device's own calendar. */
 function dayBefore(from: Date, n: number): string {
   return localDate(new Date(from.getFullYear(), from.getMonth(), from.getDate() - n));
@@ -86,9 +113,15 @@ export function useReadingProgress(
   const [loaded, setLoaded] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
 
+  // Read in an effect, never during render: the first paint has to match the
+  // server's, which has no localStorage to read.
   useEffect(() => {
-    setLog(read());
+    setLog(load());
     setLoaded(true);
+    listeners.add(setLog);
+    return () => {
+      listeners.delete(setLog);
+    };
   }, []);
 
   const key = keyFor(day, rite);
@@ -102,26 +135,19 @@ export function useReadingProgress(
 
   const open = useCallback(
     (kind: string) => {
-      setLog((prev) => {
-        const was = prev[key];
-        if (was?.read.includes(kind)) return prev;
+      const prev = load();
+      const was = prev[key];
+      if (was?.read.includes(kind)) return;
 
-        const readNow = [...(was?.read ?? []), kind];
-        const complete = total > 0 && readNow.length >= total;
-        // Fire the completion animation on the edge only, never on a re-render
-        // or on re-opening a day that was already finished.
-        if (complete && !was?.done) setJustCompleted(true);
+      const readNow = [...(was?.read ?? []), kind];
+      const complete = total > 0 && readNow.length >= total;
+      // Fire the completion animation on the edge only, never on a re-render
+      // or on re-opening a day that was already finished.
+      if (complete && !was?.done) setJustCompleted(true);
 
-        const next: Log = {
-          ...prev,
-          [key]: { read: readNow, total, done: complete, at: Date.now() },
-        };
-        try {
-          localStorage.setItem(KEY, JSON.stringify(next));
-        } catch {
-          /* private mode — the place simply does not survive a reload */
-        }
-        return next;
+      publish({
+        ...prev,
+        [key]: { read: readNow, total, done: complete, at: Date.now() },
       });
     },
     [key, total],

@@ -25,8 +25,13 @@ const T = {
   source: { ar: "المصدر", en: "Source" },
 } as const;
 
-/** The tick that draws itself once a reading has been opened. */
-function Tick({ fresh }: { fresh: boolean }) {
+/**
+ * The tick that draws itself once a reading has been opened.
+ *
+ * Exported because the calendar draws today's readings too, and the same fact
+ * about the same reading has to carry the same mark on both screens.
+ */
+export function Tick({ fresh }: { fresh: boolean }) {
   return (
     <svg viewBox="0 0 22 22" style={{ width: 17, height: 17, flex: "none" }} aria-hidden="true">
       <circle
@@ -65,6 +70,29 @@ function Tick({ fresh }: { fresh: boolean }) {
         }
       />
     </svg>
+  );
+}
+
+/**
+ * Read or not read, in the width a tick takes either way.
+ *
+ * The hollow ring is not a placeholder for the tick, it is the other half of
+ * the pair: a row with nothing in that slot would read as a row that cannot be
+ * ticked, and the line would also shift sideways the moment it was.
+ */
+export function ReadingMark({ read, fresh }: { read: boolean; fresh: boolean }) {
+  if (read) return <Tick fresh={fresh} />;
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: 17,
+        height: 17,
+        flex: "none",
+        borderRadius: "50%",
+        border: "1.4px solid rgb(var(--veil-rgb) / .22)",
+      }}
+    />
   );
 }
 
@@ -137,20 +165,7 @@ function ReadingRow({
           cursor: reading.text ? "pointer" : "default",
         }}
       >
-        {read ? (
-          <Tick fresh={fresh} />
-        ) : (
-          <span
-            aria-hidden="true"
-            style={{
-              width: 17,
-              height: 17,
-              flex: "none",
-              borderRadius: "50%",
-              border: "1.4px solid rgb(var(--veil-rgb) / .22)",
-            }}
-          />
-        )}
+        <ReadingMark read={read} fresh={fresh} />
         <span
           lang={script.lang}
           dir={script.dir}
