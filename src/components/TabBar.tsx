@@ -112,21 +112,30 @@ export default function TabBar({
       dir="ltr"
       style={{
         position: "absolute",
-        insetInline: 0,
-        bottom: 0,
-        padding: "8px 14px var(--tab-pad-b)",
+        insetInline: "var(--tab-inline)",
+        bottom: "var(--tab-float-b)",
+        padding: 6,
         display: "flex",
-        gap: 4,
-        // --tab-bg is set only where iOS leaves a strip under the page
-        // (globals.css); everywhere else the bar is the translucent gradient
-        // it always was.
-        background:
-          "var(--tab-bg, linear-gradient(rgb(var(--bg-base-rgb) / 0),rgb(var(--bg-base-rgb) / .86) 40%,rgb(var(--bg-base-rgb) / .97)))",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        borderTop: "1px solid rgb(var(--veil-rgb) / .06)",
+        gap: 2,
+        // A capsule, not a shelf. Clear of every edge, so the page runs on
+        // underneath it and the blur has something to soften.
+        borderRadius: 999,
+        // Thin enough to read what is behind it, opaque enough to keep the
+        // labels legible over a bright card scrolling past.
+        background: "rgb(var(--bg-base-rgb) / .58)",
+        // The saturation is what keeps the ground from going grey under the
+        // blur; without it a translucent dark bar drains the colour it sits on.
+        backdropFilter: "blur(22px) saturate(170%)",
+        WebkitBackdropFilter: "blur(22px) saturate(170%)",
+        border: "1px solid rgb(var(--veil-rgb) / .1)",
+        boxShadow:
+          "0 10px 30px rgb(var(--shadow-rgb) / var(--shadow-a)), inset 0 1px 0 rgb(var(--veil-rgb) / .05)",
         transition: `transform .5s ${EASE}, opacity .35s ease`,
-        transform: hidden ? "translateY(120%)" : "translateY(0)",
+        // Far enough to clear its own height, the gap beneath it, and the
+        // shadow that trails it.
+        transform: hidden
+          ? "translateY(calc(100% + var(--tab-float-b) + 24px))"
+          : "translateY(0)",
         opacity: hidden ? 0 : 1,
         pointerEvents: hidden ? "none" : "auto",
       }}
@@ -147,10 +156,15 @@ export default function TabBar({
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 5,
-              padding: "7px 0 var(--tab-btn-pad-b)",
+              gap: 4,
+              padding: "6px 0",
               color: ink,
-              transition: "color .25s ease",
+              // The active tab is a chip inside the capsule: a faint wash of
+              // the accent, so which tab you are on reads at a glance rather
+              // than only from the colour of the icon.
+              borderRadius: 999,
+              background: on ? "rgb(var(--accent-rgb) / .13)" : "transparent",
+              transition: "color .25s ease, background .25s ease",
             }}
           >
             <svg viewBox="0 0 24 24" style={{ width: 21, height: 21 }} aria-hidden="true">

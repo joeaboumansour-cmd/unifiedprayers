@@ -25,8 +25,13 @@ import { useEffect, useState } from "react";
 
 /** Matches SPLASH_LOGO in scripts/generate-icons.mjs, and the launch images it writes. */
 const LOGO = "62vmin";
-/** The ground the logo and every launch image are drawn on. */
-const GROUND = "#4f0305";
+/**
+ * The ground the logo and every launch image are drawn on. Defined in
+ * globals.css, which also paints the document itself this colour for as long
+ * as this element is mounted — the strip iOS leaves below a short viewport is
+ * outside the page, so the splash cannot cover it and the ground must match.
+ */
+const GROUND = "var(--splash-ground)";
 /** Never a flash: once shown, it stays at least this long. */
 const MIN_MS = 700;
 /** Never a trap: a network that does not answer does not keep the app hidden. */
@@ -84,6 +89,8 @@ export default function LaunchSplash({ ready }: { ready: boolean }) {
 
   return (
     <div
+      // globals.css keys the document's ground off this id.
+      id="launch-splash"
       role="status"
       aria-label="Loading"
       className={leaving ? "ls-leave" : undefined}

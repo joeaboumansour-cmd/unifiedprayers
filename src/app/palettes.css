@@ -4,10 +4,11 @@
    Every colour in the app resolves through these tokens, so switching
    palette is just setting data-palette on <html>.
 
-   There are two, and they are a pair rather than a list:
+   There are three:
 
      midnight   deep blue ground / warm gold accent — the dark one
      linen      warm paper ground / bronze accent  — the light one
+     ember      deep red ground  / the same gold   — the launch screen's own
 
    Each is a whole scheme, not an accent swap: ground, surface, ink and
    accent all move together, and the muted text ramp is mixed from the
@@ -194,4 +195,90 @@
     #e9e3d6 100%
   );
   --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #e9e4d9, #dcd6c8);
+}
+
+/* Deep red ground, the same gold — the launch screen, carried into the app.
+   Every token is restated here, because the :root block still matches <html>.
+
+   The ground is darker than the splash's own #4f0305. That colour is right
+   behind a dove and a few words, and tiring under a full screen of prayer
+   text; deepened, it still reads unmistakably red and the gold gains contrast
+   rather than losing it. The splash red stays on as the glow the app opens
+   from, at the top of --grad-app. */
+[data-palette="ember"] {
+  color-scheme: dark;
+
+  /* Untouched from midnight: this is the gold the toggles, beads and accents
+     already wear, and the gold in the launch image it now sits beside. */
+  --accent-rgb: 232 199 126;
+  --accent: rgb(var(--accent-rgb));
+  --accent-deep: #d3ab5c;
+  --accent-soft-rgb: 246 224 178;
+  --accent-soft: rgb(var(--accent-soft-rgb));
+  --accent-glow: #fff4dc;
+  --sparkle: #fff4dc;
+  --accent-text: #e2d1a9;
+  --accent-ink: var(--accent);
+  --on-accent: #241205;
+
+  /* The muted ramp is mixed from the ground's own red, the way midnight's is
+     mixed from its blue — a neutral grey ramp on this ground reads as dust. */
+  --ink-rgb: 247 233 228;
+  --ink: rgb(var(--ink-rgb));
+  --body: #ecd8d2;
+  --soft: #d3b3ab;
+  --soft-2: #e0c5be;
+  --dim: #b88d84;
+  --dim-2: #a87c73;
+  --dim-3: #9c7269;
+  --dim-4: #7e5851;
+
+  --bead-rgb: 245 224 216;
+  --bead: rgb(var(--bead-rgb));
+
+  --bg-base-rgb: 42 5 7;
+  --bg-base: #2a0507;
+  --surface: #3d0b0e;
+  --scrim: rgba(20, 2, 3, 0.66);
+  --resume-a: rgba(208, 96, 74, 0.22);
+  --resume-b: rgba(61, 11, 14, 0.5);
+
+  --veil-rgb: 255 255 255;
+  --well: rgba(0, 0, 0, 0.3);
+  /* Warm rather than neutral black: a grey shadow on this ground goes muddy. */
+  --shadow-rgb: 26 1 2;
+  --shadow-a: 0.58;
+  --switch-knob: #ffffff;
+  --art-plate: transparent;
+  --tap-bright: 1.18;
+  --dim-veil: linear-gradient(rgba(60, 26, 0, 0.42), rgba(40, 16, 0, 0.5)),
+    rgba(0, 0, 0, 0.28);
+  /* Lifted well clear of the ground: midnight's danger pink is a warning on
+     near-black and merely a lighter red here, which is the one thing a
+     destructive action must never look like. */
+  --danger-rgb: 255 173 183;
+  --danger: rgb(var(--danger-rgb));
+
+  /* Brightened from midnight's, because these dots now sit on a red ground:
+     the red vestment in particular has to separate from what is behind it,
+     and only luminance can do that when the hues agree. */
+  --lit-white: #e8c77e;
+  --lit-red: #f3958a;
+  --lit-green: #8cc093;
+  --lit-violet: #b89bd8;
+  --lit-rose: #e6aec2;
+
+  --grad-app: radial-gradient(
+    120% 80% at 50% -10%,
+    #5c0a0d 0%,
+    #3a0608 45%,
+    #2a0507 100%
+  );
+  --grad-player: radial-gradient(
+    110% 70% at 50% 6%,
+    #630c10 0%,
+    #340507 48%,
+    #1e0304 100%
+  );
+  --grad-backdrop: radial-gradient(900px 600px at 50% 0%, #1d1012, #0d0708);
 }

@@ -5,7 +5,7 @@ export type Lang = "ar" | "en";
 export type PrayerId = "spirit" | "mary";
 export type MysteryKey = "joyful" | "sorrowful" | "glorious" | "luminous";
 export type BeadStyle = "arc" | "ring" | "chain" | "orb";
-export type Palette = "midnight" | "linen";
+export type Palette = "midnight" | "linen" | "ember";
 
 export type NamedPrayer = { name: string; sections: string[] };
 export type Gift = { name: string; super: string };
@@ -293,6 +293,8 @@ export const PALETTES: PaletteInfo[] = [
     swatch: "#e8c77e", ground: "#0b1226", ink: "#eceff7", theme: "#070c18" },
   { id: "linen", label: { ar: "نهاري", en: "Linen" },
     swatch: "#b08445", ground: "#f6f3ec", ink: "#23262e", theme: "#f1ece1" },
+  { id: "ember", label: { ar: "جمري", en: "Ember" },
+    swatch: "#e8c77e", ground: "#3a0608", ink: "#f7e9e4", theme: "#2a0507" },
 ];
 
 export const paletteInfo = (id: Palette): PaletteInfo =>

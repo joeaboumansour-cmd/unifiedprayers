@@ -1013,16 +1013,15 @@ export default function Home({
       {tab === 3 && (
         <div dir="ltr" style={{ ["--knob" as string]: "18px" }}>
           <div style={sectionLabel}>{PALETTE_LABEL.en}</div>
-          {/* One control split down the middle, dark on one side and light on
-              the other. Each half is painted in its OWN palette rather than
-              the running one, so the control shows what the tap will do
-              instead of describing it. */}
+          {/* One control divided into a column per palette. Each column is
+              painted in its OWN palette rather than the running one, so the
+              control shows what the tap will do instead of describing it. */}
           <div
             role="group"
             aria-label={PALETTE_LABEL.en}
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: `repeat(${PALETTES.length}, 1fr)`,
               borderRadius: 18,
               overflow: "hidden",
               /* The frame is drawn in the live accent, not in the neutral

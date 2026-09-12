@@ -3,6 +3,16 @@
 :root {
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* The ground the launch images are drawn on, and so the ground the splash
+     has to keep. scripts/generate-icons.mjs does not store it — it reads the
+     colour out of the source logo's own corner and bakes that into every
+     launch image — so this is a transcription of what that produces, and it
+     has to be re-read if the logo is ever redrawn on a different ground.
+
+     Not a palette token: iOS chose its copy at install time, and no later
+     choice of the reader's can repaint a picture Apple already holds. */
+  --splash-ground: #4f0305;
+
   --safe-t: env(safe-area-inset-top, 0px);
   /* In Safari the document is pinned to the small viewport, which already
      sits above the browser's bottom bar, so the home-indicator inset would be
@@ -16,54 +26,42 @@
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
 
-  /* Tab-bar metrics. These are the values every platform gets: the bar
-     clears whatever the system reserves at the bottom edge. Android's
-     gesture bar and Windows' taskbar live there and would cover it. */
-  --tab-pad-b: max(10px, var(--safe-b));
-  --tab-btn-pad-b: 7px;
+  /* Tab-bar metrics. The bar is a capsule that floats clear of all four
+     edges, so these are the gaps *around* it, not padding inside it, and
+     the page keeps scrolling underneath where the blur can see it.
+
+     --tab-float-b is what the bar sits above. Android's gesture bar and
+     Windows' taskbar live at the bottom edge and would cover it; on an
+     installed iPhone the home indicator wants the same room, which is what
+     --safe-b carries once standalone turns it on. */
+  --tab-float-b: max(10px, var(--safe-b));
+  --tab-inline: 12px;
   --tab-label-lh: normal;
-  --tab-clear: calc(86px + max(10px, var(--safe-b)));
-  --toast-b: calc(74px + max(10px, var(--safe-b)));
+  /* What a scroller pads its last card by: the capsule, the gap under it,
+     and a little air so nothing stops half-covered. */
+  --tab-clear: calc(76px + var(--tab-float-b));
+  --toast-b: calc(66px + var(--tab-float-b));
 }
 
-/* iOS only. The home indicator is a thin overlay rather than reserved
-   chrome, so the bar can sit on the bottom edge and let the indicator
-   pass over it. Set from layout.tsx before the first paint. */
+/* iOS only, set from layout.tsx before the first paint. The labels are a
+   touch tighter than the platform default leaves them. */
 html[data-ios] {
-  --tab-pad-b: 0px;
-  --tab-btn-pad-b: 0px;
   --tab-label-lh: 1.05;
-  --tab-clear: 78px;
-  --toast-b: 66px;
 }
 
 @media (display-mode: standalone), (display-mode: fullscreen) {
   :root {
     --safe-b: env(safe-area-inset-bottom, 0px);
   }
-
-  /* Every installed iPhone app: the tab bar is solid ground colour below its
-     soft top edge. Where iOS leaves a strip under the page (below) that is
-     what makes the strip read as the bar's lower half; where it does not,
-     a solid bar is simply a solid bar. Keyed on the platform rather than on
-     the strip being measured, so a launch that measures it late cannot leave
-     the bar translucent. */
-  html[data-ios] {
-    --tab-bg: linear-gradient(rgb(var(--bg-base-rgb) / 0), rgb(var(--bg-base-rgb)) 38%);
-  }
 }
 
 /* An installed iPhone app that iOS has handed a viewport short of the screen
    (see data-ios-gap in layout.tsx). The strip below the page is outside it —
    nothing can be drawn there — and iOS paints it the page's ground colour.
-   The installed-iPhone rule above makes the bar that colour, solid — translucent
-   it shows the darker app behind it and meets the strip with a visible step —
-   so the strip reads as the bar's own lower half. Here the labels get a few
-   points of air above the seam rather than sitting on it. */
+   A floating bar wants exactly that: the strip becomes the gap beneath the
+   capsule, so the bar asks for nothing more than room for its own shadow. */
 html[data-ios-gap] {
-  --tab-pad-b: 8px;
-  --tab-clear: 86px;
-  --toast-b: 74px;
+  --tab-float-b: 4px;
 }
 
 * {
@@ -81,6 +79,25 @@ html {
   overscroll-behavior: none;
   overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
+  /* Only ever seen at the seam below: eases the ground from the splash's
+     colour to the palette's as the splash unmounts, instead of snapping. */
+  transition: background 0.45s ease;
+}
+
+/* The document's own ground, while the splash is up.
+
+   Where iOS hands an installed app a viewport shorter than the screen (see
+   data-ios-gap in layout.tsx) it fills the strip below with this colour —
+   and the splash, being inside the page, cannot reach there. Left at the
+   palette's ground that painted a navy stripe under a red launch screen.
+   Matched here instead, so the launch screen runs edge to edge.
+
+   Keyed on the splash element rather than on a flag set from script: the
+   splash is in the server-rendered HTML and this has to be right on the very
+   first paint, before any of it runs. It stops applying when the splash
+   unmounts, which also keeps it off the pages that never mount one. */
+html:has(#launch-splash) {
+  background: var(--splash-ground);
 }
 
 body {
