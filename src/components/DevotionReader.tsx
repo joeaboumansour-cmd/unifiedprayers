@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import Completion from "@/components/Completion";
 import { type Lang, ui } from "@/lib/content";
-import { playPageTurn } from "@/lib/sfx";
+import { playGlimmer, playReveal, resetGlimmer } from "@/lib/glimmer";
 import type { Devotion } from "@/lib/useDevotions";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
@@ -210,8 +210,6 @@ export type DevotionReaderProps = {
    * put down part-way. Read once per opening, not tracked afterwards.
    */
   startAt?: number;
-  /** Mirrors the player: a page turn is heard only if ambience is on. */
-  audio: boolean;
   /** Every reveal, so closing the reader never loses the place. */
   onProgress: (shown: number, total: number) => void;
   /** Called once, when the last block has been tapped past. */
@@ -238,7 +236,6 @@ export default function DevotionReader({
   dateLine,
   trackLabel,
   startAt = 1,
-  audio,
   onProgress,
   onComplete,
   onClose,
@@ -275,6 +272,11 @@ export default function DevotionReader({
     setShown(Math.max(1, Math.min(startAt, blocks.length || 1)));
     setDone(false);
     setBurst((b) => b + 1);
+    // The sound of the page being unsealed, under the big opening burst. The
+    // reveals after it climb a scale, and a new page starts that climb again
+    // from the bottom.
+    resetGlimmer();
+    playReveal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, devotion?.id]);
 
@@ -300,7 +302,9 @@ export default function DevotionReader({
       onComplete();
       return;
     }
-    if (audio) playPageTurn();
+    // A smaller version of the opening sound, one step higher each time, so
+    // the page sounds like it is being uncovered rather than clicked through.
+    playGlimmer();
     const next = shown + 1;
     setShown(next);
     setBurst((b) => b + 1);

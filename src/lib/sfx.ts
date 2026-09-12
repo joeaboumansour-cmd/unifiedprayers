@@ -31,8 +31,11 @@ let noise: AudioBuffer | null = null;
  * A second of white noise, made once and reused. Building it per turn costs a
  * fresh buffer of random numbers on the tap itself, which is the one moment
  * that has to stay smooth.
+ *
+ * Shared with the reveals in glimmer.ts, which shape the same second of noise
+ * into air rather than into a breath.
  */
-function noiseBuffer(ctx: AudioContext): AudioBuffer | null {
+export function noiseBuffer(ctx: AudioContext): AudioBuffer | null {
   if (noise && noise.sampleRate === ctx.sampleRate) return noise;
   try {
     const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate), ctx.sampleRate);

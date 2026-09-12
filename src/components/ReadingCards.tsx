@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { Lang } from "@/lib/content";
+import { playGlimmer, playTick } from "@/lib/glimmer";
 import type { Rite } from "@/lib/liturgy";
 import type { Reading } from "@/lib/supabase/types";
 import type { ReadingProgress } from "@/lib/useReadingProgress";
@@ -129,10 +130,17 @@ function ReadingRow({
   const toggle = () => {
     const next = !open;
     setOpen(next);
-    if (next && !read) {
-      setFresh(true);
-      onOpen();
+    if (!next) return;
+    if (read) {
+      // Already ticked, so nothing is being marked: the quiet version, for
+      // opening a passage again.
+      playGlimmer(true);
+      return;
     }
+    setFresh(true);
+    onOpen();
+    // Timed to the tick drawing itself beside it, ring first and then check.
+    playTick();
   };
 
   return (

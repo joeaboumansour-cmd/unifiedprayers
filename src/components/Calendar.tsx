@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { type Lang } from "@/lib/content";
+import { playGlimmer, playTick } from "@/lib/glimmer";
 import {
   RITE_LABEL,
   buildAgenda,
@@ -745,6 +746,11 @@ function Readings({
                   if (!isOpen && isToday && !progress.isRead(r.kind)) {
                     setFresh(r.kind);
                     progress.open(r.kind);
+                    // The same sound the tick gets on the home screen: same
+                    // fact about the same reading, same mark, same sound.
+                    playTick();
+                  } else if (!isOpen) {
+                    playGlimmer(true);
                   }
                 }}
                 style={{

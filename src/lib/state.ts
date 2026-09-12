@@ -14,6 +14,11 @@ export type Prefs = {
   palette: Palette;
   size: number;
   dim: boolean;
+  /**
+   * Sound: the bed under an open prayer, and every reveal, tick and bell the
+   * rest of the app makes. One switch, because a person who does not want the
+   * app making noise does not want half of it making noise either.
+   */
   audio: boolean;
   awake: boolean;
   /**
@@ -38,7 +43,11 @@ export const DEFAULT_PREFS: Prefs = {
   palette: "midnight",
   size: 1,
   dim: false,
-  audio: false,
+  // On, because the sound is part of the thing rather than an extra on top of
+  // it, and a first visit with it off is a first visit that never hears any of
+  // it. Nothing plays until a tap unlocks the browser's audio anyway, so this
+  // cannot make noise at somebody who has not touched the app yet.
+  audio: true,
   awake: true,
   updatedAt: 0,
 };
@@ -54,14 +63,48 @@ export const DEFAULT_PREFS: Prefs = {
 const knownPalette = (p: Palette): Palette =>
   PALETTES.some((x) => x.id === p) ? p : DEFAULT_PREFS.palette;
 
+/**
+ * Marks that this device has already been given the sound once.
+ *
+ * Sound used to be off unless it was asked for, so every device that ran an
+ * older build holds `audio: false` — including the great majority who never
+ * opened Settings and were simply handed the old default. Turning it on for
+ * them is the point of the change; turning it on again every launch would
+ * override somebody who has since gone in and muted it. So it is switched on
+ * once per device, and this key is how the app remembers having done it.
+ */
+const SOUND_DEFAULT_KEY = "up_sound_on_v1";
+
+function soundOnOnce(p: Prefs): Prefs {
+  try {
+    if (localStorage.getItem(SOUND_DEFAULT_KEY)) return p;
+    localStorage.setItem(SOUND_DEFAULT_KEY, "1");
+    // Stamped as a change made now, which it is. Without it the account's copy
+    // in the database — written before this build and still holding the old
+    // default — comes back newer on the next sign-in and switches the sound
+    // straight off again. The stamp costs this device's whole settings blob
+    // winning that comparison once, which is whole-copy last-write-wins
+    // working as designed rather than an exception to it.
+    return { ...p, audio: true, updatedAt: Date.now() };
+  } catch {
+    return p; // private mode — the default in memory is on either way
+  }
+}
+
 export function readPrefs(): Prefs | null {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
-    if (!raw) return null;
+    if (!raw) {
+      // No blob at all is still a device that has been handed the sound, and
+      // marking it now keeps a later mute from being undone on the launch
+      // after it.
+      soundOnOnce(DEFAULT_PREFS);
+      return null;
+    }
     // Spread over the defaults: a blob written by an older build is missing
     // whatever has been added since, and must still load.
     const p = { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) };
-    return { ...p, palette: knownPalette(p.palette) };
+    return soundOnOnce({ ...p, palette: knownPalette(p.palette) });
   } catch {
     return null; // private mode, or a corrupt blob — defaults are fine
   }

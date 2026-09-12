@@ -36,6 +36,7 @@ import type { DevotionTrack } from "@/lib/supabase/types";
 import { setAppBusy } from "@/lib/appBusy";
 import { watchAudioUnlock } from "@/lib/audio";
 import { playChime } from "@/lib/chime";
+import { playGlimmer, setGlimmerEnabled } from "@/lib/glimmer";
 import { playPageTurn, preloadSfx } from "@/lib/sfx";
 import { buildSteps } from "@/lib/steps";
 import { useAdmin } from "@/lib/useAdmin";
@@ -212,6 +213,23 @@ export default function Page() {
 
   useWakeLock(prefs.awake && screen === "player");
   useAmbience(prefs.audio && screen === "player");
+
+  /* The same preference, handed to the sounds the rest of the app makes.
+     Those are asked for from screens that know nothing about prefs — a reading
+     opening, a tab changing — so the switch is held in the sound module and set
+     from here rather than threaded through every one of them. */
+  useEffect(() => setGlimmerEnabled(prefs.audio), [prefs.audio]);
+
+  /* A page turning under the thumb. Here rather than on the tab bar's own
+     handler because a tab is also changed by swiping across the screen, and
+     both ways of arriving on a page should sound the same. The ref is what
+     keeps the first render — which is not a change — from making a sound at
+     somebody who has only just opened the app. */
+  const tabSound = useRef(false);
+  useEffect(() => {
+    if (tabSound.current) playGlimmer(true);
+    else tabSound.current = true;
+  }, [tab]);
 
   // Browsers only start audio a person asked for, and Safari only accepts the
   // request while the gesture is still being handled -- too early for the
@@ -644,11 +662,14 @@ export default function Page() {
             ? (devotions.stateOf(devotionTrack)?.shown ?? 1)
             : 1
         }
-        audio={prefs.audio}
         onProgress={(shown, total) =>
           devotionTrack && devotions.saveProgress(devotionTrack, shown, total)
         }
-        onComplete={() => devotionTrack && devotions.markRead(devotionTrack)}
+        onComplete={() => {
+          // The same bell a finished rosary gets, over the same closing tick.
+          if (prefs.audio) playChime();
+          if (devotionTrack) devotions.markRead(devotionTrack);
+        }}
         onClose={closeDevotion}
       />
 
