@@ -172,7 +172,7 @@ export default function Player({
           // Lit wins over muted: a tap back onto the first step should still
           // show the arrow answering, not blink out mid-flash.
           opacity: lit ? 1 : muted ? 0.07 : intro ? 0.58 : 0.26,
-          transition: "opacity .55s ease, background .3s ease",
+          transition: "opacity .55s ease, background .3s ease, scale var(--t-rise) var(--ease-out)",
         }}
       >
         <svg
@@ -375,7 +375,7 @@ export default function Player({
               ? "rgb(var(--accent-rgb) / .16)"
               : "rgb(var(--veil-rgb) / .07)",
             border: "1px solid rgb(var(--veil-rgb) / .09)",
-            transition: `background .3s ${EASE}`,
+            transition: `background .3s ${EASE}, scale var(--t-rise) var(--ease-out)`,
           }}
         >
           {/* The short word, not the full setting name: the switch beside it

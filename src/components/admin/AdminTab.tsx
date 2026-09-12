@@ -62,6 +62,9 @@ export default function AdminTab({ lang }: { lang: Lang }) {
           overflowX: "auto",
           scrollbarWidth: "none",
         }}
+        /* Sideways in here is this row's, not the tab swipe's — see
+           useTabSwipe, which looks for exactly this. */
+        data-scroll-x=""
       >
         {ORDER.map((id) => {
           const on = id === section;
@@ -83,7 +86,7 @@ export default function AdminTab({ lang }: { lang: Lang }) {
                 fontWeight: 500,
                 fontFamily: "inherit",
                 cursor: "pointer",
-                transition: "background .25s ease, color .25s ease",
+                transition: "background .25s ease, color .25s ease, scale var(--t-rise) var(--ease-out)",
                 color: on ? "var(--on-accent)" : "var(--soft)",
                 background: on ? "rgb(var(--accent-rgb) / .9)" : "transparent",
               }}

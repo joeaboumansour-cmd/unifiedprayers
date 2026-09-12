@@ -88,7 +88,7 @@ export function Button({
         background: disabled ? "rgb(var(--veil-rgb) / .03)" : colours.bg,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit",
-        transition: "background .2s ease, color .2s ease",
+        transition: "background .2s ease, color .2s ease, scale var(--t-rise) var(--ease-out)",
       }}
     >
       {children}
@@ -224,7 +224,7 @@ export function Choice<T extends string>({
               fontWeight: 500,
               fontFamily: "inherit",
               cursor: "pointer",
-              transition: "background .2s ease, color .2s ease",
+              transition: "background .2s ease, color .2s ease, scale var(--t-rise) var(--ease-out)",
               color: on ? "var(--on-accent)" : "var(--soft)",
               background: on ? "rgb(var(--accent-rgb) / .9)" : "rgb(var(--veil-rgb) / .05)",
               border: `1px solid ${on ? "transparent" : "rgb(var(--veil-rgb) / .1)"}`,

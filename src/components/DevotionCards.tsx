@@ -169,7 +169,7 @@ export default function DevotionCards({
                     ? "rgb(var(--veil-rgb) / .1)"
                     : "rgb(var(--veil-rgb) / .05)"
               }`,
-              transition: `background .4s ${EASE}, border-color .4s ${EASE}`,
+              transition: `background .4s ${EASE}, border-color .4s ${EASE}, scale var(--t-rise) var(--ease-out)`,
             }}
           >
             {/* The glow behind an unopened card, breathing so the pair reads

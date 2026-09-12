@@ -1,13 +1,18 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import AccountCard from "@/components/AccountCard";
 import Calendar from "@/components/Calendar";
 import DailyVerseCard from "@/components/DailyVerseCard";
 import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
 import { AboutRow } from "@/components/LayoutProbe";
-import ReadingCards, { readingsEmpty, readingsLabel } from "@/components/ReadingCards";
+import ReadingCards, {
+  ReadingsWaiting,
+  readingsEmpty,
+  readingsLabel,
+} from "@/components/ReadingCards";
 import RosaryIcon, { IconPlate } from "@/components/RosaryIcon";
 import { AnnouncementBanner } from "@/components/Announcements";
 import NotificationsCard from "@/components/NotificationsCard";
@@ -37,6 +42,7 @@ import type { Liturgy } from "@/lib/useLiturgy";
 import type { DailyVerseState } from "@/lib/useDailyVerse";
 import type { ReadingsState } from "@/lib/useReadings";
 import type { ReadingProgress } from "@/lib/useReadingProgress";
+import type { TabSwipe } from "@/lib/useTabSwipe";
 import type { Push } from "@/lib/usePush";
 
 /** The admin tab's own name. Chrome, not prayer text — so not in design.json. */
@@ -236,6 +242,12 @@ function Toggle({ on }: { on: boolean }) {
 export type HomeProps = {
   hidden: boolean;
   tab: number;
+  /** The sideways drag across the pages. Held by the shell, which also owns
+      `tab` and hands the same gesture to the tab bar. */
+  swipe: TabSwipe;
+  /** Counts taps on the tab already open. Each one sends that page to the
+      top; counted rather than flagged so two in a row are two requests. */
+  home: number;
   lang: Lang;
   /** Real counts from the device's log of finished prayers. */
   stats: Stats;
@@ -289,6 +301,8 @@ export type HomeProps = {
 export default function Home({
   hidden,
   tab,
+  swipe,
+  home,
   lang,
   stats,
   progress,
@@ -333,7 +347,7 @@ export default function Home({
   // the shell around them mirrors in Arabic, and re-pin --knob, which the root
   // sets to travel the mirrored way.
   const tEn = ui("en");
-  const enOnly = tab === 3 || tab === 4;
+  const enOnly = (i: number) => i === 3 || i === 4;
   const today = new Date();
   const hour = today.getHours();
   const greet = hour < 5 ? 0 : hour < 12 ? 1 : hour < 17 ? 2 : 3;
@@ -378,24 +392,66 @@ export default function Home({
     color: active ? "var(--on-accent)" : "var(--soft)",
   });
 
-  return (
-    <div
-      className="scroll-y"
-      style={{
-        position: "absolute",
-        inset: 0,
-        padding:
-          "calc(20px + var(--safe-t)) 20px var(--tab-clear)",
-        boxSizing: "border-box",
-        transition: `transform .5s ${EASE}, opacity .4s ease`,
-        transform: hidden ? "scale(.965)" : "scale(1)",
-        opacity: hidden ? 0 : 1,
-        pointerEvents: hidden ? "none" : "auto",
-        // Keeps the knob travel correct when the layout mirrors.
-        ["--knob" as string]: ar ? "-18px" : "18px",
-      }}
-      aria-hidden={hidden}
-    >
+  const count = isAdmin ? 5 : 4;
+
+  /* Tapping the tab you are already on takes that page back to the top.
+     Now that each page keeps its own scroll position, the long ones stay
+     where they were left — which is what you want every time except the one
+     time you are a long way down and just want to be back at the start. The
+     tab under your thumb is the obvious way to ask for that, and on a phone
+     it is the only one that does not involve a lot of scrolling.
+
+     `home` counts the taps rather than naming the tab, so two in a row on the
+     same tab are two separate requests. */
+  const pane = useRef<(HTMLDivElement | null)[]>([]);
+  useEffect(() => {
+    if (!home) return;
+    pane.current[tab]?.scrollTo({
+      top: 0,
+      /* The one place a long, eased motion is right on a direct tap: this is
+         travel, and cutting straight to the top loses where you came from.
+         Unless the reader has asked for less of it, in which case a long
+         glide past everything they scrolled through is the whole of what
+         they were asking to be spared. */
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+  }, [home, tab]);
+
+  /* Which pages are built. A page you can reach with the next swipe has to be
+     there already or there would be nothing to slide in, so the two either
+     side of the current one are kept alive — and once built a page stays,
+     because it is holding its own scroll position and, for the calendar, the
+     day it went and fetched. Settings and Admin are therefore never built for
+     a reader who only ever opens the first three. */
+  const [live, setLive] = useState<number[]>(() => [tab]);
+  useEffect(() => {
+    setLive((was) => {
+      const want = [tab - 1, tab, tab + 1].filter((i) => i >= 0 && i < count);
+      const missing = want.filter((i) => !was.includes(i));
+      return missing.length ? [...was, ...missing] : was;
+    });
+  }, [tab, count]);
+
+  /* A tap that skips a tab should not fly the pages between it past the
+     reader: three pages of travel reads as a journey rather than a change of
+     place. Everything next door — every swipe, and a tap on a neighbour —
+     slides.
+
+     Decided the moment the tab changes and then held, rather than derived from
+     a ref each render: the answer has to survive the re-renders that follow
+     one tab change, and a ref updated in an effect is already stale by the
+     second of them. Setting state during a render is the supported way to
+     adjust to a changed prop — React re-runs this render before it paints. */
+  const [motion, setMotion] = useState({ tab, near: true });
+  if (motion.tab !== tab) {
+    setMotion({ tab, near: Math.abs(tab - motion.tab) <= 1 });
+  }
+
+  /** One page, built for whichever tab it is. */
+  const page = (i: number) => (
+    <>
       {/* header */}
       <div
         style={{
@@ -423,11 +479,11 @@ export default function Home({
               letterSpacing: "-.01em",
             }}
           >
-            {tab === 0
+            {i === 0
               ? t.greeting[greet]
-              : enOnly
-                ? (tEn.pages[tab] ?? ADMIN_LABEL.en)
-                : (t.pages[tab] ?? ADMIN_LABEL[lang])}
+              : enOnly(i)
+                ? (tEn.pages[i] ?? ADMIN_LABEL.en)
+                : (t.pages[i] ?? ADMIN_LABEL[lang])}
           </div>
         </div>
         <button
@@ -453,7 +509,7 @@ export default function Home({
       </div>
 
       {/* ---------- PRAYERS ---------- */}
-      {tab === 0 && (
+      {i === 0 && (
         <div>
           {banner && (
             <AnnouncementBanner
@@ -732,6 +788,11 @@ export default function Home({
                 translation={readings.data.translation}
                 source={readings.data.source}
               />
+            ) : readings.loading ? (
+              /* Still asking. Not the same thing as the day having none, and
+                 the sentence below says exactly that — so for the second the
+                 fetch takes it would be telling the reader something untrue. */
+              <ReadingsWaiting />
             ) : (
               /* Nothing yet for this day in this church — the mirror has not
                  reached it, or no source covers that rite. Said plainly rather
@@ -797,7 +858,7 @@ export default function Home({
       )}
 
       {/* ---------- TODAY ---------- */}
-      {tab === 1 && (
+      {i === 1 && (
         <div>
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             {[stats.streak, stats.monthPrayers, stats.monthMinutes].map((n, i) => (
@@ -921,6 +982,11 @@ export default function Home({
                 translation={readings.data.translation}
                 source={readings.data.source}
               />
+            ) : readings.loading ? (
+              /* Still asking. Not the same thing as the day having none, and
+                 the sentence below says exactly that — so for the second the
+                 fetch takes it would be telling the reader something untrue. */
+              <ReadingsWaiting />
             ) : (
               /* Nothing yet for this day in this church — the mirror has not
                  reached it, or no source covers that rite. Said plainly rather
@@ -1000,7 +1066,7 @@ export default function Home({
       )}
 
       {/* ---------- CALENDAR ---------- */}
-      {tab === 2 && (
+      {i === 2 && (
         <Calendar
           lang={lang}
           liturgy={liturgy}
@@ -1010,7 +1076,7 @@ export default function Home({
       )}
 
       {/* ---------- SETTINGS ---------- */}
-      {tab === 3 && (
+      {i === 3 && (
         <div dir="ltr" style={{ ["--knob" as string]: "18px" }}>
           <div style={sectionLabel}>{PALETTE_LABEL.en}</div>
           {/* One control divided into a column per palette. Each column is
@@ -1264,11 +1330,72 @@ export default function Home({
       {/* ---------- ADMIN ---------- */}
       {/* Guarded twice over: the tab bar only offers this index to an admin,
           and the panel is only mounted for one. */}
-      {tab === 4 && isAdmin && (
+      {i === 4 && isAdmin && (
         <div dir="ltr" style={{ ["--knob" as string]: "17px" }}>
           <AdminTab lang="en" />
         </div>
       )}
+    </>
+  );
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        /* `clip` rather than `hidden`: a hidden box is still scrollable by
+           script, and one scrollIntoView deep inside a page — the morning
+           notification lands on one — would shove the whole track sideways
+           and leave it there with no way back. A clipped box cannot scroll. */
+        overflow: "clip",
+        transition: `transform .5s ${EASE}, opacity .4s ease`,
+        transform: hidden ? "scale(.965)" : "scale(1)",
+        opacity: hidden ? 0 : 1,
+        pointerEvents: hidden ? "none" : "auto",
+        // Keeps the knob travel correct when the layout mirrors.
+        ["--knob" as string]: ar ? "-18px" : "18px",
+      }}
+      aria-hidden={hidden}
+      {...swipe.handlers}
+    >
+      <div
+        /* Left to right in both languages, like the tab bar and for the same
+           reason: these pages are in that bar's order, and an order that
+           reversed with the language would make one habit into two. */
+        dir="ltr"
+        style={{
+          display: "flex",
+          height: "100%",
+          width: `${count * 100}%`,
+          // The percentage is of the track, which is `count` pages wide, so
+          // one page is 100/count of it.
+          transform: `translateX(calc(${(-tab * 100) / count}% + ${swipe.offset}px))`,
+          transition: swipe.dragging || !motion.near ? "none" : `transform .42s ${EASE}`,
+        }}
+      >
+        {Array.from({ length: count }, (_, i) => (
+          <div
+            key={i}
+            ref={(el) => {
+              pane.current[i] = el;
+            }}
+            className="scroll-y"
+            dir={ar ? "rtl" : "ltr"}
+            style={{
+              width: `${100 / count}%`,
+              height: "100%",
+              padding: "calc(20px + var(--safe-t)) 20px var(--tab-clear)",
+              boxSizing: "border-box",
+              // Up and down stays the browser's, which does it far better than
+              // script can; everything sideways belongs to the swipe.
+              touchAction: "pan-y",
+            }}
+            aria-hidden={i !== tab}
+          >
+            {live.includes(i) && page(i)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -93,17 +93,34 @@ const GLYPHS: ((p: { on: boolean }) => ReactNode)[] = [Rosary, Sunrise, Calendar
 
 export default function TabBar({
   tab,
+  at,
+  dragging,
   hidden,
   isAdmin,
   onSelect,
 }: {
   tab: number;
+  /**
+   * Where the pages actually are, as a fractional tab index. Equal to `tab`
+   * at rest and somewhere in between while a finger is dragging them, so the
+   * chip travels with the pages rather than jumping once they land.
+   */
+  at: number;
+  /** A finger is on the pages right now, so the chip drops its easing. */
+  dragging: boolean;
   hidden: boolean;
   /** Appends the admin tab. Nothing behind it trusts this flag. */
   isAdmin: boolean;
   onSelect: (i: number) => void;
 }) {
   const labels = [...LABELS, ...(isAdmin ? [ADMIN_LABEL] : [])];
+  const n = labels.length;
+  /* The chip's own width, and the step from one seat to the next. The capsule
+     is padded 6 all round and the buttons are 2 apart, so neither is simply
+     `100% / n`. */
+  const seat = `((100% - 12px - ${(n - 1) * 2}px) / ${n})`;
+  // Clamped: the track rubber-bands past the ends and the chip must not.
+  const slot = Math.max(0, Math.min(n - 1, at));
   return (
     <nav
       // Left to right in both languages. The labels are English either way,
@@ -141,8 +158,36 @@ export default function TabBar({
       }}
       aria-hidden={hidden}
     >
+      {/* The chip the active tab sits in, as one element that moves rather
+          than a background lit on whichever button is current: it has to be
+          able to be between two of them while a page is being dragged. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 6,
+          bottom: 6,
+          left: 6,
+          width: `calc(${seat})`,
+          /* Moved on a transform rather than `left`: a percentage here is of
+             the chip's own width, which is exactly one seat, so the step from
+             one tab to the next is a seat plus the 2px between buttons and
+             needs to know nothing about the capsule around it. It also runs
+             on the compositor, which is what keeps it pinned to the finger. */
+          transform: `translateX(calc(${slot} * (100% + 2px)))`,
+          borderRadius: 999,
+          background: "rgb(var(--accent-rgb) / .13)",
+          // No easing while a finger is on it: the position it is being handed
+          // already follows the finger, and easing on top of that only lags.
+          transition: dragging ? "none" : `transform .42s ${EASE}`,
+        }}
+      />
       {labels.map((label, i) => {
-        const on = i === tab;
+        /* Which tab is lit follows the chip rather than the settled `tab`, so
+           the icon and its label take the accent as the chip reaches them —
+           halfway through a drag — instead of a beat later when the page
+           lands. */
+        const on = i === Math.round(slot);
         const ink = on ? "var(--accent)" : "var(--dim-3)";
         const Glyph = GLYPHS[i];
         return (
@@ -159,12 +204,13 @@ export default function TabBar({
               gap: 4,
               padding: "6px 0",
               color: ink,
-              // The active tab is a chip inside the capsule: a faint wash of
-              // the accent, so which tab you are on reads at a glance rather
-              // than only from the colour of the icon.
-              borderRadius: 999,
-              background: on ? "rgb(var(--accent-rgb) / .13)" : "transparent",
-              transition: "color .25s ease, background .25s ease",
+              // Above the chip, which is drawn behind all of them.
+              position: "relative",
+              /* The press scale is named here as well as in globals.css:
+                 an inline `transition` replaces the whole list, so a button
+                 that sets one of its own drops the press easing and snaps
+                 back instead of rising. */
+              transition: `color .25s ease, scale var(--t-rise) var(--ease-out)`,
             }}
           >
             <svg viewBox="0 0 24 24" style={{ width: 21, height: 21 }} aria-hidden="true">

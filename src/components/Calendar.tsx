@@ -282,7 +282,7 @@ export default function Calendar({
                   borderRadius: 999,
                   fontSize: 12,
                   fontWeight: 500,
-                  transition: `background .25s ${EASE}, color .25s ${EASE}`,
+                  transition: `background .25s ${EASE}, color .25s ${EASE}, scale var(--t-rise) var(--ease-out)`,
                   background: on ? "rgb(var(--accent-rgb) / .16)" : "transparent",
                   color: on ? "var(--accent-ink)" : "var(--dim-3)",
                 }}

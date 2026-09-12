@@ -2,6 +2,19 @@
 
 :root {
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* For things answering a touch rather than making an entrance: it leaves
+     at once and settles without the overshoot --ease is shaped for. */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.3, 1);
+
+  /* How long the interface takes to answer.
+
+     These are deliberately short. The long, eased motion elsewhere in this
+     file belongs to things that arrive — a sheet, the splash, a passage
+     unrolling — where the movement is the point. A control replying to a
+     finger is not an arrival: anything a reader can outrun by tapping again
+     reads as lag, however elegant it is. */
+  --t-press: 90ms;
+  --t-rise: 240ms;
 
   /* The ground the launch images are drawn on, and so the ground the splash
      has to keep. scripts/generate-icons.mjs does not store it — it reads the
@@ -384,8 +397,46 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  /* Killing the durations leaves the press still shrinking, instantly, which
+     is the jolt this setting exists to avoid. The brightness stays: it says
+     the same thing and nothing moves. */
+  button:active,
+  [role="button"]:active,
+  .tap:active,
+  .tap:hover {
+    scale: 1;
+    translate: 0 0;
+  }
 }
 
+
+/* ---------------------------------------------------------------
+   Waiting
+
+   The shape of the thing that is coming, breathing, rather than a
+   spinner. A spinner says something is happening somewhere; this
+   says "three readings are on their way and this is where they will
+   sit", which is the part a reader actually wants to know — and it
+   means the section does not jump when they land.
+
+   Staggered per row, set inline, so it reads as a few separate
+   things arriving rather than one block flashing.
+   --------------------------------------------------------------- */
+.wait {
+  background: rgb(var(--veil-rgb) / 0.05);
+  border: 1px solid rgb(var(--veil-rgb) / 0.06);
+  animation: waitBreathe 1.6s var(--ease) infinite both;
+}
+
+@keyframes waitBreathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
 
 /* ---------------------------------------------------------------
    The app surface
@@ -422,22 +473,91 @@ button {
   }
 }
 
-/* Pointer devices get a hover affordance; touch devices get none, so nothing
-   sticks in a hovered state after a tap. Transform and filter are used
-   because the components set their own colours inline. */
+/* ---------------------------------------------------------------
+   Press, hover, focus
+
+   Everything you can touch answers at once. The answer is a press —
+   the control giving very slightly under the finger — quick on the
+   way down and slower coming back up, because that asymmetry is what
+   a real button does and a symmetrical one reads as an animation
+   rather than a response.
+
+   A finger used to get nothing at all: the whole affordance was
+   inside `(hover: hover) and (pointer: fine)`, which is every device
+   except the phones this app is built for. The hover lift stays
+   there — a touch device has no hover to leave, so lighting a
+   control on tap would leave it lit — but the press is now
+   everyone's, and it is the half that matters on a phone.
+
+   `scale` rather than `transform`: it is a separate property, so it
+   can never collide with a transform a component sets inline, and
+   several of them do.
+   --------------------------------------------------------------- */
+
+button,
+[role="button"],
+.tap,
+label,
+summary,
+a {
+  /* Without this iOS sits on every tap for ~300ms waiting for the second
+     one that would zoom the page. Nothing in here zooms, and the wait is
+     the single biggest reason a web app feels slower than a native one. */
+  touch-action: manipulation;
+}
+
+button,
+[role="button"],
+.tap {
+  transition:
+    scale var(--t-rise) var(--ease-out),
+    filter var(--t-rise) var(--ease-out);
+}
+
+button:active,
+[role="button"]:active,
+.tap:active {
+  scale: 0.972;
+  filter: brightness(calc(1 + (var(--tap-bright) - 1) * 0.45));
+  /* Down fast, up slow: the transition above carries the release. */
+  transition-duration: var(--t-press);
+}
+
+/* A control the size of a page, or one whose own animation owns its
+   scale. Marked at the element rather than guessed at from its size. */
+[data-press="none"]:active {
+  scale: 1;
+}
+
+button:disabled,
+button:disabled:active {
+  scale: 1;
+  filter: none;
+}
+
+/* The keyboard's equivalent of the press state. Never on a mouse click —
+   `:focus-visible` is exactly the browser's own judgement about that — so
+   this costs a pointer user nothing and gives a keyboard one the thing
+   they have no other way to see. */
+:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.75);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .tap {
-    transition:
-      transform 0.25s var(--ease),
-      filter 0.2s ease;
-  }
   .tap:hover {
-    transform: translateY(-2px);
+    translate: 0 -2px;
     filter: brightness(var(--tap-bright));
   }
+  .tap {
+    transition:
+      scale var(--t-rise) var(--ease-out),
+      translate var(--t-rise) var(--ease-out),
+      filter var(--t-rise) var(--ease-out);
+  }
   .tap:active {
-    transform: translateY(0);
-    filter: brightness(calc(1 + (var(--tap-bright) - 1) * 0.28));
+    translate: 0 0;
   }
 }
 

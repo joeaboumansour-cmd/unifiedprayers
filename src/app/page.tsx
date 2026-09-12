@@ -52,6 +52,7 @@ import { useLiturgy } from "@/lib/useLiturgy";
 import { useDailyVerse } from "@/lib/useDailyVerse";
 import { useReadings } from "@/lib/useReadings";
 import { useReadingProgress } from "@/lib/useReadingProgress";
+import { useTabSwipe } from "@/lib/useTabSwipe";
 import { TRACKS, useDevotions } from "@/lib/useDevotions";
 import { useWakeLock } from "@/lib/useWakeLock";
 
@@ -67,6 +68,10 @@ export default function Page() {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [screen, setScreen] = useState<"home" | "player">("home");
   const [tab, setTab] = useState(0);
+  /* Taps on the tab already open, counted. Home sends that page back to the
+     top on each one — see the note there. A count rather than a flag so two
+     in a row read as two requests rather than one. */
+  const [home, setHome] = useState(0);
   const [prayer, setPrayer] = useState<PrayerId>("spirit");
   const [mysterySet, setMysterySet] = useState<MysteryKey>("joyful");
   const [step, setStep] = useState(0);
@@ -236,6 +241,20 @@ export default function Page() {
   useEffect(() => {
     if (!isAdmin && tab > 3) setTab(0);
   }, [isAdmin, tab]);
+
+  /* The pages, swiped between. Held here rather than inside Home because the
+     tab bar needs the same gesture: it draws its chip wherever the pages have
+     got to, which is not a whole tab until the finger lets go.
+
+     Off whenever something is over the app. A sheet's own scrim takes the
+     touches, but the player leaves the pages beneath it live, and a devotional
+     book's reader has a horizontal drag of its own. */
+  const swipe = useTabSwipe(
+    tab,
+    isAdmin ? 5 : 4,
+    setTab,
+    screen === "home" && devotionTrack === null,
+  );
 
   useEffect(() => {
     const { theme } = paletteInfo(prefs.palette);
@@ -418,6 +437,8 @@ export default function Page() {
       <Home
         hidden={isPlayer}
         tab={tab}
+        swipe={swipe}
+        home={home}
         lang={prefs.lang}
         stats={stats}
         progress={progress}
@@ -478,9 +499,12 @@ export default function Page() {
 
       <TabBar
         tab={tab}
+        at={swipe.at}
+        dragging={swipe.dragging}
         hidden={isPlayer}
         isAdmin={isAdmin}
         onSelect={(i) => {
+          if (i === tab) setHome((n) => n + 1);
           setTab(i);
         }}
       />

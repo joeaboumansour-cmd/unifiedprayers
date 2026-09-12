@@ -161,7 +161,7 @@ export default function RiteSheet({
                   padding: "14px 15px",
                   borderRadius: 16,
                   textAlign: "start",
-                  transition: "background .25s ease,border-color .25s ease",
+                  transition: "background .25s ease,border-color .25s ease, scale var(--t-rise) var(--ease-out)",
                   background: on
                     ? "rgb(var(--accent-rgb) / .12)"
                     : "rgb(var(--veil-rgb) / .035)",

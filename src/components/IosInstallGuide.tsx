@@ -628,7 +628,7 @@ export default function IosInstallGuide({ flow, open }: { flow: IosFlow; open: b
                   color: on ? "var(--body)" : "var(--dim)",
                   background: on ? "rgb(var(--accent-rgb) / .08)" : "transparent",
                   border: `1px solid ${on ? "rgb(var(--accent-rgb) / .24)" : "transparent"}`,
-                  transition: "background .3s ease, border-color .3s ease, color .3s ease",
+                  transition: "background .3s ease, border-color .3s ease, color .3s ease, scale var(--t-rise) var(--ease-out)",
                 }}
               >
                 <span

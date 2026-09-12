@@ -343,3 +343,38 @@ export default function ReadingCards({
 
 export const readingsLabel = (lang: Lang) => T.label[lang];
 export const readingsEmpty = (lang: Lang) => T.none[lang];
+
+/**
+ * Where the readings will be, while they are still coming.
+ *
+ * The heading above this section is drawn before the answer is known, so the
+ * space under it has to say something. It used to say the readings had not
+ * arrived — which is what this screen says when a day genuinely has none, and
+ * so was a flat contradiction for the second or two the fetch takes, on the
+ * one part of the app that comes off the network.
+ *
+ * Three rows because three is what most days have. Getting the count wrong
+ * costs nothing; the point is that the section is already the right shape when
+ * the real ones land, so nothing under it jumps.
+ */
+export function ReadingsWaiting() {
+  return (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 8 }}
+      aria-hidden="true"
+    >
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="wait"
+          style={{
+            height: 45,
+            borderRadius: 16,
+            // A beat between them, so they read as three things arriving.
+            animationDelay: `${i * 0.13}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
