@@ -9,6 +9,8 @@ export type Profile = {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  /** Whether friends may see this account's streak. See 0016_friends.sql. */
+  shareActivity: boolean;
 };
 
 /**
@@ -22,6 +24,12 @@ export type Profile = {
 export function useProfile(userId: string | null): {
   profile: Profile | null;
   loading: boolean;
+  /**
+   * Turns activity sharing on or off. Optimistic, because it is a switch: it
+   * has to move under the thumb that moved it, and the update policy from 0002
+   * is what actually decides. A refusal puts it back.
+   */
+  setShareActivity: (on: boolean) => Promise<void>;
 } {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,7 +41,7 @@ export function useProfile(userId: string | null): {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, display_name, avatar_url")
+        .select("id, username, display_name, avatar_url, share_activity")
         .eq("id", id)
         .maybeSingle();
 
@@ -49,9 +57,26 @@ export function useProfile(userId: string | null): {
         username: data.username,
         displayName: data.display_name,
         avatarUrl: data.avatar_url,
+        // A profile row written before 0016 has no column at all; friends see
+        // the streak by default, which is what the column's own default says.
+        shareActivity: data.share_activity ?? true,
       });
     },
     [],
+  );
+
+  const setShareActivity = useCallback(
+    async (on: boolean) => {
+      const supabase = getSupabase();
+      if (!supabase || !userId) return;
+      setProfile((was) => (was ? { ...was, shareActivity: on } : was));
+      const { error } = await supabase
+        .from("profiles")
+        .update({ share_activity: on })
+        .eq("id", userId);
+      if (error) setProfile((was) => (was ? { ...was, shareActivity: !on } : was));
+    },
+    [userId],
   );
 
   useEffect(() => {
@@ -68,5 +93,5 @@ export function useProfile(userId: string | null): {
     };
   }, [userId, load]);
 
-  return { profile, loading };
+  return { profile, loading, setShareActivity };
 }

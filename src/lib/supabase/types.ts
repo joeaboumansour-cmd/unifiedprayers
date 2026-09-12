@@ -62,6 +62,12 @@ export type ProfileRow = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  /**
+   * Whether friends may see this account's streak and whether it prayed today.
+   * Added in 0016. A flag rather than a secret: the friends list has to read it
+   * to know what to draw, and what it gates is two aggregates and nothing else.
+   */
+  share_activity: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -317,6 +323,110 @@ export type CoupleInviteRow = {
   accepted_at: string | null;
 };
 
+/* --------------------------------- friends -------------------------------- */
+/* See supabase/migrations/0016_friends.sql. The app reads almost none of these
+   tables directly — the four overview functions below are what it calls — but
+   the rows are declared so the client is typed end to end. */
+
+/** One pair, ordered so there is exactly one row per friendship. */
+export type FriendshipRow = {
+  low_id: string;
+  high_id: string;
+  created_at: string;
+};
+
+/** Pending while `declined_at` is null. The pair is the primary key. */
+export type FriendRequestRow = {
+  from_id: string;
+  to_id: string;
+  created_at: string;
+  declined_at: string | null;
+};
+
+/** The code inside a shared link. One open row per account. */
+export type FriendInviteRow = {
+  code: string;
+  owner_id: string;
+  created_at: string;
+  expires_at: string;
+  max_uses: number;
+  uses: number;
+  revoked_at: string | null;
+};
+
+/** One ring of the bell. The unique index on the hour is the rate limit. */
+export type FriendNudgeRow = {
+  from_id: string;
+  to_id: string;
+  created_at: string;
+};
+
+/** Something to pray for, visible to the author's friends until it expires. */
+export type IntentionRow = {
+  id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  closed_at: string | null;
+  expires_at: string;
+};
+
+/** One person, one intention. The count is people, not taps. */
+export type IntentionPrayerRow = {
+  intention_id: string;
+  user_id: string;
+  created_at: string;
+};
+
+/** A row of the friends list: who they are, and the two aggregates they share. */
+export type FriendOverviewRow = {
+  user_id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  friends_since: string;
+  /** False when they have turned sharing off — then streak is 0, not unknown. */
+  shares: boolean;
+  streak: number;
+  prayed_today: boolean;
+  /** Whether the database will accept a bell for them right now. */
+  can_nudge: boolean;
+  last_nudge_at: string | null;
+};
+
+export type FriendRequestView = {
+  direction: "incoming" | "outgoing";
+  user_id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+};
+
+/** What someone already is to you, so the row draws the right button. */
+export type PersonRelation = "friend" | "incoming" | "outgoing" | "none";
+
+export type SearchPersonRow = {
+  user_id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  relation: PersonRelation;
+};
+
+export type IntentionFeedRow = {
+  id: string;
+  author_id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  body: string;
+  created_at: string;
+  mine: boolean;
+  prayed_count: number;
+  i_prayed: boolean;
+};
+
 /** postgrest-js resolves a table to `never` unless Relationships is present. */
 type Table<Row, Insert = Row, Update = Partial<Row>> = {
   Row: Row;
@@ -372,6 +482,12 @@ export type Database = {
       couples: Table<CoupleRow>;
       couple_members: Table<CoupleMemberRow>;
       couple_invites: Table<CoupleInviteRow>;
+      friendships: Table<FriendshipRow>;
+      friend_requests: Table<FriendRequestRow>;
+      friend_invites: Table<FriendInviteRow>;
+      friend_nudges: Table<FriendNudgeRow>;
+      intentions: Table<IntentionRow>;
+      intention_prayers: Table<IntentionPrayerRow>;
       announcements: Table<
         AnnouncementRow,
         Partial<Omit<AnnouncementRow, "title_ar" | "title_en">> &
@@ -446,6 +562,92 @@ export type Database = {
       leave_couple: {
         Args: Record<string, never>;
         Returns: undefined;
+      };
+
+      /* ------------------------------ friends ------------------------------ */
+      /* Reads. Each is one round trip for a whole section of the page; see the
+         notes in 0016 for why they are functions and not selects. */
+
+      /** The friends list, with the streak and the bell's state per friend. */
+      friends_overview: {
+        Args: Record<string, never>;
+        Returns: FriendOverviewRow[];
+      };
+      /** Both directions of the request queue, with names attached. */
+      friend_requests_overview: {
+        Args: Record<string, never>;
+        Returns: FriendRequestView[];
+      };
+      /** People by handle or name, with what they already are to you. */
+      search_people: {
+        Args: { q: string };
+        Returns: SearchPersonRow[];
+      };
+      /** Your friends' open intentions, and your own. */
+      intentions_feed: {
+        Args: Record<string, never>;
+        Returns: IntentionFeedRow[];
+      };
+
+      /* Writes. Every one raises a distinct errcode per reason — the mapping
+         lives in src/lib/useFriends.ts. */
+
+      /** Returns 'sent', or 'friends' when they had already asked you. */
+      send_friend_request: {
+        Args: { target: string };
+        Returns: string;
+      };
+      accept_friend_request: {
+        Args: { from_user: string };
+        Returns: undefined;
+      };
+      decline_friend_request: {
+        Args: { from_user: string };
+        Returns: undefined;
+      };
+      cancel_friend_request: {
+        Args: { to_user: string };
+        Returns: undefined;
+      };
+      /** Unfriends both ways, and clears any request either had outstanding. */
+      remove_friend: {
+        Args: { other: string };
+        Returns: undefined;
+      };
+      /** A fresh link code, replacing and revoking any previous one. */
+      create_friend_invite: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      revoke_friend_invite: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      /** Redeems a link and answers with whose it was. */
+      accept_friend_invite: {
+        Args: { invite_code: string };
+        Returns: string;
+      };
+      /**
+       * Records one ring and refuses a second inside the hour. Records only —
+       * the sending is /api/friends/nudge, which calls this first.
+       */
+      nudge_friend: {
+        Args: { target: string };
+        Returns: undefined;
+      };
+      post_intention: {
+        Args: { body: string };
+        Returns: string;
+      };
+      close_intention: {
+        Args: { intention: string };
+        Returns: undefined;
+      };
+      /** Answers with the author to notify, or null if there is nobody to tell. */
+      pray_for_intention: {
+        Args: { intention: string };
+        Returns: string | null;
       };
     };
     Enums: Record<never, never>;

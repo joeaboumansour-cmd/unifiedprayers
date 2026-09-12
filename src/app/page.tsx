@@ -48,6 +48,8 @@ import { useRemoteContent } from "@/lib/useRemoteContent";
 import { useStats } from "@/lib/useStats";
 import { useStrayAuthToken } from "@/lib/useStrayAuthToken";
 import { useCouple } from "@/lib/useCouple";
+import { type FriendsError, useFriends } from "@/lib/useFriends";
+import { useProfile } from "@/lib/useProfile";
 import { useLiturgy } from "@/lib/useLiturgy";
 import { useDailyVerse } from "@/lib/useDailyVerse";
 import { useReadings } from "@/lib/useReadings";
@@ -55,6 +57,9 @@ import { useReadingProgress } from "@/lib/useReadingProgress";
 import { useTabSwipe } from "@/lib/useTabSwipe";
 import { TRACKS, useDevotions } from "@/lib/useDevotions";
 import { useWakeLock } from "@/lib/useWakeLock";
+
+/** Where a `?friend=` code waits while the visitor goes off to sign in. */
+const INVITE_KEY = "up.invite";
 
 const DEFAULT_PROGRESS: Progress = {
   prayer: "spirit",
@@ -94,6 +99,14 @@ export default function Page() {
   // way a prayer is counted as finished rather than merely left.
   const [done, setDone] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  /* An invitation code from a `?friend=` link, and how redeeming it went.
+     Held by the shell rather than the Friends page because it arrives in the
+     URL before that page is built, and because a signed-out visitor has to go
+     through /login and come back — see the restore effect below. */
+  const [pendingInvite, setPendingInvite] = useState<string | null>(null);
+  const [inviteResult, setInviteResult] = useState<{
+    error: FriendsError | null;
+  } | null>(null);
 
   /* ---------------- content, account, sync ---------------- */
 
@@ -121,6 +134,10 @@ export default function Page() {
   // page is withheld from an account that is not half of a couple, so pairing
   // changes what that query returns and has to re-ask it.
   const couple = useCouple(auth.user?.id ?? null);
+  const friends = useFriends(auth.user?.id ?? null);
+  // Held here rather than inside the Friends page because Settings draws the
+  // switch and the Friends page explains it — one copy, two screens.
+  const { profile, setShareActivity } = useProfile(auth.user?.id ?? null);
   const devotions = useDevotions(prefs.lang, couple.coupleId);
   // Which church's year the Calendar tab keeps. Held on the device, outside
   // the synced prefs — see the note in useLiturgy.
@@ -228,18 +245,84 @@ export default function Page() {
     }
 
     // Deep links from the manifest shortcuts.
-    const wanted = new URLSearchParams(window.location.search).get("set");
+    const params = new URLSearchParams(window.location.search);
+    const wanted = params.get("set");
     if (wanted === "mary" || wanted === "holy-spirit") {
       setPrayer(wanted === "mary" ? "mary" : "spirit");
       setStep(0);
       setScreen("player");
       window.history.replaceState(null, "", window.location.pathname);
     }
+
+    /* An invitation someone sent over WhatsApp, and the notifications that
+       point at this page. Both land on Friends. */
+    const invite = (params.get("friend") ?? "")
+      .replace(/[^A-Za-z0-9]/g, "")
+      .toUpperCase();
+    /* Kept for the length of the tab, not the device: a signed-out visitor is
+       sent to /login and comes back to "/" with the code gone from the URL,
+       and without this the invitation is lost exactly for the people who most
+       need it to survive — the ones who did not have an account yet. It is
+       deliberately not localStorage: an invitation that outlived the visit and
+       reappeared next week would be a mystery rather than a link. */
+    const stored = (() => {
+      try {
+        return window.sessionStorage.getItem(INVITE_KEY);
+      } catch {
+        return null;
+      }
+    })();
+
+    if (invite.length === 10) {
+      setPendingInvite(invite);
+      try {
+        window.sessionStorage.setItem(INVITE_KEY, invite);
+      } catch {
+        /* Private mode. The code is in state and works for this visit. */
+      }
+      setTab(3);
+      window.history.replaceState(null, "", window.location.pathname);
+    } else if (stored) {
+      setPendingInvite(stored);
+      setTab(3);
+    } else if (params.get("tab") === "friends") {
+      // Where a friends notification points.
+      setTab(3);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
     setHydrated(true);
   }, []);
 
+  /* Redeeming is the shell's because the outcome is the shell's to remember:
+     the card that reports it has to survive the Friends page re-rendering
+     under it, and the stored code must be cleared exactly once. */
+  const acceptInvite = useCallback(async () => {
+    if (!pendingInvite) return;
+    const error = await friends.redeem(pendingInvite);
+    setInviteResult({ error });
+    if (!error) setPendingInvite(null);
+    try {
+      window.sessionStorage.removeItem(INVITE_KEY);
+    } catch {
+      /* Nothing was stored. */
+    }
+  }, [pendingInvite, friends]);
+
+  const dismissInvite = useCallback(() => {
+    setPendingInvite(null);
+    setInviteResult(null);
+    try {
+      window.sessionStorage.removeItem(INVITE_KEY);
+    } catch {
+      /* Nothing was stored. */
+    }
+  }, []);
+
+  // Admin is the last tab, now index 5. Losing it while standing on it sends
+  // the reader home rather than to a blank page.
   useEffect(() => {
-    if (!isAdmin && tab > 3) setTab(0);
+    if (!isAdmin && tab > 4) setTab(0);
   }, [isAdmin, tab]);
 
   /* The pages, swiped between. Held here rather than inside Home because the
@@ -251,7 +334,7 @@ export default function Page() {
      book's reader has a horizontal drag of its own. */
   const swipe = useTabSwipe(
     tab,
-    isAdmin ? 5 : 4,
+    isAdmin ? 6 : 5,
     setTab,
     screen === "home" && devotionTrack === null,
   );
@@ -459,6 +542,18 @@ export default function Page() {
         readingProgress={readingProgress}
         dailyVerse={dailyVerse}
         paired={couple.paired}
+        friends={friends}
+        pendingInvite={pendingInvite}
+        inviteResult={inviteResult}
+        onAcceptInvite={acceptInvite}
+        onDismissInvite={dismissInvite}
+        onSignIn={() => {
+          window.location.href = "/login";
+        }}
+        shareActivity={profile?.shareActivity ?? true}
+        onToggleShareActivity={() =>
+          void setShareActivity(!(profile?.shareActivity ?? true))
+        }
         banner={banner}
         onDismissBanner={() => banner && dismiss(banner.id)}
         onToggleLang={() =>
@@ -503,6 +598,7 @@ export default function Page() {
         dragging={swipe.dragging}
         hidden={isPlayer}
         isAdmin={isAdmin}
+        badge={friends.incoming.length}
         onSelect={(i) => {
           if (i === tab) setHome((n) => n + 1);
           setTab(i);

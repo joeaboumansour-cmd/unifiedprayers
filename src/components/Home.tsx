@@ -7,6 +7,7 @@ import AccountCard from "@/components/AccountCard";
 import Calendar from "@/components/Calendar";
 import DailyVerseCard from "@/components/DailyVerseCard";
 import DevotionCards, { TrackGlyph } from "@/components/DevotionCards";
+import Friends from "@/components/Friends";
 import { AboutRow } from "@/components/LayoutProbe";
 import ReadingCards, {
   ReadingsWaiting,
@@ -36,6 +37,7 @@ import { formatNum, intlLocale } from "@/lib/locale";
 import type { Stats } from "@/lib/sessions";
 import type { AnnouncementRow, DevotionTrack } from "@/lib/supabase/types";
 import type { Auth } from "@/lib/useAuth";
+import type { Friends as FriendsState, FriendsError } from "@/lib/useFriends";
 import { TRACKS, type Devotions } from "@/lib/useDevotions";
 import type { SyncStatus } from "@/lib/useCloudSync";
 import type { Liturgy } from "@/lib/useLiturgy";
@@ -45,8 +47,24 @@ import type { ReadingProgress } from "@/lib/useReadingProgress";
 import type { TabSwipe } from "@/lib/useTabSwipe";
 import type { Push } from "@/lib/usePush";
 
-/** The admin tab's own name. Chrome, not prayer text — so not in design.json. */
-const ADMIN_LABEL = { ar: "الإدارة", en: "Admin" } as const;
+/**
+ * The names of the pages the content document does not know about.
+ *
+ * `UI.pages` in design.json is [Prayers, Today, Calendar, Settings] and the
+ * live copy of that document is edited in Supabase, not in this bundle — so
+ * once Friends took index 3, indexing that array by tab number started
+ * answering "Settings" for the Friends page, and would keep doing so however
+ * the bundled JSON were edited.
+ *
+ * These three are chrome rather than prayer text and are English in both
+ * languages (see `enOnly` below), so naming them here rather than in the
+ * document costs nothing and cannot drift.
+ */
+const CHROME_TITLES: Record<number, string> = {
+  3: "Friends",
+  4: "Settings",
+  5: "Admin",
+};
 
 /**
  * Four editor panels, their forms and their bilingual copy, fetched only by the
@@ -277,6 +295,22 @@ export type HomeProps = {
   dailyVerse: DailyVerseState;
   /** Half of a couple. Draws the couples devotion card unlocked. */
   paired: boolean;
+  /** The Friends page's whole state, and everything that changes it. */
+  friends: FriendsState;
+  /**
+   * An invitation link that was tapped, and how redeeming it went. Owned by
+   * the shell: the code arrives in the URL before this page is built, and has
+   * to survive a trip through sign-in.
+   */
+  pendingInvite: string | null;
+  inviteResult: { error: FriendsError | null } | null;
+  onAcceptInvite: () => void;
+  onDismissInvite: () => void;
+  /** Takes the reader to the sign-in screen. */
+  onSignIn: () => void;
+  /** Whether friends may see this account's streak. Settings draws the switch. */
+  shareActivity: boolean;
+  onToggleShareActivity: () => void;
   banner: AnnouncementRow | null;
   onDismissBanner: () => void;
   onToggleLang: () => void;
@@ -322,6 +356,14 @@ export default function Home({
   readingProgress,
   dailyVerse,
   paired,
+  friends,
+  pendingInvite,
+  inviteResult,
+  onAcceptInvite,
+  onDismissInvite,
+  onSignIn,
+  shareActivity,
+  onToggleShareActivity,
   banner,
   onDismissBanner,
   onToggleLang,
@@ -347,7 +389,11 @@ export default function Home({
   // the shell around them mirrors in Arabic, and re-pin --knob, which the root
   // sets to travel the mirrored way.
   const tEn = ui("en");
-  const enOnly = (i: number) => i === 3 || i === 4;
+  // Friends, Settings and Admin. Friends joins them because it is an account
+  // surface too — the names on it are whatever people typed, and a page that
+  // mirrored its layout around them would be picking a direction for content
+  // it cannot read.
+  const enOnly = (i: number) => i >= 3;
   const today = new Date();
   const hour = today.getHours();
   const greet = hour < 5 ? 0 : hour < 12 ? 1 : hour < 17 ? 2 : 3;
@@ -392,7 +438,9 @@ export default function Home({
     color: active ? "var(--on-accent)" : "var(--soft)",
   });
 
-  const count = isAdmin ? 5 : 4;
+  // Prayers, Today, Calendar, Friends, Settings — and Admin for those who have
+  // it. Must stay in step with the tab bar's own list and with useTabSwipe.
+  const count = isAdmin ? 6 : 5;
 
   /* Tapping the tab you are already on takes that page back to the top.
      Now that each page keeps its own scroll position, the long ones stay
@@ -482,8 +530,8 @@ export default function Home({
             {i === 0
               ? t.greeting[greet]
               : enOnly(i)
-                ? (tEn.pages[i] ?? ADMIN_LABEL.en)
-                : (t.pages[i] ?? ADMIN_LABEL[lang])}
+                ? CHROME_TITLES[i]
+                : (t.pages[i] ?? "")}
           </div>
         </div>
         <button
@@ -1075,8 +1123,23 @@ export default function Home({
         />
       )}
 
-      {/* ---------- SETTINGS ---------- */}
+      {/* ---------- FRIENDS ---------- */}
       {i === 3 && (
+        <div dir="ltr">
+          <Friends
+            friends={friends}
+            signedIn={auth.status === "signed-in"}
+            pendingInvite={pendingInvite}
+            inviteResult={inviteResult}
+            onAcceptInvite={onAcceptInvite}
+            onDismissInvite={onDismissInvite}
+            onSignIn={onSignIn}
+          />
+        </div>
+      )}
+
+      {/* ---------- SETTINGS ---------- */}
+      {i === 4 && (
         <div dir="ltr" style={{ ["--knob" as string]: "18px" }}>
           <div style={sectionLabel}>{PALETTE_LABEL.en}</div>
           {/* One control divided into a column per palette. Each column is
@@ -1284,6 +1347,34 @@ export default function Home({
               </Row>
             ))}
 
+            {/* Lives here rather than on the Friends page because it is a
+                setting about this account, and because somebody looking to
+                turn it off looks in Settings. Only drawn for an account —
+                signed out there are no friends to be visible to. */}
+            {auth.status === "signed-in" && (
+              <Row
+                onClick={onToggleShareActivity}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  padding: "15px 16px",
+                  borderBottom: "1px solid rgb(var(--veil-rgb) / .05)",
+                }}
+              >
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}
+                >
+                  <div style={{ fontSize: 14.5 }}>Share activity with friends</div>
+                  <div style={{ fontSize: 11.5, color: "var(--dim-3)", lineHeight: 1.4 }}>
+                    Your streak and whether you prayed today. Never what or when.
+                  </div>
+                </div>
+                <Toggle on={shareActivity} />
+              </Row>
+            )}
+
             <div
               style={{
                 display: "flex",
@@ -1330,7 +1421,7 @@ export default function Home({
       {/* ---------- ADMIN ---------- */}
       {/* Guarded twice over: the tab bar only offers this index to an admin,
           and the panel is only mounted for one. */}
-      {i === 4 && isAdmin && (
+      {i === 5 && isAdmin && (
         <div dir="ltr" style={{ ["--knob" as string]: "17px" }}>
           <AdminTab lang="en" />
         </div>
@@ -1340,6 +1431,19 @@ export default function Home({
 
   return (
     <div
+      /* Left to right in both languages, and this is the one that matters.
+         The track inside is `count * 100%` wide — far wider than this box —
+         and an overflowing child is laid out from its parent's inline start.
+         Inheriting `rtl` from the shell put that start on the RIGHT, so the
+         track hung off the left edge by its whole overflow (a 5-page track in
+         a 375px window began at -1500px) and `translateX(-tab …)` then moved
+         it further away. Every page sat off-screen and the app painted as an
+         empty gradient in Arabic.
+         The track already declares `dir="ltr"`, but that governs the order of
+         the panes *inside* it, never where the track itself is placed — only
+         this element can decide that. Nothing else here reads the direction:
+         each pane sets its own below, and --knob is a length, not a flow. */
+      dir="ltr"
       style={{
         position: "absolute",
         inset: 0,

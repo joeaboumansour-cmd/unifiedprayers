@@ -10,7 +10,7 @@ const EASE = "cubic-bezier(.22,1,.36,1)";
  * content document: they are chrome, not prayer text, and a list an admin can
  * edit could grow a fifth name with no tab behind it.
  */
-const LABELS = ["Home", "Today", "Calendar", "Settings"];
+const LABELS = ["Home", "Today", "Calendar", "Friends", "Settings"];
 const ADMIN_LABEL = "Admin";
 
 /**
@@ -62,6 +62,42 @@ function Calendar({ on }: { on: boolean }) {
   );
 }
 
+/**
+ * Friends: two people, one a step behind the other.
+ *
+ * Drawn as two open shoulder arcs rather than two filled figures, so it keeps
+ * the same hollow, thin-stroke weight as the rosary and the calendar page
+ * beside it. The one behind is smaller and set slightly higher, which is what
+ * reads as depth at 21px — two figures on the same baseline read as a blob.
+ * The near figure's shoulders are drawn last so they close over the far one.
+ */
+function People({ on }: { on: boolean }) {
+  return (
+    <>
+      {/* behind */}
+      <circle cx="15.6" cy="8.4" r="2.35" {...STROKE} />
+      <path d="M14 13.1a4.3 4.3 0 0 1 6.6 3.6" {...STROKE} />
+      {/* in front, filled faintly when the tab is live */}
+      {on && (
+        <>
+          <circle cx="9.6" cy="9.5" r="3" fill="currentColor" opacity={0.16} />
+          <path
+            d="M3.6 18.4a6 6 0 0 1 12 0Z"
+            fill="currentColor"
+            opacity={0.16}
+          />
+        </>
+      )}
+      {/* The near figure's own ground, so the arc behind it does not show
+          through the gap between head and shoulders. */}
+      <circle cx="9.6" cy="9.5" r="3" fill="var(--bg-base)" stroke="none" />
+      {on && <circle cx="9.6" cy="9.5" r="3" fill="currentColor" opacity={0.16} stroke="none" />}
+      <circle cx="9.6" cy="9.5" r="3" {...STROKE} />
+      <path d="M3.6 18.4a6 6 0 0 1 12 0" {...STROKE} />
+    </>
+  );
+}
+
 /** Settings: three sliders, each set somewhere different. */
 function Sliders({ on }: { on: boolean }) {
   const knob = (cx: number, cy: number) => (
@@ -89,7 +125,14 @@ function Shield({ on }: { on: boolean }) {
   );
 }
 
-const GLYPHS: ((p: { on: boolean }) => ReactNode)[] = [Rosary, Sunrise, Calendar, Sliders, Shield];
+const GLYPHS: ((p: { on: boolean }) => ReactNode)[] = [
+  Rosary,
+  Sunrise,
+  Calendar,
+  People,
+  Sliders,
+  Shield,
+];
 
 export default function TabBar({
   tab,
@@ -97,6 +140,7 @@ export default function TabBar({
   dragging,
   hidden,
   isAdmin,
+  badge,
   onSelect,
 }: {
   tab: number;
@@ -111,6 +155,13 @@ export default function TabBar({
   hidden: boolean;
   /** Appends the admin tab. Nothing behind it trusts this flag. */
   isAdmin: boolean;
+  /**
+   * Friend requests waiting to be answered, drawn as a dot on the Friends tab.
+   * Zero draws nothing. A count rather than a flag because the number is the
+   * reason to look — but it is never shown as a number, only as a dot: this is
+   * a prayer app, and a red 7 is a debt.
+   */
+  badge: number;
   onSelect: (i: number) => void;
 }) {
   const labels = [...LABELS, ...(isAdmin ? [ADMIN_LABEL] : [])];
@@ -213,9 +264,29 @@ export default function TabBar({
               transition: `color .25s ease, scale var(--t-rise) var(--ease-out)`,
             }}
           >
-            <svg viewBox="0 0 24 24" style={{ width: 21, height: 21 }} aria-hidden="true">
-              <Glyph on={on} />
-            </svg>
+            <div style={{ position: "relative", lineHeight: 0 }}>
+              <svg viewBox="0 0 24 24" style={{ width: 21, height: 21 }} aria-hidden="true">
+                <Glyph on={on} />
+              </svg>
+              {/* Friends only, and only while somebody is waiting. Ringed in
+                  the bar's own ground so it stays legible over the icon it
+                  sits on rather than merging into a stroke. */}
+              {label === "Friends" && badge > 0 && (
+                <span
+                  aria-label={`${badge} waiting`}
+                  style={{
+                    position: "absolute",
+                    top: -1,
+                    insetInlineEnd: -2,
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    background: "var(--accent)",
+                    boxShadow: "0 0 0 2px rgb(var(--bg-base-rgb) / .9)",
+                  }}
+                />
+              )}
+            </div>
             <span
               style={{
                 fontSize: 10.5,

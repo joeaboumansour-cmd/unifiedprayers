@@ -66,6 +66,37 @@ export async function callerId(req: Request): Promise<string | null> {
 }
 
 /**
+ * A client that acts as the caller rather than as the service.
+ *
+ * The anon key plus the request's own bearer token, so `auth.uid()` inside a
+ * SECURITY DEFINER function is the person who made the request and every RLS
+ * policy applies exactly as it would from their phone.
+ *
+ * This exists for the friends routes, and the reason is worth stating: the bell
+ * is rate limited to once an hour, and that limit lives in the database
+ * (0016_friends.sql) rather than in the route. A route holding the secret key
+ * bypasses every policy, so calling `nudge_friend` with it would turn the limit
+ * into a suggestion the route was free to forget. Calling it as the user means
+ * the route cannot ring the bell twice even if it tries — and the route's job
+ * shrinks to the one thing only it can do, which is hold the VAPID key and
+ * send the push.
+ *
+ * Not cached: it is bound to one request's token and must not outlive it.
+ */
+export function callerClient(req: Request): SupabaseClient<Database> | null {
+  const token = bearer(req);
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!token || !url || !anon) return null;
+  return createClient<Database>(url, anon, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    // Nothing to persist and nothing to refresh: the token came in on the
+    // request and dies with it. Left on, the client would try to manage a
+    // session in a process that has no storage to keep one in.
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/**
  * The caller's id if they are an admin, otherwise null.
  *
  * Checked server-side on every admin route even though the admin tab is only

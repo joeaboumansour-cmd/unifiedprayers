@@ -353,6 +353,7 @@ src/
     username.ts          username, phone and password rules for the form
     useAuth.ts           sign in/up, password reset, sign out
     useProfile.ts        the signed-in account's own profile row
+    useFriends.ts        friends, requests, the bell, and the intentions wall
     useAdmin.ts          whether to render the admin tab, and nothing more
     useCloudSync.ts      mirrors prefs and progress to Supabase
     useRemoteContent.ts  overlays DB prayer text onto the bundled JSON
@@ -379,6 +380,23 @@ scripts/
 ```
 
 ## Notes
+
+- **Friends.** The fourth tab, between Calendar and Settings. Friendships are
+  symmetric and unowned — one row per pair, removing one removes it for both —
+  and every write goes through a `SECURITY DEFINER` function in
+  `0016_friends.sql`; the tables have read policies and no write policies at
+  all. Four things ride on that: friend requests, an invitation link to send
+  over WhatsApp, a bell that may be rung once an hour per friend, and a wall of
+  intentions your friends can pray for.
+
+  Two rules live in the database rather than in the app, deliberately. The
+  bell's hour is enforced by `nudge_friend` plus a unique index on the hour
+  bucket, so `/api/friends/nudge` calls it *as the signed-in user* and can only
+  send a push after the database has agreed. And what a friend may see of your
+  prayer life is exactly two aggregates — your streak, and whether today is
+  counted — computed inside `friends_overview()`; `prayer_sessions` keeps its
+  owner-only policy from 0005, and "Share activity with friends" in Settings
+  turns even the aggregates off.
 
 - **Palettes.** Six dark palettes chosen in Settings. Each is built the way the
   original is: a deep, cool ground with a luminous accent from the opposite
