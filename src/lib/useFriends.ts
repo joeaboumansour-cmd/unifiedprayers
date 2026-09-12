@@ -85,27 +85,28 @@ export type Friends = {
  * table at the top of the writes section there.
  *
  * The same code means different things in different calls — 23505 is "already
- * friends" when adding and "rung too recently" when nudging — so the caller
- * passes what it was trying to do.
+ * friends" when adding and "rung too recently" when nudging. This is the
+ * mapping for the calls the browser still makes directly; the ones that go
+ * through /api/friends/connect are mapped there, beside the push they send,
+ * and the bell and the wall map their own in the routes that own them.
  */
-function reason(
-  code: string | undefined,
-  doing: "add" | "nudge" | "redeem" | "post",
-): FriendsError {
-  if (doing === "nudge") return code === "23505" ? "too-soon" : "unknown-person";
-  if (doing === "post") return "limit";
-  if (doing === "redeem") {
-    if (code === "P0001") return "own-link";
-    if (code === "23505") return "already";
-    return "expired";
-  }
+function reason(code: string | undefined): FriendsError {
   if (code === "P0001") return "cool-off";
   if (code === "23505") return "already";
   if (code === "P0002") return "unknown-person";
   return "offline";
 }
 
-/** The token, when there is a session. The two friends routes require one. */
+/**
+ * Every name the route may answer with, so an unfamiliar one — a proxy's HTML
+ * error page, a 500 — cannot be cast into the union and shown as wording.
+ */
+const KNOWN = new Set<string>([
+  "self", "unknown-person", "already", "too-soon", "full",
+  "cool-off", "own-link", "expired", "limit", "offline",
+]);
+
+/** The token, when there is a session. Every friends route requires one. */
 async function authHeader(): Promise<Record<string, string>> {
   const supabase = getSupabase();
   if (!supabase) return {};
@@ -219,13 +220,49 @@ export function useFriends(userId: string | null): Friends {
   const act = useCallback(
     async (
       run: () => Promise<{ error: { code?: string } | null }>,
-      doing: "add" | "nudge" | "redeem" | "post" = "add",
     ): Promise<FriendsError | null> => {
       const supabase = getSupabase();
       if (!supabase) return "offline";
       try {
         const { error } = await run();
-        if (error) return reason(error.code, doing);
+        if (error) return reason(error.code);
+        refresh();
+        return null;
+      } catch {
+        return "offline";
+      }
+    },
+    [refresh],
+  );
+
+  /**
+   * The three that make a friendship, through the route rather than the
+   * database directly.
+   *
+   * Same reason as the bell below: the RPCs alone would write the row and tell
+   * nobody, because sending needs the VAPID key. /api/friends/connect calls
+   * those same functions as this user, so every rule — the cool-off, the
+   * friend limit, whether a request to accept even exists — is still the
+   * database's, and the route only adds the push afterwards.
+   *
+   * The error names come back already worded for the screen; the route does
+   * the errcode mapping `reason()` does for the calls that stayed direct.
+   * Anything unrecognised is a network answer, not a rule, and reads as such.
+   */
+  const send = useCallback(
+    async (body: Record<string, string>): Promise<FriendsError | null> => {
+      try {
+        const res = await fetch("/api/friends/connect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(await authHeader()) },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const { error } = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          return KNOWN.has(error ?? "") ? (error as FriendsError) : "offline";
+        }
         refresh();
         return null;
       } catch {
@@ -236,18 +273,13 @@ export function useFriends(userId: string | null): Friends {
   );
 
   const add = useCallback(
-    (target: string) =>
-      act(async () => {
-        const supabase = getSupabase()!;
-        return supabase.rpc("send_friend_request", { target });
-      }),
-    [act],
+    (target: string) => send({ action: "ask", target }),
+    [send],
   );
 
   const accept = useCallback(
-    (from_user: string) =>
-      act(async () => getSupabase()!.rpc("accept_friend_request", { from_user })),
-    [act],
+    (from_user: string) => send({ action: "accept", target: from_user }),
+    [send],
   );
 
   const decline = useCallback(
@@ -289,12 +321,8 @@ export function useFriends(userId: string | null): Friends {
   }, []);
 
   const redeem = useCallback(
-    (code: string) =>
-      act(
-        async () => getSupabase()!.rpc("accept_friend_invite", { invite_code: code }),
-        "redeem",
-      ),
-    [act],
+    (code: string) => send({ action: "redeem", code }),
+    [send],
   );
 
   /* ---------------------------- the bell ---------------------------- */
